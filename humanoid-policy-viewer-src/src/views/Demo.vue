@@ -1,23 +1,5 @@
 <template>
   <div id="mujoco-container"></div>
-  <transition name="shortcut-fade">
-    <div v-if="showShortcuts" class="shortcut-overlay" @click="showShortcuts = false">
-      <div class="shortcut-card" @click.stop>
-        <div class="shortcut-title">Keyboard Shortcuts</div>
-        <div class="shortcut-grid">
-          <kbd>W</kbd><span>Forward</span>
-          <kbd>S</kbd><span>Back</span>
-          <kbd>A</kbd><span>Left</span>
-          <kbd>D</kbd><span>Right</span>
-          <kbd>Q</kbd><span>Turn left</span>
-          <kbd>E</kbd><span>Turn right</span>
-          <kbd>Bksp</kbd><span>Reset</span>
-          <kbd>H</kbd><span>This help</span>
-        </div>
-        <div class="shortcut-dismiss">Click anywhere or press <kbd>H</kbd> to dismiss</div>
-      </div>
-    </div>
-  </transition>
   <div class="global-alerts">
     <v-alert
       v-if="isSafari"
@@ -61,22 +43,37 @@
       <div v-if="mobileDrawerOpen" class="mobile-drawer">
         <div class="mobile-drawer-content">
           <div class="mobile-drawer-section">
+            <div class="mobile-drawer-label">Task</div>
+            <div class="mobile-task-toggle">
+              <button
+                v-for="option in plannerTaskOptions"
+                :key="'m-task-'+option.value"
+                class="mobile-task-btn"
+                :class="{ active: plannerTask === option.value }"
+                @click="setPlannerTask(option.value)"
+              >
+                {{ option.label }}
+              </button>
+            </div>
             <div class="mobile-drawer-label">Box Start</div>
             <div class="mobile-obj-grid">
               <span class="mobile-obj-grid-label">Pos</span>
               <input v-model.number="boxStart.x" type="number" min="-5" max="5" step="0.05" class="mobile-obj-input" placeholder="X"/>
               <input v-model.number="boxStart.y" type="number" min="-5" max="5" step="0.05" class="mobile-obj-input" placeholder="Y"/>
-              <input v-model.number="boxStart.z" type="number" min="0.15" max="0.8" step="0.05" class="mobile-obj-input" placeholder="Z"/>
+              <input v-model.number="boxStart.z" type="number" min="0.15" max="0.8" step="0.05" class="mobile-obj-input" :disabled="isPushTask" placeholder="Z"/>
             </div>
             <div class="mobile-drawer-label" style="margin-top:8px">Goal</div>
             <div class="mobile-obj-grid">
               <span class="mobile-obj-grid-label">Pos</span>
               <input v-model.number="goalPos.x" type="number" min="-5" max="5" step="0.05" class="mobile-obj-input" placeholder="X"/>
               <input v-model.number="goalPos.y" type="number" min="-5" max="5" step="0.05" class="mobile-obj-input" placeholder="Y"/>
-              <input v-model.number="goalPos.z" type="number" min="0.15" max="0.8" step="0.05" class="mobile-obj-input" placeholder="Z"/>
+              <input v-model.number="goalPos.z" type="number" min="0.15" max="0.8" step="0.05" class="mobile-obj-input" :disabled="isPushTask" placeholder="Z"/>
             </div>
             <div class="mobile-drawer-row" style="margin-top:8px">
               <button class="mobile-task-btn" @click="applyPlannerConfig()">Apply</button>
+              <button class="mobile-task-btn mobile-replan-btn" :class="{ active: autoReplanEnabled }" @click="toggleAutoReplan()">
+                {{ autoReplanEnabled ? 'Replan On' : 'Replan Off' }}
+              </button>
               <button class="mobile-task-btn mobile-reset-btn" @click="reset()">Reset</button>
               <button class="mobile-task-btn mobile-reset-btn" @click="randomReset()">Random Reset</button>
             </div>
@@ -136,41 +133,102 @@
     </transition>
   </template>
   <div v-if="!isSmallScreen" class="controls">
-    <v-card class="controls-card">
-      <v-card-title>OmniContact Policy Viewer</v-card-title>
+    <v-card class="controls-card" elevation="0">
+      <div class="controls-titlebar">
+        <div class="controls-title-copy">
+          <span class="controls-eyebrow">MuJoCo WASM + ONNX</span>
+          <h1>OmniContact</h1>
+        </div>
+        <div class="viewer-state" :class="{ ready: state === 1, error: state < 0, loading: state === 0 }">
+          <span class="viewer-state-dot"></span>
+          <span>{{ viewerStateLabel }}</span>
+        </div>
+      </div>
       <v-card-text class="py-0 controls-body">
 
-        <div class="section-header" @click="sectionTask = !sectionTask">
-          <v-icon size="14" class="section-chevron">{{ sectionTask ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-          <span class="status-name">Planner</span>
-          <span class="text-caption ml-1" style="opacity:0.7" v-if="!sectionTask">box / goal</span>
-        </div>
-        <div v-if="sectionTask" class="planner-controls mt-2">
-          <div class="planner-grid">
-            <label class="text-caption grid-label">Box start</label>
-            <input v-model.number="boxStart.x" type="number" min="-5" max="5" step="0.05" class="pos-input" placeholder="X"/>
-            <input v-model.number="boxStart.y" type="number" min="-5" max="5" step="0.05" class="pos-input" placeholder="Y"/>
-            <input v-model.number="boxStart.z" type="number" min="0.15" max="0.8" step="0.05" class="pos-input" placeholder="Z"/>
-            <label class="text-caption grid-label">Goal</label>
-            <input v-model.number="goalPos.x" type="number" min="-5" max="5" step="0.05" class="pos-input" placeholder="X"/>
-            <input v-model.number="goalPos.y" type="number" min="-5" max="5" step="0.05" class="pos-input" placeholder="Y"/>
-            <input v-model.number="goalPos.z" type="number" min="0.15" max="0.8" step="0.05" class="pos-input" placeholder="Z"/>
+        <section class="control-section control-section-primary">
+          <button class="section-header" type="button" @click="sectionTask = !sectionTask">
+            <span class="section-title-group">
+              <v-icon size="16">mdi-map-marker-path</v-icon>
+              <span class="status-name">Planner</span>
+            </span>
+            <span class="section-meta" v-if="!sectionTask">box / goal</span>
+            <v-icon size="16" class="section-chevron">{{ sectionTask ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+          </button>
+          <div v-if="sectionTask" class="planner-controls">
+            <div class="field-label-row">
+              <span>Task</span>
+              <span>{{ plannerTaskOptions.find((option) => option.value === plannerTask)?.label }}</span>
+            </div>
+            <v-btn-toggle
+              v-model="plannerTask"
+              mandatory
+              density="compact"
+              variant="tonal"
+              class="planner-task-toggle"
+            >
+              <v-btn
+              v-for="option in plannerTaskOptions"
+              :key="'task-'+option.value"
+              size="small"
+              :value="option.value"
+              @click="setPlannerTask(option.value)"
+            >
+                {{ option.label }}
+              </v-btn>
+            </v-btn-toggle>
+            <div class="pose-card-grid">
+              <div class="pose-card">
+                <div class="pose-card-title">
+                  <v-icon size="15">mdi-cube-outline</v-icon>
+                  <span>Box Start</span>
+                </div>
+                <div class="axis-grid">
+                  <label>X</label>
+                  <label>Y</label>
+                  <label>Z</label>
+                  <input v-model.number="boxStart.x" type="number" min="-5" max="5" step="0.05" class="pos-input" placeholder="X"/>
+                  <input v-model.number="boxStart.y" type="number" min="-5" max="5" step="0.05" class="pos-input" placeholder="Y"/>
+                  <input v-model.number="boxStart.z" type="number" min="0.15" max="0.8" step="0.05" class="pos-input" :disabled="isPushTask" placeholder="Z"/>
+                </div>
+              </div>
+              <div class="pose-card">
+                <div class="pose-card-title">
+                  <v-icon size="15">mdi-crosshairs-gps</v-icon>
+                  <span>Goal</span>
+                </div>
+                <div class="axis-grid">
+                  <label>X</label>
+                  <label>Y</label>
+                  <label>Z</label>
+                  <input v-model.number="goalPos.x" type="number" min="-5" max="5" step="0.05" class="pos-input" placeholder="X"/>
+                  <input v-model.number="goalPos.y" type="number" min="-5" max="5" step="0.05" class="pos-input" placeholder="Y"/>
+                  <input v-model.number="goalPos.z" type="number" min="0.15" max="0.8" step="0.05" class="pos-input" :disabled="isPushTask" placeholder="Z"/>
+                </div>
+              </div>
+            </div>
+            <div class="task-buttons">
+              <v-btn size="small" variant="flat" color="primary" :disabled="state !== 1" prepend-icon="mdi-check" @click="applyPlannerConfig">Apply</v-btn>
+              <v-btn size="small" :variant="autoReplanEnabled ? 'flat' : 'tonal'" color="warning" :disabled="state !== 1" prepend-icon="mdi-autorenew" @click="toggleAutoReplan">
+                {{ autoReplanEnabled ? 'Replan On' : 'Replan Off' }}
+              </v-btn>
+              <v-btn size="small" variant="tonal" :disabled="state !== 1" prepend-icon="mdi-restart" @click="reset">Reset</v-btn>
+              <v-btn size="small" variant="tonal" :disabled="state !== 1" prepend-icon="mdi-shuffle-variant" @click="randomReset">Random</v-btn>
+            </div>
           </div>
-          <div class="task-buttons mt-2">
-            <v-btn size="small" variant="flat" color="primary" :disabled="state !== 1" @click="applyPlannerConfig">Apply</v-btn>
-            <v-btn size="small" variant="tonal" :disabled="state !== 1" @click="reset">Reset</v-btn>
-            <v-btn size="small" variant="tonal" :disabled="state !== 1" @click="randomReset">Random Reset</v-btn>
-          </div>
-        </div>
+        </section>
 
         <template v-if="isInteractionMode">
-        <v-divider class="my-2"/>
-        <div class="section-header" @click="sectionObject = !sectionObject">
-          <v-icon size="14" class="section-chevron">{{ sectionObject ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-          <span class="status-name">Add Object</span>
-          <span class="text-caption ml-1" style="opacity:0.7" v-if="!sectionObject && userObjects.length">{{ userObjects.length }} obj</span>
-        </div>
-        <div v-if="sectionObject" class="obj-upload mt-1">
+        <section class="control-section">
+        <button class="section-header" type="button" @click="sectionObject = !sectionObject">
+          <span class="section-title-group">
+            <v-icon size="16">mdi-shape-plus</v-icon>
+            <span class="status-name">Objects</span>
+          </span>
+          <span class="section-meta" v-if="!sectionObject && userObjects.length">{{ userObjects.length }} obj</span>
+          <v-icon size="16" class="section-chevron">{{ sectionObject ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+        </button>
+        <div v-if="sectionObject" class="obj-upload">
           <input
             ref="meshFileInput"
             type="file"
@@ -182,16 +240,20 @@
             size="small"
             variant="tonal"
             :disabled="state !== 1 || objComputing"
+            prepend-icon="mdi-upload"
             @click="$refs.meshFileInput.click()"
           >
             Upload Mesh
           </v-btn>
         </div>
         <div v-if="sectionObject && userObjects.length > 0" class="mt-2">
-          <div class="section-header" @click="sectionObjectList = !sectionObjectList">
+          <button class="section-header subsection-header" type="button" @click="sectionObjectList = !sectionObjectList">
+            <span class="section-title-group">
+              <v-icon size="14">mdi-format-list-bulleted</v-icon>
+              <span class="status-name text-caption">Objects ({{ userObjects.length }})</span>
+            </span>
             <v-icon size="14" class="section-chevron">{{ sectionObjectList ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-            <span class="status-name text-caption">Objects ({{ userObjects.length }})</span>
-          </div>
+          </button>
           <div v-if="sectionObjectList" class="user-objects-list mt-1">
           <div v-for="obj in userObjects" :key="obj.name" class="user-object-item">
             <div class="user-object-header">
@@ -281,15 +343,21 @@
             ></v-checkbox>
           </template>
         </v-tooltip>
+        </section>
         </template>
 
-        <v-divider class="my-2"/>
-        <div class="section-header" @click="sectionSettings = !sectionSettings">
-          <v-icon size="14" class="section-chevron">{{ sectionSettings ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-          <span class="status-name">Settings</span>
-        </div>
+        <section class="control-section">
+        <button class="section-header" type="button" @click="sectionSettings = !sectionSettings">
+          <span class="section-title-group">
+            <v-icon size="16">mdi-tune-variant</v-icon>
+            <span class="status-name">Settings</span>
+          </span>
+          <span class="section-meta" v-if="!sectionSettings">{{ renderScaleLabel }}</span>
+          <v-icon size="16" class="section-chevron">{{ sectionSettings ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+        </button>
         <template v-if="sectionSettings">
-        <div class="status-legend follow-controls mt-1">
+        <div class="settings-grid">
+        <div class="status-legend follow-controls">
           <span class="status-name">Camera follow</span>
           <v-btn
             size="x-small"
@@ -302,10 +370,13 @@
           </v-btn>
         </div>
         <div class="status-legend">
-          <span class="status-name">Render scale</span>
-          <span class="text-caption">{{ renderScaleLabel }}</span>
           <span class="status-name">Sim Freq</span>
           <span class="text-caption">{{ simStepLabel }}</span>
+        </div>
+        </div>
+        <div class="field-label-row slider-label-row">
+          <span>Render scale</span>
+          <span>{{ renderScaleLabel }}</span>
         </div>
         <v-slider
           v-model="renderScale"
@@ -316,23 +387,9 @@
           hide-details
           @update:modelValue="onRenderScaleChange"
         ></v-slider>
-        <div class="status-legend mt-1">
-          <span class="status-name">SDF resolution</span>
-          <span class="text-caption">{{ sdfResolution }}³</span>
-        </div>
-        <v-slider
-          v-model="sdfResolution"
-          min="16"
-          max="64"
-          step="8"
-          density="compact"
-          hide-details
-        ></v-slider>
         </template>
+        </section>
       </v-card-text>
-      <v-card-actions>
-        <v-btn color="primary" block @click="reset">Reset</v-btn>
-      </v-card-actions>
     </v-card>
   </div>
   <v-dialog :model-value="state === 0" persistent max-width="600px" scrollable>
@@ -382,6 +439,15 @@ export default {
       isDefault: true
     },
     trackingTimer: null,
+    plannerTask: 'carrybox',
+    plannerTaskOptions: [
+      { value: 'carrybox', label: 'Carry' },
+      { value: 'pushbox', label: 'Push' },
+      { value: 'pushbox-old', label: 'Push 2' }
+    ],
+    carryBoxDefaultHeight: 0.16,
+    carryGoalDefaultHeight: 0.55,
+    pushBoxHalfHeight: 0.26,
     boxStart: { x: 1.0, y: 0.0, z: 0.16 },
     goalPos: { x: 1.0, y: 1.0, z: 0.55 },
     // OBJ upload
@@ -394,6 +460,7 @@ export default {
     sectionObject: true,
     sectionSettings: false,
     cameraFollowEnabled: true,
+    autoReplanEnabled: false,
     // Mobile joystick state
     joystickX: 0,
     joystickY: 0,
@@ -402,7 +469,6 @@ export default {
     _turnDir: 0,
     _turnRafId: null,
     sdfVisEnabled: true,
-    showShortcuts: false,
     mobileDrawerOpen: false,
     mobileObjectListOpen: true,
     sectionObjectList: true,
@@ -417,6 +483,18 @@ export default {
     resize_listener: null
   }),
   computed: {
+    viewerStateLabel() {
+      if (this.state === 1) {
+        return 'Ready';
+      }
+      if (this.state < 0) {
+        return 'Error';
+      }
+      return 'Loading';
+    },
+    isPushTask() {
+      return this.plannerTask === 'pushbox' || this.plannerTask === 'pushbox-old';
+    },
     renderScaleLabel() {
       return `${this.renderScale.toFixed(2)}x`;
     },
@@ -432,7 +510,36 @@ export default {
       };
     }
   },
+  watch: {
+    plannerTask(newTask, oldTask) {
+      this.syncTaskHeights();
+      if (oldTask !== undefined && newTask !== oldTask && this.state === 1) {
+        void this.applyPlannerConfig({ resetSimulation: true });
+      }
+    }
+  },
   methods: {
+    setPlannerTask(task) {
+      if (this.plannerTask === task) {
+        return;
+      }
+      this.plannerTask = task;
+    },
+    syncTaskHeights() {
+      if (this.isPushTask) {
+        this.syncPushHeights();
+        return;
+      }
+      this.boxStart.z = this.carryBoxDefaultHeight;
+      this.goalPos.z = this.carryGoalDefaultHeight;
+    },
+    syncPushHeights() {
+      if (!this.isPushTask) {
+        return;
+      }
+      this.boxStart.z = this.pushBoxHalfHeight;
+      this.goalPos.z = this.pushBoxHalfHeight;
+    },
     detectSafari() {
       const ua = navigator.userAgent;
       return /Safari\//.test(ua)
@@ -468,11 +575,6 @@ export default {
         this.state = 1;
         // Signal parent page that the viewer is ready (dismisses loading overlay)
         try { window.parent.postMessage({ type: 'lessmimic-ready' }, '*'); } catch (e) {}
-        // Show shortcut overlay briefly on first load (desktop only)
-        if (!this.isSmallScreen) {
-          this.showShortcuts = true;
-          setTimeout(() => { this.showShortcuts = false; }, 4000);
-        }
       } catch (error) {
         this.state = -1;
         this.extra_error_message = error.toString();
@@ -507,6 +609,7 @@ export default {
       this.goalPos.x = this.clampPlannerValue(this.goalPos.x, -5, 5);
       this.goalPos.y = this.clampPlannerValue(this.goalPos.y, -5, 5);
       this.goalPos.z = this.clampPlannerValue(this.goalPos.z, 0.15, 0.8);
+      this.syncPushHeights();
       const boxStartPos = [
         Number(this.boxStart.x),
         Number(this.boxStart.y),
@@ -520,30 +623,39 @@ export default {
       if (boxStartPos.some((v) => !Number.isFinite(v)) || goalPos.some((v) => !Number.isFinite(v))) {
         return null;
       }
-      return { boxStartPos, goalPos };
+      return { boxStartPos, goalPos, task: this.plannerTask };
     },
-    applyPlannerConfig(options = {}) {
+    async applyPlannerConfig(options = {}) {
       const config = this.buildPlannerConfig();
       if (!config) {
         return;
       }
-      this.demo?.applyCarryBoxPlannerConfig?.({
+      await this.demo?.applyCarryBoxPlannerConfig?.({
         ...config,
         resetSimulation: Boolean(options.resetSimulation)
       });
+    },
+    toggleAutoReplan() {
+      const config = this.buildPlannerConfig();
+      if (!config) {
+        return;
+      }
+      this.autoReplanEnabled = !this.autoReplanEnabled;
+      this.demo?.updateCarryBoxReplanGoal?.({ goalPos: config.goalPos, task: config.task });
+      this.demo?.setAutoReplanEnabled?.(this.autoReplanEnabled);
     },
     randomReset() {
       this.boxStart = {
         x: this.randomPlannerValue(-5, 5),
         y: this.randomPlannerValue(-5, 5),
-        z: this.randomPlannerValue(0.15, 0.8)
+        z: this.isPushTask ? this.pushBoxHalfHeight : this.randomPlannerValue(0.15, 0.8)
       };
       this.goalPos = {
         x: this.randomPlannerValue(-5, 5),
         y: this.randomPlannerValue(-5, 5),
-        z: this.randomPlannerValue(0.15, 0.8)
+        z: this.isPushTask ? this.pushBoxHalfHeight : this.randomPlannerValue(0.15, 0.8)
       };
-      this.applyPlannerConfig({ resetSimulation: true });
+      void this.applyPlannerConfig({ resetSimulation: true });
     },
     moveTargetRoot(dx, dy, dz) {
       const runner = this.demo?.interactionRunner;
@@ -752,7 +864,7 @@ export default {
         this.demo.resetSimulation();
         return;
       }
-      this.applyPlannerConfig({ resetSimulation: true });
+      void this.applyPlannerConfig({ resetSimulation: true });
     },
     startTrackingPoll() {
       this.stopTrackingPoll();
@@ -831,11 +943,6 @@ export default {
         return;
       }
       const key = event.key.toLowerCase();
-      // Toggle shortcut overlay
-      if (key === 'h' || key === '?') {
-        this.showShortcuts = !this.showShortcuts;
-        return;
-      }
       // Movement keys — continuous via RAF loop
       if (MOVEMENT_KEYS.has(key) && !this._pressedKeys.has(key)) {
         this._pressedKeys.add(key);
@@ -874,9 +981,9 @@ export default {
   position: fixed;
   top: clamp(12px, 1.2vw, 24px);
   left: clamp(12px, 1.2vw, 24px);
-  width: clamp(260px, 20vw, 420px);
+  width: clamp(320px, 23vw, 430px);
   z-index: 1000;
-  font-size: clamp(0.7rem, 0.85vw, 1rem);
+  font-size: clamp(0.72rem, 0.82vw, 0.95rem);
 }
 
 .global-alerts {
@@ -902,18 +1009,107 @@ export default {
 
 .controls-card {
   max-height: calc(100vh - clamp(24px, 2.4vw, 48px));
+  overflow: hidden;
+  border: 1px solid rgba(226, 232, 240, 0.16);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(18, 26, 38, 0.94), rgba(8, 13, 22, 0.9)),
+    rgba(15, 23, 42, 0.92) !important;
+  color: #e5edf6;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(14px);
 }
 
-.controls-card :deep(.v-card-title) {
-  font-size: clamp(0.9rem, 1.1vw, 1.35rem);
-  padding: clamp(8px, 0.8vw, 16px) clamp(10px, 1vw, 20px);
+.controls-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 15px 12px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.72), rgba(12, 18, 30, 0.2));
+}
+
+.controls-title-copy {
+  min-width: 0;
+}
+
+.controls-eyebrow {
+  display: block;
+  color: #8ee5d7;
+  font-size: 0.63rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.controls-title-copy h1 {
+  margin: 4px 0 0;
+  color: #f8fafc;
+  font-size: 1.15rem;
+  font-weight: 850;
+  line-height: 1.1;
+}
+
+.viewer-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid rgba(148, 163, 184, 0.26);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.74);
+  color: #cbd5e1;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.viewer-state-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #94a3b8;
+  box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.12);
+}
+
+.viewer-state.ready .viewer-state-dot {
+  background: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.16);
+}
+
+.viewer-state.error .viewer-state-dot {
+  background: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.18);
+}
+
+.viewer-state.loading .viewer-state-dot {
+  background: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.16);
 }
 
 .controls-body {
-  max-height: calc(100vh - clamp(100px, 10vw, 200px));
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: calc(100vh - clamp(92px, 8vw, 150px));
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 0 clamp(8px, 0.8vw, 16px) clamp(8px, 0.8vw, 16px) !important;
+  padding: 12px !important;
+}
+
+.control-section {
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.54);
+  overflow: hidden;
+}
+
+.control-section-primary {
+  border-color: rgba(94, 234, 212, 0.22);
+  background: linear-gradient(180deg, rgba(20, 31, 44, 0.78), rgba(13, 20, 31, 0.64));
 }
 
 .motion-status {
@@ -944,26 +1140,115 @@ export default {
 }
 
 .task-buttons {
-  display: flex;
-  gap: clamp(4px, 0.4vw, 8px);
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1.05fr 1.05fr 0.85fr 0.85fr;
+  gap: 6px;
+  margin-top: 2px;
 }
 
 .task-buttons .v-btn {
-  font-size: clamp(0.65rem, 0.75vw, 0.9rem) !important;
+  min-width: 0;
+  font-size: 0.68rem !important;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .planner-controls {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 10px;
+  padding: 0 12px 12px;
 }
 
-.planner-grid {
-  display: grid;
-  grid-template-columns: minmax(68px, auto) repeat(3, minmax(48px, 1fr));
-  gap: 4px 6px;
+.field-label-row {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
+  color: #94a3b8;
+  font-size: 0.67rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.field-label-row span:last-child {
+  color: #e2e8f0;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.planner-task-toggle {
+  align-self: stretch;
+  width: 100%;
+  height: 34px;
+  padding: 3px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 8px;
+  background: rgba(2, 6, 23, 0.42);
+}
+
+.planner-task-toggle .v-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 28px !important;
+  border-radius: 6px !important;
+  font-size: 0.68rem !important;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #cbd5e1 !important;
+}
+
+.planner-task-toggle .v-btn :deep(.v-btn__content) {
+  color: #cbd5e1 !important;
+}
+
+.planner-task-toggle .v-btn.v-btn--active,
+.planner-task-toggle .v-btn.v-btn--selected {
+  background: rgba(59, 130, 246, 0.88) !important;
+  color: #ffffff !important;
+}
+
+.planner-task-toggle .v-btn.v-btn--active :deep(.v-btn__content),
+.planner-task-toggle .v-btn.v-btn--selected :deep(.v-btn__content) {
+  color: #ffffff !important;
+}
+
+.pose-card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.pose-card {
+  padding: 9px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 8px;
+  background: rgba(2, 6, 23, 0.26);
+}
+
+.pose-card-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  color: #dbeafe;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.axis-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.axis-grid label {
+  color: #94a3b8;
+  font-size: 0.6rem;
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
 }
 
 .user-objects-list {
@@ -972,12 +1257,14 @@ export default {
   gap: 6px;
   max-height: 180px;
   overflow-y: auto;
+  padding: 0 12px 10px;
 }
 
 .user-object-item {
-  background: rgba(var(--v-theme-surface-variant), 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(2, 6, 23, 0.3);
   border-radius: 6px;
-  padding: 4px 8px;
+  padding: 6px 8px;
 }
 
 .user-object-header {
@@ -1004,18 +1291,21 @@ export default {
 }
 
 .pos-input {
-  width: clamp(44px, 3.5vw, 72px);
-  padding: clamp(1px, 0.1vw, 3px) clamp(2px, 0.3vw, 6px);
-  font-size: clamp(0.65rem, 0.75vw, 0.9rem);
-  border: 1px solid rgba(128, 128, 128, 0.3);
-  border-radius: 4px;
+  width: 100%;
+  min-width: 0;
+  height: 30px;
+  padding: 0 6px;
+  font-size: 0.72rem;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 6px;
   text-align: center;
-  background: transparent;
+  background: rgba(15, 23, 42, 0.55);
   color: inherit;
 }
 
 .pos-input:focus {
-  outline: 1px solid rgb(var(--v-theme-primary));
+  outline: 1px solid rgba(94, 234, 212, 0.76);
+  border-color: rgba(94, 234, 212, 0.62);
 }
 
 .user-object-scale {
@@ -1033,10 +1323,11 @@ export default {
 
 .user-object-scale .v-slider {
   flex: 1;
+  padding: 0 !important;
 }
 
 .sdf-vis-checkbox {
-  margin-top: 2px !important;
+  margin: 0 12px 10px !important;
 }
 
 .sdf-vis-checkbox :deep(.v-label) {
@@ -1046,8 +1337,18 @@ export default {
 .section-header {
   display: flex;
   align-items: center;
-  gap: clamp(2px, 0.3vw, 6px);
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
   cursor: pointer;
+  font: inherit;
+  text-align: left;
   user-select: none;
 }
 
@@ -1056,11 +1357,36 @@ export default {
 }
 
 .section-header:hover {
-  opacity: 0.8;
+  background: rgba(148, 163, 184, 0.07);
 }
 
 .section-chevron {
   flex-shrink: 0;
+  color: #94a3b8;
+}
+
+.section-title-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.section-title-group .v-icon {
+  color: #8ee5d7;
+}
+
+.section-meta {
+  margin-left: auto;
+  color: #94a3b8;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.subsection-header {
+  min-height: 32px;
+  padding: 0 6px;
+  border-radius: 6px;
 }
 
 .status-legend {
@@ -1071,7 +1397,7 @@ export default {
 }
 
 .status-name {
-  font-weight: 600;
+  font-weight: 800;
 }
 
 .policy-file {
@@ -1079,6 +1405,36 @@ export default {
   margin-top: 4px;
 }
 
+.obj-upload {
+  padding: 0 12px 10px;
+}
+
+.obj-upload .v-btn {
+  width: 100%;
+  justify-content: center;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.settings-grid {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 12px 8px;
+}
+
+.slider-label-row {
+  padding: 0 12px;
+}
+
+.control-section :deep(.v-slider) {
+  padding: 0 12px 10px;
+}
+
+.control-section :deep(.v-slider__container) {
+  min-height: 28px;
+}
 
 .upload-section {
   display: flex;
@@ -1290,6 +1646,13 @@ export default {
   color: #fff;
 }
 
+.mobile-task-toggle {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
 .mobile-reset-btn {
   background: rgba(185, 28, 28, 0.6);
 }
@@ -1420,82 +1783,4 @@ export default {
   transform: translateY(-10px);
 }
 
-/* Keyboard shortcut overlay */
-.shortcut-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 2000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.55);
-}
-
-.shortcut-card {
-  background: rgba(30, 41, 59, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  padding: 20px 28px;
-  color: #e2e8f0;
-  max-width: 320px;
-  backdrop-filter: blur(8px);
-}
-
-.shortcut-title {
-  font-weight: 700;
-  font-size: 1rem;
-  margin-bottom: 12px;
-  text-align: center;
-}
-
-.shortcut-grid {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 6px 14px;
-  align-items: center;
-}
-
-.shortcut-grid kbd {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  font-family: monospace;
-  font-size: 0.8rem;
-  font-weight: 600;
-  text-align: center;
-  min-width: 32px;
-}
-
-.shortcut-grid span {
-  font-size: 0.82rem;
-  color: #94a3b8;
-}
-
-.shortcut-dismiss {
-  margin-top: 12px;
-  text-align: center;
-  font-size: 0.72rem;
-  color: #64748b;
-}
-
-.shortcut-dismiss kbd {
-  padding: 1px 5px;
-  border-radius: 3px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  font-family: monospace;
-  font-size: 0.7rem;
-}
-
-.shortcut-fade-enter-active,
-.shortcut-fade-leave-active {
-  transition: opacity 0.25s ease;
-}
-
-.shortcut-fade-enter-from,
-.shortcut-fade-leave-to {
-  opacity: 0;
-}
 </style>

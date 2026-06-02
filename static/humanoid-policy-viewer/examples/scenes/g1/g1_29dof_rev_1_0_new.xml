@@ -219,22 +219,22 @@
                           <joint name="left_wrist_yaw_joint" pos="0 0 0" axis="0 0 1" range="-1.61443 1.61443" actuatorfrcrange="-5 5"/>
                           <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.7 0.7 0.7 1" mesh="left_wrist_yaw_link"/>
                           <geom type="mesh" rgba="0.7 0.7 0.7 1" mesh="left_wrist_yaw_link"/>
-                          <geom name="left_rubber_hand_collision_01" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 1" mesh="left_rubber_hand_col_01"/>
-                          <geom name="left_rubber_hand_collision_02" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 1" mesh="left_rubber_hand_col_02"/>
-                          <geom name="left_rubber_hand_collision_03" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 1" mesh="left_rubber_hand_col_03"/>
-                          <geom name="left_rubber_hand_collision_04" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 1" mesh="left_rubber_hand_col_04"/>
-                          <geom name="left_rubber_hand_collision_05" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 1" mesh="left_rubber_hand_col_05"/>
-                          <geom name="left_rubber_hand_collision_06" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 1" mesh="left_rubber_hand_col_06"/>
-                          <geom name="left_rubber_hand_collision_07" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 1" mesh="left_rubber_hand_col_07"/>
-                          <geom name="left_rubber_hand_collision_08" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 1" mesh="left_rubber_hand_col_08"/>
-                          <geom name="left_rubber_hand_collision_09" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 1" mesh="left_rubber_hand_col_09"/>
-                          <geom name="left_rubber_hand_collision_10" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 1" mesh="left_rubber_hand_col_10"/>
-                          <geom name="left_rubber_hand_collision_11" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 1" mesh="left_rubber_hand_col_11"/>
-                          <geom name="left_rubber_hand_collision_12" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 1" mesh="left_rubber_hand_col_12"/>
-                          <geom name="left_rubber_hand_collision_13" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 1" mesh="left_rubber_hand_col_13"/>
-                          <geom name="left_rubber_hand_collision_14" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 1" mesh="left_rubber_hand_col_14"/>
-                          <geom name="left_rubber_hand_collision_15" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 1" mesh="left_rubber_hand_col_15"/>
-                          <geom name="left_rubber_hand_collision_16" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 1" mesh="left_rubber_hand_col_16"/>
+                          <geom name="left_rubber_hand_collision_01" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 0" mesh="left_rubber_hand_col_01"/>
+                          <geom name="left_rubber_hand_collision_02" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 0" mesh="left_rubber_hand_col_02"/>
+                          <geom name="left_rubber_hand_collision_03" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 0" mesh="left_rubber_hand_col_03"/>
+                          <geom name="left_rubber_hand_collision_04" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 0" mesh="left_rubber_hand_col_04"/>
+                          <geom name="left_rubber_hand_collision_05" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 0" mesh="left_rubber_hand_col_05"/>
+                          <geom name="left_rubber_hand_collision_06" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 0" mesh="left_rubber_hand_col_06"/>
+                          <geom name="left_rubber_hand_collision_07" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 0" mesh="left_rubber_hand_col_07"/>
+                          <geom name="left_rubber_hand_collision_08" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 0" mesh="left_rubber_hand_col_08"/>
+                          <geom name="left_rubber_hand_collision_09" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 0" mesh="left_rubber_hand_col_09"/>
+                          <geom name="left_rubber_hand_collision_10" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 0" mesh="left_rubber_hand_col_10"/>
+                          <geom name="left_rubber_hand_collision_11" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 0" mesh="left_rubber_hand_col_11"/>
+                          <geom name="left_rubber_hand_collision_12" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 0" mesh="left_rubber_hand_col_12"/>
+                          <geom name="left_rubber_hand_collision_13" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 0" mesh="left_rubber_hand_col_13"/>
+                          <geom name="left_rubber_hand_collision_14" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 0" mesh="left_rubber_hand_col_14"/>
+                          <geom name="left_rubber_hand_collision_15" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 0" mesh="left_rubber_hand_col_15"/>
+                          <geom name="left_rubber_hand_collision_16" pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="1.0 0.005 0.0001" rgba="0.7 0.7 0.7 0" mesh="left_rubber_hand_col_16"/>
                           <geom pos="0.0415 0.003 0" quat="1 0 0 0" type="mesh" contype="0" conaffinity="0"
                                 group="1" density="0" rgba="0.7 0.7 0.7 1" mesh="left_rubber_hand"/>
                           <body name="left_palm_link" pos="0.0415 0.003 0" quat="1 0 0 0"/>
@@ -279,22 +279,22 @@
                           <inertial pos="0.0708244 -0.000191745 0.00161742" quat="0.493188 0.468078 0.526295 0.510571" mass="0.254576" diaginertia="0.000646113 0.000559993 0.000147566"/>
                           <joint name="right_wrist_yaw_joint" pos="0 0 0" axis="0 0 1" range="-1.61443 1.61443" actuatorfrcrange="-5 5"/>
                           <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.7 0.7 0.7 1" mesh="right_wrist_yaw_link"/>
-                          <geom name="right_rubber_hand_collision_01" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 1" mesh="right_rubber_hand_col_01"/>
-                          <geom name="right_rubber_hand_collision_02" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 1" mesh="right_rubber_hand_col_02"/>
-                          <geom name="right_rubber_hand_collision_03" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 1" mesh="right_rubber_hand_col_03"/>
-                          <geom name="right_rubber_hand_collision_04" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 1" mesh="right_rubber_hand_col_04"/>
-                          <geom name="right_rubber_hand_collision_05" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 1" mesh="right_rubber_hand_col_05"/>
-                          <geom name="right_rubber_hand_collision_06" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 1" mesh="right_rubber_hand_col_06"/>
-                          <geom name="right_rubber_hand_collision_07" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 1" mesh="right_rubber_hand_col_07"/>
-                          <geom name="right_rubber_hand_collision_08" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 1" mesh="right_rubber_hand_col_08"/>
-                          <geom name="right_rubber_hand_collision_09" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 1" mesh="right_rubber_hand_col_09"/>
-                          <geom name="right_rubber_hand_collision_10" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 1" mesh="right_rubber_hand_col_10"/>
-                          <geom name="right_rubber_hand_collision_11" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 1" mesh="right_rubber_hand_col_11"/>
-                          <geom name="right_rubber_hand_collision_12" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 1" mesh="right_rubber_hand_col_12"/>
-                          <geom name="right_rubber_hand_collision_13" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 1" mesh="right_rubber_hand_col_13"/>
-                          <geom name="right_rubber_hand_collision_14" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 1" mesh="right_rubber_hand_col_14"/>
-                          <geom name="right_rubber_hand_collision_15" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 1" mesh="right_rubber_hand_col_15"/>
-                          <geom name="right_rubber_hand_collision_16" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 1" mesh="right_rubber_hand_col_16"/>
+                          <geom name="right_rubber_hand_collision_01" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 0" mesh="right_rubber_hand_col_01"/>
+                          <geom name="right_rubber_hand_collision_02" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 0" mesh="right_rubber_hand_col_02"/>
+                          <geom name="right_rubber_hand_collision_03" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 0" mesh="right_rubber_hand_col_03"/>
+                          <geom name="right_rubber_hand_collision_04" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 0" mesh="right_rubber_hand_col_04"/>
+                          <geom name="right_rubber_hand_collision_05" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 0" mesh="right_rubber_hand_col_05"/>
+                          <geom name="right_rubber_hand_collision_06" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 0" mesh="right_rubber_hand_col_06"/>
+                          <geom name="right_rubber_hand_collision_07" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 0" mesh="right_rubber_hand_col_07"/>
+                          <geom name="right_rubber_hand_collision_08" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 0" mesh="right_rubber_hand_col_08"/>
+                          <geom name="right_rubber_hand_collision_09" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 0" mesh="right_rubber_hand_col_09"/>
+                          <geom name="right_rubber_hand_collision_10" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 0" mesh="right_rubber_hand_col_10"/>
+                          <geom name="right_rubber_hand_collision_11" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 0" mesh="right_rubber_hand_col_11"/>
+                          <geom name="right_rubber_hand_collision_12" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 0" mesh="right_rubber_hand_col_12"/>
+                          <geom name="right_rubber_hand_collision_13" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 0" mesh="right_rubber_hand_col_13"/>
+                          <geom name="right_rubber_hand_collision_14" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 0" mesh="right_rubber_hand_col_14"/>
+                          <geom name="right_rubber_hand_collision_15" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 0" mesh="right_rubber_hand_col_15"/>
+                          <geom name="right_rubber_hand_collision_16" pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" density="0" friction="0.9 0.01 0.001" rgba="0.7 0.7 0.7 0" mesh="right_rubber_hand_col_16"/>
                           <geom pos="0.0415 -0.003 0" quat="1 0 0 0" type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.7 0.7 0.7 1" mesh="right_rubber_hand"/>
                           <body name="right_palm_link" pos="0.0415 -0.003 0" quat="1 0 0 0"/>
                         </body>

@@ -722,10 +722,75 @@
   background: #f4f5f7;
 }
 
+.policy-viewer-stage,
 .embedded-viewer--policy iframe {
   height: calc(100vh - 150px);
   min-height: 900px;
+}
+
+.policy-viewer-stage {
+  position: relative;
   background: #0f172a;
+}
+
+.embedded-viewer--policy iframe {
+  height: 100%;
+  min-height: 100%;
+}
+
+.policy-viewer-placeholder {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  background:
+    radial-gradient(circle at 50% 44%, rgba(249, 115, 22, 0.2), transparent 30%),
+    linear-gradient(135deg, rgba(8, 145, 178, 0.14), rgba(15, 23, 42, 0.96) 52%),
+    #0f172a;
+}
+
+.policy-viewer-stage.is-loading .policy-viewer-placeholder {
+  display: none;
+}
+
+.policy-viewer-load-button {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-width: min(360px, 86vw);
+  min-height: 96px;
+  padding: 1.2rem 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #111827;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.36);
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.policy-viewer-load-button:hover {
+  transform: translateY(-2px);
+  border-color: rgba(249, 115, 22, 0.78);
+  box-shadow: 0 28px 84px rgba(0, 0, 0, 0.44);
+}
+
+.policy-viewer-load-button span {
+  font-size: 1.05rem;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.policy-viewer-load-button small {
+  color: var(--omni-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .embedded-viewer--glb iframe {
@@ -793,6 +858,7 @@
     padding-right: 0.5rem;
   }
 
+  .policy-viewer-stage,
   .embedded-viewer--policy iframe {
     height: 82vh;
     min-height: 680px;
@@ -868,6 +934,7 @@
     min-height: 560px;
   }
 
+  .policy-viewer-stage,
   .embedded-viewer--policy iframe {
     height: 82vh;
     min-height: 680px;

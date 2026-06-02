@@ -4,6 +4,7 @@
   "g1/g1_29dof_rev_1_0_new.xml",
   "g1/g1_ghost.xml",
   "g1/g1_interaction.xml",
+  "g1/omniplan2track_push_box.xml",
   "g1/meshes/head_link.STL",
   "g1/meshes/left_ankle_pitch_link.STL",
   "g1/meshes/left_ankle_roll_link.STL",

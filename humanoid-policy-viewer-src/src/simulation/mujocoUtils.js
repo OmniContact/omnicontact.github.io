@@ -125,6 +125,8 @@ export async function reloadScene(mjcf_path) {
 
   // Build body name → body ID lookup
   this.bodyNameToId = {};
+  this.geomNameToId = {};
+  this.geomIdToMesh = {};
   const bodyNamesArray = new Uint8Array(this.model.names);
   for (let b = 0; b < this.model.nbody; b++) {
     let start_idx = this.model.name_bodyadr[b];
@@ -137,6 +139,17 @@ export async function reloadScene(mjcf_path) {
 
     if (bodyName === 'pelvis' || bodyName === 'base') {
       this.pelvis_body_id = b;
+    }
+  }
+  for (let g = 0; g < this.model.ngeom; g++) {
+    let start_idx = this.model.name_geomadr[g];
+    let end_idx = start_idx;
+    while (end_idx < bodyNamesArray.length && bodyNamesArray[end_idx] !== 0) {
+      end_idx++;
+    }
+    const geomName = textDecoder.decode(bodyNamesArray.subarray(start_idx, end_idx));
+    if (geomName) {
+      this.geomNameToId[geomName] = g;
     }
   }
   // Find the pelvis freejoint's qpos/qvel addresses so readPolicyState
@@ -261,7 +274,8 @@ export async function reloadPolicy(policy_path, options = {}) {
     } else {
       this.policyRunner.reset();
     }
-    const boxBodyId = this.bodyNameToId.box;
+    const boxBodyName = this.policyRunner.objectBodyName ?? 'box';
+    const boxBodyId = this.bodyNameToId[boxBodyName];
     if (boxBodyId !== undefined && this.policyRunner.refObjectPos?.[0] && this.policyRunner.refObjectQuat?.[0]) {
       const jointAdr = this.model.body_jntadr[boxBodyId];
       const jointNum = this.model.body_jntnum[boxBodyId];
@@ -277,6 +291,9 @@ export async function reloadPolicy(policy_path, options = {}) {
           this.policyRunner.reset(resetState);
         }
       }
+    }
+    if (this._moveInactivePlannerBoxesAway) {
+      this._moveInactivePlannerBoxesAway(this.policyRunner.task);
     }
     this.params.current_motion = 'carrybox-wtac';
     return;
@@ -412,6 +429,7 @@ export async function loadSceneFromURL(mujoco, filename, parent) {
   const bodies = {};
   const meshes = {};
   const lights = [];
+  parent.geomIdToMesh = {};
 
   for (let g = 0; g < model.ngeom; g++) {
     if (!(model.geom_group[g] < 3)) { continue; }
@@ -583,8 +601,16 @@ export async function loadSceneFromURL(mujoco, filename, parent) {
 
     mesh.castShadow = g == 0 ? false : true;
     mesh.receiveShadow = type != 7;
+    let geom_start_idx = model.name_geomadr[g];
+    let geom_end_idx = geom_start_idx;
+    while (geom_end_idx < names_array.length && names_array[geom_end_idx] !== 0) {
+      geom_end_idx++;
+    }
     mesh.bodyID = b;
+    mesh.geomID = g;
+    mesh.geomName = textDecoder.decode(names_array.subarray(geom_start_idx, geom_end_idx));
     bodies[b].add(mesh);
+    parent.geomIdToMesh[g] = mesh;
     getPosition(model.geom_pos, g, mesh.position);
     if (type != 0) {
       getQuaternion(model.geom_quat, g, mesh.quaternion);

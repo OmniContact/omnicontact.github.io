@@ -142,14 +142,22 @@
         <div class="embedded-viewer embedded-viewer--policy reveal">
           <div class="embedded-viewer-header">
             <h3>Live MuJoCo WASM + ONNX Policy Viewer</h3>
-            <a href="policy-viewer.html?v=carrybox-wtac-20260601-cachefix" target="_blank" rel="noopener">Open full page</a>
+            <a href="policy-viewer.html?v=carrybox-wtac-dual-box-scene-20260602" target="_blank" rel="noopener">Open full page</a>
           </div>
-          <iframe
-            src="static/humanoid-policy-viewer/index.html?force_policy=./examples/checkpoints/g1/carrybox_wtac_policy.json&policy=./examples/checkpoints/g1/carrybox_wtac_policy.json&v=overview-onnx-cachefix"
-            title="Live MuJoCo WASM and ONNX carry-box policy viewer"
-            loading="lazy"
-            allow="fullscreen"
-          ></iframe>
+          <div class="policy-viewer-stage" data-policy-viewer-stage>
+            <iframe
+              data-src="static/humanoid-policy-viewer/index.html?force_policy=./examples/checkpoints/g1/carrybox_wtac_policy.json&policy=./examples/checkpoints/g1/carrybox_wtac_policy.json&v=overview-onnx-dual-box-scene-20260602"
+              title="Live MuJoCo WASM and ONNX carry-box policy viewer"
+              loading="lazy"
+              allow="fullscreen"
+            ></iframe>
+            <div class="policy-viewer-placeholder" data-policy-viewer-placeholder>
+              <button type="button" class="policy-viewer-load-button" data-policy-viewer-load>
+                <span>Click to Load Live MuJoCo Session</span>
+                <small>MuJoCo WASM + ONNX policy viewer</small>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -340,6 +348,25 @@
   </main>
 
   <script>
+    (function() {
+      document.querySelectorAll('[data-policy-viewer-stage]').forEach(function(stage) {
+        var iframe = stage.querySelector('iframe[data-src]');
+        var placeholder = stage.querySelector('[data-policy-viewer-placeholder]');
+        var button = stage.querySelector('[data-policy-viewer-load]');
+        if (!iframe || !button) return;
+
+        button.addEventListener('click', function() {
+          if (!iframe.getAttribute('src')) {
+            iframe.setAttribute('src', iframe.getAttribute('data-src'));
+          }
+          stage.classList.add('is-loading');
+          if (placeholder) {
+            placeholder.setAttribute('aria-hidden', 'true');
+          }
+        }, { once: true });
+      });
+    })();
+
     (function() {
       var csvUrl = 'static/data_tsne/hoi_tsne_dongbu_clip_cached_all_paper_soft_colors_dongbu_all_by_skill.csv';
       var colors = {

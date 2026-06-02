@@ -322,10 +322,11 @@ export function generateOmniPlanCarryBoxWTACO({
   rightWristPos = null,
   rightWristQuat = null,
   graspPitchMaxDeg = 20.0,
-  placeTorsoFollowObjZ = 0.6
+  placeTorsoFollowObjZ = 0.6,
+  stepSizeLinear = 0.02
 }) {
   const pad = 30;
-  const stepLinear = 0.02;
+  const stepLinear = Number(stepSizeLinear);
   const stepAngular = 0.03;
   const cfg = {
     handOffsetY: 0.22,
@@ -809,5 +810,619 @@ export function generateOmniPlanCarryBoxWTACO({
 
   const out = b.finalize();
   out.targetYaw = targetYaw;
+  return out;
+}
+
+function wrapToPi(angle) {
+  return ((Number(angle) + Math.PI) % (2.0 * Math.PI)) - Math.PI;
+}
+
+function rows(seq) {
+  return Array.from(seq ?? [], (row) => Array.from(row));
+}
+
+function sliceTrajByPhase(traj, startPhase, endPhase) {
+  const keep = [];
+  for (let i = 0; i < traj.refPhase.length; i++) {
+    const p = traj.refPhase[i];
+    if (p >= startPhase && p <= endPhase) {
+      keep.push(i);
+    }
+  }
+  const pick = (name) => keep.map((i) => Array.from(traj[name][i]));
+  return {
+    refPhase: keep.map((i) => traj.refPhase[i]),
+    refLeftWristPos: pick('refLeftWristPos'),
+    refLeftWristQuat: pick('refLeftWristQuat'),
+    refRightWristPos: pick('refRightWristPos'),
+    refRightWristQuat: pick('refRightWristQuat'),
+    refObjectPos: pick('refObjectPos'),
+    refObjectQuat: pick('refObjectQuat'),
+    refContact: pick('refContact'),
+    refTorsoPos: pick('refTorsoPos'),
+    refTorsoQuat: pick('refTorsoQuat'),
+    refLeftAnklePos: pick('refLeftAnklePos'),
+    refLeftAnkleQuat: pick('refLeftAnkleQuat'),
+    refRightAnklePos: pick('refRightAnklePos'),
+    refRightAnkleQuat: pick('refRightAnkleQuat')
+  };
+}
+
+function pitchDegFromTorsoYaw(torsoQuat, yawQuat) {
+  const rel = quat(quatMultiply(quatConjugate(quat(yawQuat)), quat(torsoQuat)));
+  const sinp = Math.max(-1, Math.min(1, 2.0 * (rel[0] * rel[2] - rel[3] * rel[1])));
+  return Math.asin(sinp) * 180.0 / Math.PI;
+}
+
+function appendFinalizedTraj(builder, traj) {
+  const n = traj.refPhase.length;
+  if (!n) {
+    return;
+  }
+  let start = 0;
+  while (start < n) {
+    const phase = traj.refPhase[start];
+    let end = start + 1;
+    while (end < n && traj.refPhase[end] === phase) {
+      end += 1;
+    }
+    const idxs = Array.from({ length: end - start }, (_, k) => start + k);
+    builder.append(phase, {
+      lwP: idxs.map((i) => traj.refLeftWristPos[i]),
+      lwQ: idxs.map((i) => traj.refLeftWristQuat[i]),
+      rwP: idxs.map((i) => traj.refRightWristPos[i]),
+      rwQ: idxs.map((i) => traj.refRightWristQuat[i]),
+      objP: idxs.map((i) => traj.refObjectPos[i]),
+      objQ: idxs.map((i) => traj.refObjectQuat[i]),
+      torsoP: idxs.map((i) => traj.refTorsoPos[i]),
+      torsoYawQ: idxs.map((i) => traj.refLeftAnkleQuat[i]),
+      torsoPitchDeg: idxs.map((i) => pitchDegFromTorsoYaw(traj.refTorsoQuat[i], traj.refLeftAnkleQuat[i])),
+      laP: idxs.map((i) => traj.refLeftAnklePos[i]),
+      raP: idxs.map((i) => traj.refRightAnklePos[i]),
+      contact: idxs.map((i) => traj.refContact[i])
+    });
+    start = end;
+  }
+}
+
+function lastFrame(traj) {
+  const i = traj.refPhase.length - 1;
+  return {
+    refLeftWristPos: traj.refLeftWristPos[i].slice(),
+    refLeftWristQuat: traj.refLeftWristQuat[i].slice(),
+    refRightWristPos: traj.refRightWristPos[i].slice(),
+    refRightWristQuat: traj.refRightWristQuat[i].slice(),
+    refObjectPos: traj.refObjectPos[i].slice(),
+    refObjectQuat: traj.refObjectQuat[i].slice(),
+    refTorsoPos: traj.refTorsoPos[i].slice(),
+    refTorsoQuat: traj.refTorsoQuat[i].slice(),
+    refLeftAnklePos: traj.refLeftAnklePos[i].slice(),
+    refLeftAnkleQuat: traj.refLeftAnkleQuat[i].slice(),
+    refRightAnklePos: traj.refRightAnklePos[i].slice(),
+    refRightAnkleQuat: traj.refRightAnkleQuat[i].slice()
+  };
+}
+
+function raiseCarryContactPoints(traj) {
+  const out = {
+    ...traj,
+    refLeftWristPos: rows(traj.refLeftWristPos),
+    refRightWristPos: rows(traj.refRightWristPos)
+  };
+  const contactHigher = 0.25;
+  const rootPullIn = 0.15;
+  for (let i = 0; i < out.refPhase.length; i++) {
+    if (out.refPhase[i] < 14 || out.refPhase[i] > 15) {
+      continue;
+    }
+    for (const key of ['refLeftWristPos', 'refRightWristPos']) {
+      out[key][i][2] += contactHigher;
+      const pullDir = sub(out.refTorsoPos[i], out.refObjectPos[i]);
+      pullDir[2] = 0;
+      const pullNorm = norm(pullDir);
+      if (pullNorm > 1e-6) {
+        out[key][i] = add(out[key][i], scale(pullDir, rootPullIn / pullNorm));
+      }
+    }
+  }
+  return out;
+}
+
+function reduceCarryCrouchDepth(traj, crouchScale = 0.2) {
+  const out = { ...traj, refTorsoPos: rows(traj.refTorsoPos) };
+  const idx13 = [];
+  const idxAdjust = [];
+  for (let i = 0; i < out.refPhase.length; i++) {
+    if (out.refPhase[i] === 13) idx13.push(i);
+    if (out.refPhase[i] === 14 || out.refPhase[i] === 15) idxAdjust.push(i);
+  }
+  if (!idx13.length || !idxAdjust.length) {
+    return out;
+  }
+  const standZ = out.refTorsoPos[idx13[idx13.length - 1]][2];
+  for (const i of idxAdjust) {
+    const drop = standZ - out.refTorsoPos[i][2];
+    out.refTorsoPos[i][2] = standZ - drop * crouchScale;
+  }
+  return out;
+}
+
+function getPushFaceInfo(objPos, objQuat, torsoPos, targetObjPos, dims, maxYawDeviationDeg = 20.0) {
+  let moveDir = sub(targetObjPos, objPos).slice(0, 2);
+  let moveNorm = norm2(moveDir);
+  if (moveNorm < 1e-6) {
+    moveDir = sub(objPos, torsoPos).slice(0, 2);
+    moveNorm = norm2(moveDir);
+  }
+  if (moveNorm < 1e-6) {
+    moveDir = [1, 0];
+  } else {
+    moveDir = scale([moveDir[0], moveDir[1], 0], 1 / (moveNorm + 1e-8)).slice(0, 2);
+  }
+
+  const ax = quatApply(objQuat, [1, 0, 0]);
+  const ay = quatApply(objQuat, [0, 1, 0]);
+  const candidates = [
+    { pos: add(objPos, scale(ax, dims[0])), normal: ax, halfWidth: dims[1] },
+    { pos: sub(objPos, scale(ax, dims[0])), normal: scale(ax, -1), halfWidth: dims[1] },
+    { pos: add(objPos, scale(ay, dims[1])), normal: ay, halfWidth: dims[0] },
+    { pos: sub(objPos, scale(ay, dims[1])), normal: scale(ay, -1), halfWidth: dims[0] }
+  ];
+  const desiredNormal = [-moveDir[0], -moveDir[1], 0];
+  candidates.sort((a, b) => {
+    const da = a.normal[0] * desiredNormal[0] + a.normal[1] * desiredNormal[1];
+    const db = b.normal[0] * desiredNormal[0] + b.normal[1] * desiredNormal[1];
+    return db - da;
+  });
+  const best = candidates[0];
+  let facePushDir = [-best.normal[0], -best.normal[1]];
+  const faceNorm = norm2(facePushDir);
+  facePushDir = faceNorm < 1e-6
+    ? moveDir.slice()
+    : [facePushDir[0] / (faceNorm + 1e-8), facePushDir[1] / (faceNorm + 1e-8)];
+  const goalYaw = Math.atan2(moveDir[1], moveDir[0]);
+  const faceYaw = Math.atan2(facePushDir[1], facePushDir[0]);
+  const yawDelta = wrapToPi(goalYaw - faceYaw);
+  const maxDelta = maxYawDeviationDeg * Math.PI / 180.0;
+  const targetYaw = faceYaw + Math.max(-maxDelta, Math.min(maxDelta, yawDelta));
+  return {
+    pushFace: {
+      pos: best.pos.slice(),
+      normal: best.normal.slice(),
+      halfWidth: best.halfWidth,
+      moveDir: [moveDir[0], moveDir[1]],
+      facePushDir
+    },
+    targetYawQuat: quat(yawToQuat(targetYaw)),
+    targetYaw
+  };
+}
+
+function getLineConstrainedPushInfo(objPos, objQuat, torsoPos, targetObjPos, dims) {
+  let moveDir = sub(targetObjPos, objPos).slice(0, 2);
+  let moveNorm = norm2(moveDir);
+  if (moveNorm < 1e-6) {
+    moveDir = sub(objPos, torsoPos).slice(0, 2);
+    moveNorm = norm2(moveDir);
+  }
+  if (moveNorm < 1e-6) {
+    moveDir = [1, 0];
+  } else {
+    moveDir = [moveDir[0] / (moveNorm + 1e-8), moveDir[1] / (moveNorm + 1e-8)];
+  }
+
+  const ax = quatApply(objQuat, [1, 0, 0]);
+  const ay = quatApply(objQuat, [0, 1, 0]);
+  const axis = [moveDir[0], moveDir[1], 0];
+  const perp = [-moveDir[1], moveDir[0], 0];
+  const halfAlong =
+    Math.abs(ax[0] * axis[0] + ax[1] * axis[1]) * dims[0] +
+    Math.abs(ay[0] * axis[0] + ay[1] * axis[1]) * dims[1];
+  const halfWidth =
+    Math.abs(ax[0] * perp[0] + ax[1] * perp[1]) * dims[0] +
+    Math.abs(ay[0] * perp[0] + ay[1] * perp[1]) * dims[1];
+  const targetYaw = Math.atan2(moveDir[1], moveDir[0]);
+  return {
+    pushFace: {
+      pos: sub(objPos, scale(axis, halfAlong)),
+      normal: [-moveDir[0], -moveDir[1], 0],
+      halfWidth,
+      moveDir: [moveDir[0], moveDir[1]],
+      facePushDir: [moveDir[0], moveDir[1]]
+    },
+    targetYawQuat: quat(yawToQuat(targetYaw)),
+    targetYaw
+  };
+}
+
+export function generateOmniPlanPushBox({
+  torsoPos,
+  torsoQuat,
+  leftAnklePos,
+  rightAnklePos,
+  objPos,
+  objQuat,
+  boxHalfDims = [0.2, 0.3, 0.15],
+  targetObjPos = [1, 1, 0.15],
+  leftWristPos = null,
+  leftWristQuat = null,
+  rightWristPos = null,
+  rightWristQuat = null
+}) {
+  const pad = 30;
+  const stepLinear = 0.014;
+  const stepAngular = 0.03;
+  const contact0 = [0, 0, 0, 0];
+  const contactLR = [0, 0, 1, 1];
+  const rotPitch90 = [0.7017, 0, 0.7017, 0];
+  const phase1112TorsoZ = 0.793;
+  const rotateFramesMin = 50;
+  const standFrames = 60;
+  const handOffsetY = 0.22;
+  const handOffsetZ = -0.13;
+  const objPos0 = vec3(objPos);
+  const objQuat0 = quat(objQuat);
+  const dims = vec3(boxHalfDims);
+  const target = vec3(targetObjPos);
+  target[2] = objPos0[2];
+
+  let carryGrasp = sliceTrajByPhase(generateOmniPlanCarryBoxWTACO({
+    torsoPos,
+    torsoQuat,
+    leftAnklePos,
+    rightAnklePos,
+    objPos,
+    objQuat,
+    boxHalfDims: dims,
+    targetObjPos: target,
+    leftWristPos,
+    leftWristQuat,
+    rightWristPos,
+    rightWristQuat,
+    stepSizeLinear: stepLinear
+  }), 11, 15);
+  carryGrasp = raiseCarryContactPoints(reduceCarryCrouchDepth(carryGrasp, 0.2));
+
+  const b = new TrajBuilder();
+  appendFinalizedTraj(b, carryGrasp);
+  const last = lastFrame(carryGrasp);
+
+  const torsoP160 = last.refTorsoPos;
+  const yaw160 = quat(last.refLeftAnkleQuat);
+  const pitch16 = pitchDegFromTorsoYaw(last.refTorsoQuat, last.refLeftAnkleQuat);
+  const la160 = last.refLeftAnklePos;
+  const ra160 = last.refRightAnklePos;
+  const lw160 = last.refLeftWristPos;
+  const rw160 = last.refRightWristPos;
+  const lq160 = quat(last.refLeftWristQuat);
+  const rq160 = quat(last.refRightWristQuat);
+
+  let moveXY = [target[0] - objPos0[0], target[1] - objPos0[1]];
+  const moveNorm = norm2(moveXY);
+  moveXY = moveNorm < 1e-6 ? [1, 0] : [moveXY[0] / (moveNorm + 1e-8), moveXY[1] / (moveNorm + 1e-8)];
+  const targetYaw = Math.atan2(moveXY[1], moveXY[0]);
+  const yaw161 = quat(yawToQuat(targetYaw));
+  let yaw16 = alignQuatHemisphere(interpSlerp(yaw160, yaw161, stepAngular * 0.5));
+  const n16 = Math.max(yaw16.length, rotateFramesMin);
+  if (yaw16.length !== n16) {
+    yaw16 = linspace(n16).map((u) => slerpQuat(yaw160, yaw161, u));
+  }
+  const torsoP16 = repeatVec(torsoP160, n16);
+  const invYaw160 = quatConjugate(yaw160);
+  const laLocal = quatApply(invYaw160, sub(la160, torsoP160));
+  const raLocal = quatApply(invYaw160, sub(ra160, torsoP160));
+  const lwLocal = quatApply(invYaw160, sub(lw160, torsoP160));
+  const rwLocal = quatApply(invYaw160, sub(rw160, torsoP160));
+  const objLocal = quatApply(invYaw160, sub(objPos0, torsoP160));
+  const la16 = yaw16.map((y, k) => add(torsoP16[k], quatApply(y, laLocal)));
+  const ra16 = yaw16.map((y, k) => add(torsoP16[k], quatApply(y, raLocal)));
+  const lw16 = yaw16.map((y, k) => add(torsoP16[k], quatApply(y, lwLocal)));
+  const rw16 = yaw16.map((y, k) => add(torsoP16[k], quatApply(y, rwLocal)));
+  const objP16 = yaw16.map((y, k) => add(torsoP16[k], quatApply(y, objLocal)));
+  const objQ16 = yaw16.map((y) => quat(quatMultiply(quatMultiply(y, quatConjugate(yaw160)), objQuat0)));
+  const u16 = linspace(n16);
+  const lq16 = yaw16.map((y, k) => slerpQuat(lq160, quat(quatMultiply(y, rotPitch90)), u16[k]));
+  const rq16 = yaw16.map((y, k) => slerpQuat(rq160, quat(quatMultiply(y, rotPitch90)), u16[k]));
+  b.append(16, {
+    lwP: lw16, lwQ: lq16, rwP: rw16, rwQ: rq16, objP: objP16, objQ: objQ16,
+    torsoP: torsoP16, torsoYawQ: yaw16, torsoPitchDeg: Array.from({ length: n16 }, () => pitch16),
+    laP: la16, raP: ra16, contact: repeatVec(contactLR, n16)
+  });
+  b.pad(16, contactLR, pad);
+  b.pad(16, contactLR, 50);
+
+  const objPush0 = b.last('objP');
+  const objPush1 = target.slice();
+  objPush1[2] = objPush0[2];
+  const objPush = interpLinear(objPush0, objPush1, stepLinear);
+  if (objPush.length > 1) {
+    const deltaPush = objPush.map((p) => sub(p, objPush0));
+    const nPush = objPush.length;
+    b.append(16, {
+      lwP: deltaPush.map((d) => add(b.last('lwP'), d)),
+      lwQ: repeatVec(b.last('lwQ'), nPush),
+      rwP: deltaPush.map((d) => add(b.last('rwP'), d)),
+      rwQ: repeatVec(b.last('rwQ'), nPush),
+      objP: objPush,
+      objQ: repeatVec(b.last('objQ'), nPush),
+      torsoP: deltaPush.map((d) => add(b.last('torsoP'), d)),
+      torsoYawQ: repeatVec(b.last('torsoYawQ'), nPush),
+      torsoPitchDeg: Array.from({ length: nPush }, () => pitch16),
+      laP: deltaPush.map((d) => add(b.last('laP'), d)),
+      raP: deltaPush.map((d) => add(b.last('raP'), d)),
+      contact: repeatVec(contactLR, nPush)
+    });
+    b.pad(16, contactLR, pad);
+  }
+
+  const torsoP180 = b.last('torsoP');
+  const yaw18 = b.last('torsoYawQ');
+  const objP18 = b.last('objP');
+  const objQ18 = b.last('objQ');
+  const la180 = b.last('laP');
+  const ra180 = b.last('raP');
+  const lw180 = b.last('lwP');
+  const rw180 = b.last('rwP');
+  const pitch180 = b.last('torsoPitchDeg');
+  const torsoP181 = torsoP180.slice();
+  torsoP181[2] = phase1112TorsoZ;
+  let torsoP18 = interpLinear(torsoP180, torsoP181, stepLinear);
+  const n18 = Math.max(torsoP18.length, standFrames);
+  if (torsoP18.length !== n18) {
+    torsoP18 = linspace(n18).map((u) => lerp(torsoP180, torsoP181, u));
+  }
+  const u18 = linspace(n18);
+  const torsoDelta18 = torsoP18.map((p) => sub(p, torsoP180));
+  const lwRestLocal = [0, handOffsetY, handOffsetZ];
+  const rwRestLocal = [0, -handOffsetY, handOffsetZ];
+  const lw18Goal = torsoP18.map((p) => add(p, quatApply(yaw18, lwRestLocal)));
+  const rw18Goal = torsoP18.map((p) => add(p, quatApply(yaw18, rwRestLocal)));
+  const q18 = quat(quatMultiply(yaw18, rotPitch90));
+  b.append(18, {
+    lwP: u18.map((u, i) => lerp(lw180, lw18Goal[i], u)),
+    lwQ: repeatVec(q18, n18),
+    rwP: u18.map((u, i) => lerp(rw180, rw18Goal[i], u)),
+    rwQ: repeatVec(q18, n18),
+    objP: repeatVec(objP18, n18),
+    objQ: repeatVec(objQ18, n18),
+    torsoP: torsoP18,
+    torsoYawQ: repeatVec(yaw18, n18),
+    torsoPitchDeg: u18.map((u) => (1 - u) * pitch180),
+    laP: torsoDelta18.map((d) => [la180[0] + d[0], la180[1] + d[1], la180[2]]),
+    raP: torsoDelta18.map((d) => [ra180[0] + d[0], ra180[1] + d[1], ra180[2]]),
+    contact: repeatVec(contact0, n18)
+  });
+  b.pad(18, contact0, pad);
+  const out = b.finalize();
+  out.targetYaw = targetYaw;
+  return out;
+}
+
+export function generateOmniPlanPushBoxOld({
+  torsoPos,
+  torsoQuat,
+  leftAnklePos,
+  rightAnklePos,
+  objPos,
+  objQuat,
+  boxHalfDims = [0.2, 0.3, 0.15],
+  targetObjPos = [1, 1, 0.15],
+  leftWristQuat = null,
+  rightWristQuat = null
+}) {
+  const pad = 30;
+  const stepLinear = 0.014;
+  const stepAngular = 0.03;
+  const cfg = {
+    handOffsetY: 0.22,
+    handOffsetZ: -0.13,
+    pushHandSpacing: 0.20,
+    pushHandHeightOffset: 0.10,
+    prePushStandoff: 0.75,
+    pushStandoff: 0.4,
+    reachMargin: 0.015,
+    crouchPitchDeg: 58.0,
+    crouchTorsoZ: 0.65,
+    pushYawMaxDeviationDeg: 20.0
+  };
+  const contact0 = [0, 0, 0, 0];
+  const contactLR = [0, 0, 1, 1];
+  const rotPitch90 = [0.7017, 0, 0.7017, 0];
+  const rotYawLeft90 = quat(yawToQuat(Math.PI / 2.0));
+  const rotYawRight90 = quat(yawToQuat(-Math.PI / 2.0));
+  const torsoPos0 = vec3(torsoPos);
+  const torsoQuat0 = quat(torsoQuat);
+  const objPos0 = vec3(objPos);
+  const objQuat0 = quat(objQuat);
+  const dims = vec3(boxHalfDims);
+  const target = vec3(targetObjPos);
+  target[2] = objPos0[2];
+  const yaw0 = quat(yawComponent(torsoQuat0));
+  const leftWristQuat0 = leftWristQuat && rightWristQuat ? quat(leftWristQuat) : quat(quatMultiply(yaw0, rotPitch90));
+  const rightWristQuat0 = leftWristQuat && rightWristQuat ? quat(rightWristQuat) : leftWristQuat0.slice();
+  const { pushFace, targetYawQuat, targetYaw } = getLineConstrainedPushInfo(
+    objPos0, objQuat0, torsoPos0, target, dims
+  );
+  const moveDir3 = [pushFace.moveDir[0], pushFace.moveDir[1], 0];
+  const qPushLeft = quat(quatMultiply(quatMultiply(targetYawQuat, rotYawLeft90), pitchQuatFromDeg(90)));
+  const qPushRight = quat(quatMultiply(quatMultiply(targetYawQuat, rotYawRight90), pitchQuatFromDeg(90)));
+  const b = new TrajBuilder();
+  const phase1112TorsoZ = 0.793;
+  const stanceHalfWidth = 0.12;
+  const stanceZRel = -0.75;
+  const offLA = [0, stanceHalfWidth, stanceZRel];
+  const offRA = [0, -stanceHalfWidth, stanceZRel];
+  const offLW0 = [0, cfg.handOffsetY, cfg.handOffsetZ];
+  const offRW0 = [0, -cfg.handOffsetY, cfg.handOffsetZ];
+
+  const look = sub(objPos0, torsoPos0);
+  const faceBoxYaw = quat(yawToQuat(Math.atan2(look[1], look[0])));
+  const yaw11 = interpSlerp(yaw0, faceBoxYaw, stepAngular);
+  const n11 = yaw11.length;
+  const torsoP11 = repeatVec([torsoPos0[0], torsoPos0[1], phase1112TorsoZ], n11);
+  const u11 = linspace(n11);
+  b.append(11, {
+    lwP: yaw11.map((q, i) => add(torsoP11[i], quatApply(q, offLW0))),
+    lwQ: yaw11.map((q, i) => slerpQuat(leftWristQuat0, quat(quatMultiply(q, rotPitch90)), u11[i])),
+    rwP: yaw11.map((q, i) => add(torsoP11[i], quatApply(q, offRW0))),
+    rwQ: yaw11.map((q, i) => slerpQuat(rightWristQuat0, quat(quatMultiply(q, rotPitch90)), u11[i])),
+    objP: repeatVec(objPos0, n11),
+    objQ: repeatVec(objQuat0, n11),
+    torsoP: torsoP11,
+    torsoYawQ: alignQuatHemisphere(yaw11),
+    torsoPitchDeg: Array.from({ length: n11 }, () => 0),
+    laP: yaw11.map((q, i) => add(torsoP11[i], quatApply(q, offLA))),
+    raP: yaw11.map((q, i) => add(torsoP11[i], quatApply(q, offRA))),
+    contact: repeatVec(contact0, n11)
+  });
+
+  let torsoP120 = b.last('torsoP');
+  const yaw12 = b.last('torsoYawQ');
+  const torsoP121 = torsoP120.slice();
+  torsoP121[0] = objPos0[0] - pushFace.moveDir[0] * cfg.prePushStandoff;
+  torsoP121[1] = objPos0[1] - pushFace.moveDir[1] * cfg.prePushStandoff;
+  let torsoP12 = interpLinear(torsoP120, torsoP121, stepLinear);
+  if (torsoP12.length < 2) torsoP12 = [torsoP120, torsoP121];
+  torsoP12 = torsoP12.map((p) => [p[0], p[1], phase1112TorsoZ]);
+  const n12 = torsoP12.length;
+  const q12 = quat(quatMultiply(yaw12, rotPitch90));
+  b.append(12, {
+    lwP: torsoP12.map((p) => add(p, quatApply(yaw12, offLW0))),
+    lwQ: repeatVec(q12, n12),
+    rwP: torsoP12.map((p) => add(p, quatApply(yaw12, offRW0))),
+    rwQ: repeatVec(q12, n12),
+    objP: repeatVec(objPos0, n12),
+    objQ: repeatVec(objQuat0, n12),
+    torsoP: torsoP12,
+    torsoYawQ: repeatVec(yaw12, n12),
+    torsoPitchDeg: Array.from({ length: n12 }, () => 0),
+    laP: torsoP12.map((p) => add(p, quatApply(yaw12, offLA))),
+    raP: torsoP12.map((p) => add(p, quatApply(yaw12, offRA))),
+    contact: repeatVec(contact0, n12)
+  });
+
+  const torsoP130 = b.last('torsoP');
+  const yaw130 = b.last('torsoYawQ');
+  const torsoP131 = torsoP130.slice();
+  torsoP131[0] = objPos0[0] - pushFace.moveDir[0] * cfg.pushStandoff;
+  torsoP131[1] = objPos0[1] - pushFace.moveDir[1] * cfg.pushStandoff;
+  const yaw13Seed = interpSlerp(yaw130, targetYawQuat, stepAngular);
+  const pos13Seed = interpLinear(torsoP130, torsoP131, stepLinear);
+  const n13 = Math.max(yaw13Seed.length, pos13Seed.length, 2);
+  const u13 = linspace(n13);
+  const yaw13 = u13.map((u) => slerpQuat(yaw130, targetYawQuat, u));
+  const torsoP13 = u13.map((u) => lerp(torsoP130, torsoP131, u));
+  b.append(13, {
+    lwP: torsoP13.map((p, i) => add(p, quatApply(yaw13[i], offLW0))),
+    lwQ: yaw13.map((q) => quat(quatMultiply(q, rotPitch90))),
+    rwP: torsoP13.map((p, i) => add(p, quatApply(yaw13[i], offRW0))),
+    rwQ: yaw13.map((q) => quat(quatMultiply(q, rotPitch90))),
+    objP: repeatVec(objPos0, n13),
+    objQ: repeatVec(objQuat0, n13),
+    torsoP: torsoP13,
+    torsoYawQ: alignQuatHemisphere(yaw13),
+    torsoPitchDeg: Array.from({ length: n13 }, () => 0),
+    laP: torsoP13.map((p, i) => add(p, quatApply(yaw13[i], offLA))),
+    raP: torsoP13.map((p, i) => add(p, quatApply(yaw13[i], offRA))),
+    contact: repeatVec(contact0, n13)
+  });
+
+  const torsoP140 = b.last('torsoP');
+  const yaw14 = b.last('torsoYawQ');
+  const n14 = 60;
+  const u14 = linspace(n14);
+  const torsoP14 = u14.map((u) => [torsoP140[0], torsoP140[1], (1 - u) * torsoP140[2] + u * cfg.crouchTorsoZ]);
+  const pushContactOffset = sub(pushFace.pos, objPos0);
+  pushContactOffset[2] = cfg.pushHandHeightOffset;
+  const pushPoint = add(objPos0, pushContactOffset);
+  const localPushCenter = quatApply(quatConjugate(yaw14), sub(pushPoint, torsoP14[n14 - 1]));
+  const desiredPushHandY = 0.5 * cfg.pushHandSpacing;
+  const maxSymmetricY = Math.max(pushFace.halfWidth - cfg.reachMargin, desiredPushHandY);
+  const pushHandY = Math.min(desiredPushHandY, maxSymmetricY);
+  const localLWPush = [localPushCenter[0], pushHandY, localPushCenter[2]];
+  const localRWPush = [localPushCenter[0], -pushHandY, localPushCenter[2]];
+  const lwTarget14 = torsoP14.map((p) => add(p, quatApply(yaw14, localLWPush)));
+  const rwTarget14 = torsoP14.map((p) => add(p, quatApply(yaw14, localRWPush)));
+  const lw140 = b.last('lwP');
+  const rw140 = b.last('rwP');
+  const lq140 = b.last('lwQ');
+  const rq140 = b.last('rwQ');
+  b.append(14, {
+    lwP: u14.map((u, i) => lerp(lw140, lwTarget14[i], u)),
+    lwQ: u14.map((u) => slerpQuat(lq140, qPushLeft, u)),
+    rwP: u14.map((u, i) => lerp(rw140, rwTarget14[i], u)),
+    rwQ: u14.map((u) => slerpQuat(rq140, qPushRight, u)),
+    objP: repeatVec(objPos0, n14),
+    objQ: repeatVec(objQuat0, n14),
+    torsoP: torsoP14,
+    torsoYawQ: repeatVec(yaw14, n14),
+    torsoPitchDeg: u14.map((u) => u * cfg.crouchPitchDeg),
+    laP: repeatVec(b.last('laP'), n14),
+    raP: repeatVec(b.last('raP'), n14),
+    contact: repeatVec(contact0, n14)
+  });
+  b.pad(14, contactLR, pad);
+
+  const torsoP150 = b.last('torsoP');
+  const yaw15 = b.last('torsoYawQ');
+  const pitch15 = b.last('torsoPitchDeg');
+  const la150 = b.last('laP');
+  const ra150 = b.last('raP');
+  const pushStart = b.last('objP');
+  let objP15 = interpLinear(pushStart, target, stepLinear * 0.7);
+  const n15 = Math.max(objP15.length, 2);
+  const u15 = linspace(n15);
+  objP15 = u15.map((u) => lerp(pushStart, target, u));
+  const torsoGoal15 = torsoP150.slice();
+  torsoGoal15[0] = target[0] - pushFace.moveDir[0] * cfg.pushStandoff;
+  torsoGoal15[1] = target[1] - pushFace.moveDir[1] * cfg.pushStandoff;
+  torsoGoal15[2] = cfg.crouchTorsoZ;
+  const torsoP15 = u15.map((u) => lerp(torsoP150, torsoGoal15, u));
+  b.append(15, {
+    lwP: torsoP15.map((p) => add(p, quatApply(yaw15, localLWPush))),
+    lwQ: repeatVec(qPushLeft, n15),
+    rwP: torsoP15.map((p) => add(p, quatApply(yaw15, localRWPush))),
+    rwQ: repeatVec(qPushRight, n15),
+    objP: objP15,
+    objQ: repeatVec(objQuat0, n15),
+    torsoP: torsoP15,
+    torsoYawQ: repeatVec(yaw15, n15),
+    torsoPitchDeg: Array.from({ length: n15 }, () => pitch15),
+    laP: torsoP15.map((p) => [p[0] + quatApply(yaw15, offLA)[0], p[1] + quatApply(yaw15, offLA)[1], la150[2]]),
+    raP: torsoP15.map((p) => [p[0] + quatApply(yaw15, offRA)[0], p[1] + quatApply(yaw15, offRA)[1], ra150[2]]),
+    contact: repeatVec(contactLR, n15)
+  });
+  b.pad(15, contactLR, pad);
+
+  const torsoP160 = b.last('torsoP');
+  const yaw16 = b.last('torsoYawQ');
+  const la160 = b.last('laP');
+  const ra160 = b.last('raP');
+  const lw160 = b.last('lwP');
+  const rw160 = b.last('rwP');
+  const n16 = 60;
+  const u16 = linspace(n16);
+  const torsoP16 = u16.map((u) => [torsoP160[0], torsoP160[1], (1 - u) * torsoP160[2] + u * phase1112TorsoZ]);
+  const lwRest16 = torsoP16.map((p) => add(p, quatApply(yaw16, offLW0)));
+  const rwRest16 = torsoP16.map((p) => add(p, quatApply(yaw16, offRW0)));
+  const q16 = quat(quatMultiply(yaw16, rotPitch90));
+  b.append(16, {
+    lwP: u16.map((u, i) => lerp(lw160, lwRest16[i], u)),
+    lwQ: repeatVec(q16, n16),
+    rwP: u16.map((u, i) => lerp(rw160, rwRest16[i], u)),
+    rwQ: repeatVec(q16, n16),
+    objP: repeatVec(target, n16),
+    objQ: repeatVec(objQuat0, n16),
+    torsoP: torsoP16,
+    torsoYawQ: repeatVec(yaw16, n16),
+    torsoPitchDeg: u16.map((u) => (1 - u) * cfg.crouchPitchDeg),
+    laP: repeatVec(la160, n16),
+    raP: repeatVec(ra160, n16),
+    contact: repeatVec(contact0, n16)
+  });
+  b.pad(16, contact0, pad);
+  const out = b.finalize();
+  out.targetYaw = targetYaw;
+  out.pushMoveDir = moveDir3;
   return out;
 }

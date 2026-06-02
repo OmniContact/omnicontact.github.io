@@ -7,6 +7,7 @@
   "reference_source": "rule_planner",
   "goal_pos": [1.0, 1.0, 0.55],
   "box_half_dims": [0.15, 0.15, 0.15],
+  "push_box_half_dims": [0.23, 0.25, 0.26],
   "history_length": 5,
   "policy_joint_names": [
     "left_hip_pitch_joint",

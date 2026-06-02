@@ -7,7 +7,11 @@ import {
   quatApplyInv,
   quatToRot6d
 } from './utils/math.js';
-import { generateOmniPlanCarryBoxWTACO } from './omniPlanCarryBoxWTACO.js';
+import {
+  generateOmniPlanCarryBoxWTACO,
+  generateOmniPlanPushBox,
+  generateOmniPlanPushBoxOld
+} from './omniPlanCarryBoxWTACO.js';
 
 const FUTURE_FRAMES = [0, 1, 2, 3, 4, 8, 12, 16, 24, 32, 50];
 const HISTORY_SLICES = [
@@ -34,6 +38,36 @@ const BODY_INDEX = {
   leftWrist: 10,
   rightWrist: 13
 };
+
+function normalizePlannerTask(task) {
+  const key = String(task ?? 'carrybox').trim().toLowerCase().replace(/_/g, '-');
+  if (key === 'push' || key === 'pushbox') {
+    return 'pushbox';
+  }
+  if (key === 'push-old' || key === 'pushbox-old' || key === 'old-push') {
+    return 'pushbox-old';
+  }
+  return 'carrybox';
+}
+
+function taskBoxHalfDims(task, carryDims, pushDims) {
+  const normalized = normalizePlannerTask(task);
+  return normalized === 'pushbox' || normalized === 'pushbox-old' ? pushDims : carryDims;
+}
+
+function taskObjectBodyName(task) {
+  return 'box';
+}
+
+function buildBboxOffsets(dims) {
+  const hx = Number(dims?.[0] ?? 0.15);
+  const hy = Number(dims?.[1] ?? 0.15);
+  const hz = Number(dims?.[2] ?? 0.15);
+  return [
+    [hx, hy, hz], [hx, hy, -hz], [hx, -hy, hz], [hx, -hy, -hz],
+    [-hx, hy, hz], [-hx, hy, -hz], [-hx, -hy, hz], [-hx, -hy, -hz]
+  ];
+}
 
 function toFloatArray(value, length, fallback = 0.0) {
   const out = new Float32Array(length);
@@ -157,13 +191,15 @@ export class CarryBoxWTACPolicyRunner {
     this.actionScaleLab = toFloatArray(config.action_scale_lab, this.numActions, 1.0);
     this.lab2mj = Array.from(config.lab2mj ?? Array.from({ length: this.numActions }, (_, i) => i));
     this.mj2lab = Array.from(config.mj2lab ?? Array.from({ length: this.numActions }, (_, i) => i));
-    this.bboxOffsets = [
-      [0.15, 0.15, 0.15], [0.15, 0.15, -0.15], [0.15, -0.15, 0.15], [0.15, -0.15, -0.15],
-      [-0.15, 0.15, 0.15], [-0.15, 0.15, -0.15], [-0.15, -0.15, 0.15], [-0.15, -0.15, -0.15]
-    ];
     this.referenceSource = config.reference_source ?? 'rule_planner';
+    this.task = normalizePlannerTask(config.task ?? config.planner_task ?? 'carrybox');
     this.goalPos = new Float32Array(config.goal_pos ?? [1.0, 1.0, 0.55]);
-    this.boxHalfDims = new Float32Array(config.box_half_dims ?? [0.15, 0.15, 0.15]);
+    this.carryBoxHalfDims = new Float32Array(config.box_half_dims ?? [0.15, 0.15, 0.15]);
+    this.pushBoxHalfDims = new Float32Array(config.push_box_half_dims ?? [0.23, 0.25, 0.26]);
+    this.boxHalfDims = new Float32Array(taskBoxHalfDims(this.task, this.carryBoxHalfDims, this.pushBoxHalfDims));
+    this.bboxOffsets = buildBboxOffsets(this.boxHalfDims);
+    this.objectBodyName = taskObjectBodyName(this.task);
+    this.objectQuatOverride = null;
     this.counterStep = 0;
     this.isInferencing = false;
   }
@@ -234,9 +270,24 @@ export class CarryBoxWTACPolicyRunner {
     const rightHand = this._poseFromBody('right_palm_link');
     const leftAnkle = this._poseFromBody('left_ankle_pitch_link');
     const rightAnkle = this._poseFromBody('right_ankle_pitch_link');
-    const object = this._poseFromBody('box', [1, 0, 0.55], [1, 0, 0, 0]);
-
-    const traj = generateOmniPlanCarryBoxWTACO({
+    const task = normalizePlannerTask(this.task);
+    this.boxHalfDims = new Float32Array(taskBoxHalfDims(task, this.carryBoxHalfDims, this.pushBoxHalfDims));
+    this.bboxOffsets = buildBboxOffsets(this.boxHalfDims);
+    this.objectBodyName = taskObjectBodyName(task);
+    const object = this._poseFromBody(this.objectBodyName, [1, 0, this.boxHalfDims[2]], [1, 0, 0, 0]);
+    if (this.objectQuatOverride) {
+      object.quat.set(this.objectQuatOverride);
+    }
+    const targetObjPos = Array.from(this.goalPos);
+    if (task === 'pushbox' || task === 'pushbox-old') {
+      targetObjPos[2] = this.boxHalfDims[2];
+    }
+    const generator = task === 'pushbox'
+      ? generateOmniPlanPushBox
+      : task === 'pushbox-old'
+        ? generateOmniPlanPushBoxOld
+        : generateOmniPlanCarryBoxWTACO;
+    const traj = generator({
       torsoPos: torso.pos,
       torsoQuat: torso.quat,
       leftAnklePos: leftAnkle.pos,
@@ -244,7 +295,7 @@ export class CarryBoxWTACPolicyRunner {
       objPos: object.pos,
       objQuat: object.quat,
       boxHalfDims: this.boxHalfDims,
-      targetObjPos: this.goalPos,
+      targetObjPos,
       leftWristPos: leftHand.pos,
       leftWristQuat: leftHand.quat,
       rightWristPos: rightHand.pos,
@@ -270,7 +321,7 @@ export class CarryBoxWTACPolicyRunner {
     }
     this.plannerGoal = {
       plane1: Float32Array.from([object.pos[0], object.pos[1], object.pos[2] - this.boxHalfDims[2] - 0.01]),
-      plane2: Float32Array.from([this.goalPos[0], this.goalPos[1], this.goalPos[2] - this.boxHalfDims[2] - 0.01])
+      plane2: Float32Array.from([targetObjPos[0], targetObjPos[1], targetObjPos[2] - this.boxHalfDims[2] - 0.01])
     };
     return;
 
@@ -573,7 +624,7 @@ export class CarryBoxWTACPolicyRunner {
       const leftAnkle = this._poseFromBody('left_ankle_pitch_link', state.rootPos, state.rootQuat);
       const rightAnkle = this._poseFromBody('right_ankle_pitch_link', state.rootPos, state.rootQuat);
       const mid360 = this._poseFromBody('mid360_link', state.rootPos, state.rootQuat);
-      const object = this._poseFromBody('box', this.refObjectPos[Math.min(this.counterStep, this.nframes - 1)], this.refObjectQuat[Math.min(this.counterStep, this.nframes - 1)]);
+      const object = this._poseFromBody(this.objectBodyName, this.refObjectPos[Math.min(this.counterStep, this.nframes - 1)], this.refObjectQuat[Math.min(this.counterStep, this.nframes - 1)]);
 
       const eePos = [
         ...quatApplyInv(torso.quat, [leftHand.pos[0] - torso.pos[0], leftHand.pos[1] - torso.pos[1], leftHand.pos[2] - torso.pos[2]]),

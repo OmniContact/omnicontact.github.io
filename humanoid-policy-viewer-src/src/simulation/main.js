@@ -4,12 +4,14 @@ import { DragStateManager } from './utils/DragStateManager.js';
 import { downloadExampleScenesFolder, getPosition, getQuaternion, getMujocoQuaternion, toMujocoPos, reloadScene, reloadPolicy, reloadInteractionPolicy } from './mujocoUtils.js';
 import { parseObj, parseStl, transformObjToMujoco, computeSdfGrid, buildThreeGeometry } from './objSdfComputer.js';
 import { SDFVoxelGrid } from './sdfHelper.js';
-import { eulerToQuat } from './utils/math.js';
+import { eulerToQuat, normalizeQuat } from './utils/math.js';
 
 const queryParams = new URLSearchParams(window.location.search);
 const defaultPolicy = queryParams.get('force_policy')
   ?? queryParams.get('policy')
   ?? "./examples/checkpoints/g1/carrybox_wtac_policy.json";
+const DEFAULT_CARRYBOX_SCENE = 'g1/carrybox_manager_carry.xml';
+const LOCAL_PUSHBOX_SCENE = 'g1/omniplan2track_push_box.xml';
 
 // Pre-allocated for createThickArrow.setDirection
 const _thickArrowUp = new THREE.Vector3(0, 1, 0);
@@ -121,6 +123,53 @@ function objToStlBinary(vertices, faces, numFaces) {
   return new Uint8Array(buf, 0, 84 + written * 50);
 }
 
+function normalizePlannerTask(task) {
+  const key = String(task ?? 'carrybox').trim().toLowerCase().replace(/_/g, '-');
+  if (key === 'push' || key === 'pushbox') {
+    return 'pushbox';
+  }
+  if (key === 'push-old' || key === 'pushbox-old' || key === 'old-push') {
+    return 'pushbox-old';
+  }
+  return 'carrybox';
+}
+
+function isPushPlannerTask(task) {
+  const normalized = normalizePlannerTask(task);
+  return normalized === 'pushbox' || normalized === 'pushbox-old';
+}
+
+function isPush2PlannerTask(task) {
+  return normalizePlannerTask(task) === 'pushbox-old';
+}
+
+function plannerObjectBodyName(task) {
+  return 'box';
+}
+
+function plannerGhostBodyName(task) {
+  return 'ghost_box';
+}
+
+function plannerBoxHalfDims(task, carryDims = [0.15, 0.15, 0.15], pushDims = [0.23, 0.25, 0.26]) {
+  return Array.from(isPushPlannerTask(task) ? pushDims : carryDims);
+}
+
+function plannerSceneForTask(task) {
+  return isPushPlannerTask(task) ? LOCAL_PUSHBOX_SCENE : DEFAULT_CARRYBOX_SCENE;
+}
+
+function enforcePlannerObjectHeights(task, boxStartPos, goalPos, halfDims) {
+  const start = boxStartPos ? Array.from(boxStartPos) : null;
+  const goal = goalPos ? Array.from(goalPos) : null;
+  if (isPushPlannerTask(task)) {
+    const halfHeight = Number(halfDims?.[2] ?? 0.26);
+    if (start) start[2] = halfHeight;
+    if (goal) goal[2] = halfHeight;
+  }
+  return { boxStartPos: start, goalPos: goal };
+}
+
 export class MuJoCoDemo {
   constructor(mujoco) {
     this.mujoco = mujoco;
@@ -145,6 +194,8 @@ export class MuJoCoDemo {
 
     // Body name → body ID lookup (populated on scene load)
     this.bodyNameToId = {};
+    this.geomNameToId = {};
+    this.geomIdToMesh = {};
     // SDF query body IDs (populated on interaction policy load)
     this.sdfBodyIds = [];
     // Scene object body IDs
@@ -218,6 +269,31 @@ export class MuJoCoDemo {
 
     // SDF visualization arrows (one per query body, created lazily)
     this.showSdfVis = true;
+    this.autoReplanEnabled = false;
+    this.autoReplanState = {
+      hasHeldBox: false,
+      detachCounter: 0,
+      refMismatchCounter: 0,
+      cooldownCounter: 0,
+      pendingReplan: false,
+      pendingReason: '',
+      staticCounter: 0,
+      replanCounter: 0,
+      lastReason: ''
+    };
+    this.autoReplanConfig = {
+      detachDistThreshold: 0.32,
+      detachTriggerTicks: 8,
+      replanCooldownTicks: 80,
+      goalTolerance: 0.2,
+      refMismatchThreshold: 0.18,
+      refMismatchTriggerTicks: 8,
+      objSpeedThreshold: 0.05,
+      objAngSpeedThreshold: 0.15,
+      staticTicks: 5,
+      uprightZThreshold: 0.92,
+      liftedHeightThreshold: 0.12
+    };
     this._sdfArrows = [];
     this._tmpSdfOrigin = new THREE.Vector3();
     this._tmpSdfDir = new THREE.Vector3();
@@ -310,6 +386,7 @@ export class MuJoCoDemo {
 
   async reload(mjcf_path) {
     await this.reloadScene(mjcf_path);
+    this._currentSceneFile = mjcf_path;
     this.updateFollowBodyId();
     this.timestep = this.model.opt.timestep;
     this.decimation = Math.max(1, Math.round(0.02 / this.timestep));
@@ -318,6 +395,23 @@ export class MuJoCoDemo {
 
     await this.reloadPolicy(this.currentPolicyPath ?? defaultPolicy);
     this.alive = true;
+  }
+
+  async _ensurePlannerSceneForTask(task) {
+    const sceneFile = plannerSceneForTask(task);
+    if (this._currentSceneFile === sceneFile) {
+      return false;
+    }
+
+    const wasPaused = this.params.paused;
+    this.params.paused = true;
+    this.actionTarget = null;
+    await this.reloadScene(sceneFile);
+    this._currentSceneFile = sceneFile;
+    this.updateFollowBodyId();
+    await this.reloadPolicy(this.currentPolicyPath ?? defaultPolicy);
+    this.params.paused = wasPaused;
+    return true;
   }
 
   setFollowEnabled(enabled) {
@@ -351,6 +445,374 @@ export class MuJoCoDemo {
       arrow.visible = false;
       this.scene.add(arrow);
       this._sdfArrows.push(arrow);
+    }
+  }
+
+  setAutoReplanEnabled(enabled) {
+    this.autoReplanEnabled = Boolean(enabled);
+    this.resetAutoReplanState();
+    return this.autoReplanEnabled;
+  }
+
+  getAutoReplanEnabled() {
+    return this.autoReplanEnabled;
+  }
+
+  resetAutoReplanState() {
+    this.autoReplanState.hasHeldBox = false;
+    this.autoReplanState.detachCounter = 0;
+    this.autoReplanState.refMismatchCounter = 0;
+    this.autoReplanState.cooldownCounter = 0;
+    this.autoReplanState.pendingReplan = false;
+    this.autoReplanState.pendingReason = '';
+    this.autoReplanState.staticCounter = 0;
+    this.autoReplanState.lastReason = '';
+  }
+
+  _bodyMjPos(bodyName) {
+    const bodyId = this.bodyNameToId?.[bodyName];
+    if (bodyId === undefined || !this.simulation?.xpos) {
+      return null;
+    }
+    const b = bodyId * 3;
+    return [
+      this.simulation.xpos[b],
+      this.simulation.xpos[b + 1],
+      this.simulation.xpos[b + 2]
+    ];
+  }
+
+  _bodyMjQuat(bodyName) {
+    const bodyId = this.bodyNameToId?.[bodyName];
+    if (bodyId === undefined || !this.simulation?.xquat) {
+      return null;
+    }
+    const b = bodyId * 4;
+    return normalizeQuat([
+      this.simulation.xquat[b],
+      this.simulation.xquat[b + 1],
+      this.simulation.xquat[b + 2],
+      this.simulation.xquat[b + 3]
+    ]);
+  }
+
+  _freeJointAdrForBody(bodyName) {
+    const bodyId = this.bodyNameToId?.[bodyName];
+    if (bodyId === undefined || !this.model) {
+      return null;
+    }
+    const jointAdr = this.model.body_jntadr[bodyId];
+    const jointNum = this.model.body_jntnum[bodyId];
+    if (jointNum <= 0 || jointAdr < 0) {
+      return null;
+    }
+    return {
+      qpos: this.model.jnt_qposadr[jointAdr],
+      qvel: this.model.jnt_dofadr[jointAdr]
+    };
+  }
+
+  _boxPalmMinDist() {
+    const boxPos = this._bodyMjPos(this._activePlannerObjectBodyName());
+    if (!boxPos) {
+      return Infinity;
+    }
+    const dists = [];
+    for (const name of ['left_palm_link', 'right_palm_link']) {
+      const pos = this._bodyMjPos(name);
+      if (pos) {
+        dists.push(Math.hypot(boxPos[0] - pos[0], boxPos[1] - pos[1], boxPos[2] - pos[2]));
+      }
+    }
+    return dists.length ? Math.min(...dists) : Infinity;
+  }
+
+  _isBoxHeldForReplan() {
+    const minDist = this._boxPalmMinDist();
+    const boxPos = this._bodyMjPos(this._activePlannerObjectBodyName());
+    const groundCenterZ = this.policyRunner?.boxHalfDims?.[2] ?? 0.15;
+    const lifted = boxPos
+      ? boxPos[2] >= groundCenterZ + this.autoReplanConfig.liftedHeightThreshold
+      : false;
+    return {
+      held: minDist <= this.autoReplanConfig.detachDistThreshold && lifted,
+      minDist,
+      inContact: false,
+      lifted
+    };
+  }
+
+  _boxSpeedForReplan() {
+    const adr = this._freeJointAdrForBody(this._activePlannerObjectBodyName());
+    if (!adr || adr.qvel < 0 || !this.simulation?.qvel) {
+      return { linear: 0, angular: 0 };
+    }
+    const qvel = this.simulation.qvel;
+    return {
+      linear: Math.hypot(qvel[adr.qvel], qvel[adr.qvel + 1], qvel[adr.qvel + 2]),
+      angular: Math.hypot(qvel[adr.qvel + 3], qvel[adr.qvel + 4], qvel[adr.qvel + 5])
+    };
+  }
+
+  _boxNearGoalForReplan() {
+    const boxPos = this._bodyMjPos(this._activePlannerObjectBodyName());
+    const goal = this.carryBoxPlannerConfig?.goalPos ?? this.policyRunner?.goalPos;
+    if (!boxPos || !goal) {
+      return false;
+    }
+    return Math.hypot(boxPos[0] - goal[0], boxPos[1] - goal[1], boxPos[2] - goal[2]) <= this.autoReplanConfig.goalTolerance;
+  }
+
+  _boxReferenceErrorForReplan() {
+    const boxPos = this._bodyMjPos(this._activePlannerObjectBodyName());
+    const refs = this.policyRunner?.refObjectPos;
+    if (!boxPos || !refs?.length) {
+      return 0;
+    }
+    const idx = Math.min(this.policyRunner.counterStep ?? 0, refs.length - 1);
+    const ref = refs[idx];
+    return Math.hypot(boxPos[0] - ref[0], boxPos[1] - ref[1], boxPos[2] - ref[2]);
+  }
+
+  _quatLocalZWorld(quat) {
+    const [w, x, y, z] = normalizeQuat(quat);
+    return [
+      2.0 * (x * z + w * y),
+      2.0 * (y * z - w * x),
+      1.0 - 2.0 * (x * x + y * y)
+    ];
+  }
+
+  _uprightYawQuatFrom(quat) {
+    const [w, x, y, z] = normalizeQuat(quat);
+    const xAxisX = 1.0 - 2.0 * (y * y + z * z);
+    const xAxisY = 2.0 * (x * y + w * z);
+    const yaw = Math.hypot(xAxisX, xAxisY) < 1e-6 ? 0.0 : Math.atan2(xAxisY, xAxisX);
+    return normalizeQuat([Math.cos(0.5 * yaw), 0.0, 0.0, Math.sin(0.5 * yaw)]);
+  }
+
+  _boxHalfDimsForTask(task) {
+    return plannerBoxHalfDims(
+      task,
+      this.policyRunner?.carryBoxHalfDims ?? [0.15, 0.15, 0.15],
+      this.policyRunner?.pushBoxHalfDims ?? [0.23, 0.25, 0.26]
+    );
+  }
+
+  _activePlannerTask() {
+    return normalizePlannerTask(this.carryBoxPlannerConfig?.task ?? this.policyRunner?.task ?? 'carrybox');
+  }
+
+  _activePlannerObjectBodyName(task = null) {
+    return plannerObjectBodyName(task ?? this._activePlannerTask());
+  }
+
+  _push2LineConstraint() {
+    const task = this._activePlannerTask();
+    if (!isPush2PlannerTask(task)) {
+      return null;
+    }
+    const origin = this.carryBoxPlannerConfig?.boxStartPos
+      ?? this.policyRunner?.refObjectPos?.[0]
+      ?? null;
+    const goal = this.carryBoxPlannerConfig?.goalPos
+      ?? this.policyRunner?.goalPos
+      ?? null;
+    if (!origin || !goal) {
+      return null;
+    }
+    const dx = Number(goal[0]) - Number(origin[0]);
+    const dy = Number(goal[1]) - Number(origin[1]);
+    const len = Math.hypot(dx, dy);
+    if (len < 1e-6) {
+      return null;
+    }
+    return {
+      origin: [Number(origin[0]), Number(origin[1])],
+      axis: [dx / len, dy / len]
+    };
+  }
+
+  _constrainPush2BoxMotion() {
+    const line = this._push2LineConstraint();
+    const adr = line ? this._freeJointAdrForBody(this._activePlannerObjectBodyName('pushbox-old')) : null;
+    if (!line || !adr || adr.qpos < 0 || !this.simulation?.qpos) {
+      return;
+    }
+
+    const qpos = this.simulation.qpos;
+    const relX = qpos[adr.qpos] - line.origin[0];
+    const relY = qpos[adr.qpos + 1] - line.origin[1];
+    const along = relX * line.axis[0] + relY * line.axis[1];
+    qpos[adr.qpos] = line.origin[0] + along * line.axis[0];
+    qpos[adr.qpos + 1] = line.origin[1] + along * line.axis[1];
+    qpos.set([1, 0, 0, 0], adr.qpos + 3);
+
+    const qvel = this.simulation.qvel;
+    if (qvel && adr.qvel >= 0) {
+      const vx = qvel[adr.qvel];
+      const vy = qvel[adr.qvel + 1];
+      const vAlong = vx * line.axis[0] + vy * line.axis[1];
+      qvel[adr.qvel] = vAlong * line.axis[0];
+      qvel[adr.qvel + 1] = vAlong * line.axis[1];
+      qvel[adr.qvel + 3] = 0;
+      qvel[adr.qvel + 4] = 0;
+      qvel[adr.qvel + 5] = 0;
+    }
+    this.simulation.forward();
+  }
+
+  _setFreeJointBodyPose(bodyName, pos, quat = [1, 0, 0, 0]) {
+    const adr = this._freeJointAdrForBody(bodyName);
+    if (!adr || adr.qpos < 0 || !this.simulation?.qpos) {
+      return;
+    }
+    this.simulation.qpos.set(pos, adr.qpos);
+    this.simulation.qpos.set(quat, adr.qpos + 3);
+    if (this.simulation.qvel && adr.qvel >= 0) {
+      this.simulation.qvel.fill(0, adr.qvel, adr.qvel + 6);
+    }
+  }
+
+  _moveInactivePlannerBoxesAway(task) {
+    const activeObject = plannerObjectBodyName(task);
+    const activeGhost = plannerGhostBodyName(task);
+    const farPos = [100, 100, 2.0];
+    for (const bodyName of ['box', 'box_push', 'ghost_box', 'ghost_box_push']) {
+      if (bodyName !== activeObject && bodyName !== activeGhost) {
+        this._setFreeJointBodyPose(bodyName, farPos);
+      }
+    }
+  }
+
+  _applyBoxHalfDimsToScene(halfDims, task = null) {
+    if (!this.model || !halfDims) {
+      return;
+    }
+    const normalizedTask = normalizePlannerTask(task ?? this._activePlannerTask());
+    const dims = Array.from(halfDims, Number);
+    if (this.policyRunner) {
+      this.policyRunner.boxHalfDims = new Float32Array(dims);
+      this.policyRunner.bboxOffsets = [
+        [dims[0], dims[1], dims[2]], [dims[0], dims[1], -dims[2]],
+        [dims[0], -dims[1], dims[2]], [dims[0], -dims[1], -dims[2]],
+        [-dims[0], dims[1], dims[2]], [-dims[0], dims[1], -dims[2]],
+        [-dims[0], -dims[1], dims[2]], [-dims[0], -dims[1], -dims[2]]
+      ];
+      this.policyRunner.objectBodyName = plannerObjectBodyName(normalizedTask);
+    }
+    this._moveInactivePlannerBoxesAway(normalizedTask);
+    this.simulation?.forward?.();
+  }
+
+  _applyPlannerTaskGeometry(task) {
+    this._applyBoxHalfDimsToScene(this._boxHalfDimsForTask(task), task);
+  }
+
+  _uprightBoxZAxisIfNeeded(context = 'auto_replan') {
+    const activeBox = this._activePlannerObjectBodyName();
+    const quat = this._bodyMjQuat(activeBox);
+    const adr = this._freeJointAdrForBody(activeBox);
+    if (!quat || !adr || adr.qpos < 0 || !this.simulation?.qpos) {
+      return null;
+    }
+    const zDot = this._quatLocalZWorld(quat)[2];
+    if (Math.abs(zDot) >= this.autoReplanConfig.uprightZThreshold) {
+      if (this.policyRunner) {
+        this.policyRunner.objectQuatOverride = null;
+      }
+      return null;
+    }
+
+    const uprightQuat = this._uprightYawQuatFrom(quat);
+    this.simulation.qpos.set(uprightQuat, adr.qpos + 3);
+    if (this.simulation.qvel && adr.qvel >= 0) {
+      this.simulation.qvel.fill(0, adr.qvel, adr.qvel + 6);
+    }
+    this.simulation.forward();
+    if (this.policyRunner) {
+      this.policyRunner.objectQuatOverride = Float32Array.from(uprightQuat);
+    }
+    console.log(`[closed_loop] upright box before ${context}: z_dot=${zDot.toFixed(3)}, quat=${uprightQuat.map((v) => v.toFixed(4)).join(',')}`);
+    return uprightQuat;
+  }
+
+  _maybeClosedLoopReplan() {
+    if (!this.autoReplanEnabled || this.isInteractionMode || !this.policyRunner || this.policyRunner.referenceSource !== 'rule_planner') {
+      return;
+    }
+
+    const status = this._isBoxHeldForReplan();
+    const nearGoal = this._boxNearGoalForReplan();
+
+    if (status.held) {
+      this.autoReplanState.hasHeldBox = true;
+      this.autoReplanState.detachCounter = 0;
+      this.autoReplanState.refMismatchCounter = 0;
+      this.autoReplanState.pendingReplan = false;
+      this.autoReplanState.pendingReason = '';
+      this.autoReplanState.staticCounter = 0;
+      return;
+    }
+
+    if (this.autoReplanState.cooldownCounter > 0) {
+      this.autoReplanState.cooldownCounter -= 1;
+      return;
+    }
+
+    const speed = this._boxSpeedForReplan();
+    const refError = this._boxReferenceErrorForReplan();
+    const refMismatch = refError >= this.autoReplanConfig.refMismatchThreshold;
+
+    if ((!this.autoReplanState.hasHeldBox && !refMismatch) || nearGoal) {
+      this.autoReplanState.detachCounter = 0;
+      this.autoReplanState.refMismatchCounter = 0;
+      this.autoReplanState.pendingReplan = false;
+      this.autoReplanState.pendingReason = '';
+      this.autoReplanState.staticCounter = 0;
+      return;
+    }
+
+    if (this.autoReplanState.pendingReplan) {
+      const isStatic = speed.linear <= this.autoReplanConfig.objSpeedThreshold
+        && speed.angular <= this.autoReplanConfig.objAngSpeedThreshold;
+      this.autoReplanState.staticCounter = isStatic ? this.autoReplanState.staticCounter + 1 : 0;
+      if (this.autoReplanState.staticCounter >= this.autoReplanConfig.staticTicks) {
+        this._uprightBoxZAxisIfNeeded('drop_box_wait_static');
+        this.replanCarryBoxFromCurrentState({
+          reason: this.autoReplanState.pendingReason || 'drop_box_wait_static',
+          minDist: status.minDist,
+          inContact: status.inContact,
+          objLinSpeed: speed.linear,
+          objAngSpeed: speed.angular
+        });
+      }
+      return;
+    }
+
+    if (this.autoReplanState.hasHeldBox) {
+      this.autoReplanState.detachCounter += 1;
+    } else {
+      this.autoReplanState.detachCounter = 0;
+    }
+    if (refMismatch) {
+      this.autoReplanState.refMismatchCounter += 1;
+    } else {
+      this.autoReplanState.refMismatchCounter = 0;
+    }
+
+    const dropTriggered = this.autoReplanState.detachCounter >= this.autoReplanConfig.detachTriggerTicks;
+    const movedBeforeHoldTriggered = this.autoReplanState.refMismatchCounter >= this.autoReplanConfig.refMismatchTriggerTicks;
+    if (dropTriggered || movedBeforeHoldTriggered) {
+      this.autoReplanState.pendingReplan = true;
+      this.autoReplanState.pendingReason = dropTriggered ? 'drop_box_wait_static' : 'box_ref_mismatch_wait_static';
+      this.autoReplanState.staticCounter = 0;
+      console.log(
+        `[closed_loop] ${dropTriggered ? 'drop' : 'box-ref mismatch'} detected, waiting for object to settle | `
+        + `ref_err=${refError.toFixed(3)}/${this.autoReplanConfig.refMismatchThreshold.toFixed(3)} m, `
+        + `lin=${speed.linear.toFixed(3)}/${this.autoReplanConfig.objSpeedThreshold.toFixed(3)} m/s, `
+        + `ang=${speed.angular.toFixed(3)}/${this.autoReplanConfig.objAngSpeedThreshold.toFixed(3)} rad/s`
+      );
     }
   }
 
@@ -535,6 +997,11 @@ export class MuJoCoDemo {
           }
 
           this.simulation.step();
+          this._constrainPush2BoxMotion();
+        }
+
+        if (!this.isInteractionMode) {
+          this._maybeClosedLoopReplan();
         }
 
         // Cache WASM views once for body/light update reads
@@ -1293,48 +1760,54 @@ export class MuJoCoDemo {
       this.policyRunner.reset(state);
       this.params.current_motion = 'default';
     }
+    if (this.policyRunner) {
+      this.policyRunner.objectQuatOverride = null;
+    }
+    this.resetAutoReplanState();
     this.params.paused = false;
   }
 
-  applyCarryBoxPlannerConfig(config = {}) {
-    const boxStartPos = config.boxStartPos ?? config.box_start_pos ?? null;
-    const goalPos = config.goalPos ?? config.goal_pos ?? null;
+  async applyCarryBoxPlannerConfig(config = {}) {
+    const rawBoxStartPos = config.boxStartPos ?? config.box_start_pos ?? null;
+    const rawGoalPos = config.goalPos ?? config.goal_pos ?? null;
+    const task = normalizePlannerTask(config.task ?? config.plannerTask ?? config.planner_task ?? 'carrybox');
+    const taskHalfDims = this._boxHalfDimsForTask(task);
+    const { boxStartPos, goalPos } = enforcePlannerObjectHeights(task, rawBoxStartPos, rawGoalPos, taskHalfDims);
     const shouldResetSimulation = Boolean(config.resetSimulation ?? config.reset_simulation);
     if (!this.simulation || !this.model) {
       this.carryBoxPlannerConfig = {
         boxStartPos: boxStartPos ? Array.from(boxStartPos) : null,
-        goalPos: goalPos ? Array.from(goalPos) : null
+        goalPos: goalPos ? Array.from(goalPos) : null,
+        task
       };
       return;
     }
 
     this.params.paused = true;
+    await this._ensurePlannerSceneForTask(task);
     if (shouldResetSimulation) {
       this.simulation.resetData();
     }
     const stored = this.carryBoxPlannerConfig ?? {};
     this.carryBoxPlannerConfig = {
       boxStartPos: boxStartPos ? Array.from(boxStartPos) : stored.boxStartPos ?? null,
-      goalPos: goalPos ? Array.from(goalPos) : stored.goalPos ?? null
+      goalPos: goalPos ? Array.from(goalPos) : stored.goalPos ?? null,
+      task
     };
+    this._applyPlannerTaskGeometry(this.carryBoxPlannerConfig.task);
 
     if (this.policyRunner && this.carryBoxPlannerConfig.goalPos) {
       this.policyRunner.goalPos = new Float32Array(this.carryBoxPlannerConfig.goalPos);
+      this.policyRunner.task = this.carryBoxPlannerConfig.task;
+      this.policyRunner.objectQuatOverride = null;
     }
 
-    const boxBodyId = this.bodyNameToId?.box;
-    if (boxBodyId !== undefined && this.carryBoxPlannerConfig.boxStartPos) {
-      const jointAdr = this.model.body_jntadr[boxBodyId];
-      const jointNum = this.model.body_jntnum[boxBodyId];
-      if (jointNum > 0 && jointAdr >= 0) {
-        const qadr = this.model.jnt_qposadr[jointAdr];
-        const vadr = this.model.jnt_dofadr[jointAdr];
-        this.simulation.qpos.set(this.carryBoxPlannerConfig.boxStartPos, qadr);
-        this.simulation.qpos.set([1, 0, 0, 0], qadr + 3);
-        if (vadr >= 0) {
-          this.simulation.qvel.fill(0, vadr, vadr + 6);
-        }
-      }
+    if (this.carryBoxPlannerConfig.boxStartPos) {
+      this._setFreeJointBodyPose(
+        this._activePlannerObjectBodyName(this.carryBoxPlannerConfig.task),
+        this.carryBoxPlannerConfig.boxStartPos
+      );
+      this._moveInactivePlannerBoxesAway(this.carryBoxPlannerConfig.task);
     }
 
     this.simulation.forward();
@@ -1344,6 +1817,85 @@ export class MuJoCoDemo {
       this.applyPolicyReferenceMocap();
     }
     this.actionTarget = null;
+    this.resetAutoReplanState();
+    this.params.paused = false;
+  }
+
+  updateCarryBoxReplanGoal(config = {}) {
+    const rawGoalPos = config.goalPos ?? config.goal_pos ?? null;
+    const taskArg = config.task ?? config.plannerTask ?? config.planner_task ?? null;
+    if (!rawGoalPos && !taskArg) {
+      return;
+    }
+    const stored = this.carryBoxPlannerConfig ?? {};
+    const task = taskArg ? normalizePlannerTask(taskArg) : stored.task ?? this.policyRunner?.task ?? 'carrybox';
+    const baseGoalPos = rawGoalPos ?? stored.goalPos ?? null;
+    const { goalPos } = enforcePlannerObjectHeights(task, null, baseGoalPos, this._boxHalfDimsForTask(task));
+    this.carryBoxPlannerConfig = {
+      ...stored,
+      goalPos: goalPos ? Array.from(goalPos) : stored.goalPos ?? null,
+      task
+    };
+    this._applyPlannerTaskGeometry(this.carryBoxPlannerConfig.task);
+    if (this.policyRunner) {
+      if (this.carryBoxPlannerConfig.goalPos) {
+        this.policyRunner.goalPos = new Float32Array(this.carryBoxPlannerConfig.goalPos);
+      }
+      this.policyRunner.task = this.carryBoxPlannerConfig.task;
+    }
+  }
+
+  replanCarryBoxFromCurrentState(config = {}) {
+    const rawGoalPos = config.goalPos ?? config.goal_pos ?? null;
+    const taskArg = config.task ?? config.plannerTask ?? config.planner_task ?? null;
+    if (!this.simulation || !this.model || !this.policyRunner) {
+      return;
+    }
+
+    this.params.paused = true;
+    const stored = this.carryBoxPlannerConfig ?? {};
+    const task = taskArg ? normalizePlannerTask(taskArg) : stored.task ?? this.policyRunner.task ?? 'carrybox';
+    const baseGoalPos = rawGoalPos ?? stored.goalPos ?? null;
+    const { goalPos } = enforcePlannerObjectHeights(task, null, baseGoalPos, this._boxHalfDimsForTask(task));
+    this._applyPlannerTaskGeometry(task);
+    if (goalPos) {
+      this.carryBoxPlannerConfig = {
+        ...stored,
+        goalPos: Array.from(goalPos),
+        task
+      };
+      this.policyRunner.goalPos = new Float32Array(this.carryBoxPlannerConfig.goalPos);
+      this.policyRunner.task = this.carryBoxPlannerConfig.task;
+    } else if (taskArg) {
+      this.carryBoxPlannerConfig = {
+        ...stored,
+        task
+      };
+      this.policyRunner.task = this.carryBoxPlannerConfig.task;
+    }
+
+    this.simulation.forward();
+    const state = this.readPolicyState();
+    this.policyRunner.reset(state);
+    this.applyPolicyReferenceMocap();
+    this.actionTarget = null;
+    this.params.current_motion = 'default';
+    this.autoReplanState.hasHeldBox = false;
+    this.autoReplanState.detachCounter = 0;
+    this.autoReplanState.refMismatchCounter = 0;
+    this.autoReplanState.cooldownCounter = this.autoReplanConfig.replanCooldownTicks;
+    this.autoReplanState.pendingReplan = false;
+    this.autoReplanState.pendingReason = '';
+    this.autoReplanState.staticCounter = 0;
+    this.autoReplanState.replanCounter += 1;
+    this.autoReplanState.lastReason = config.reason ?? 'manual_replan';
+    console.log(
+      `[closed_loop] replan#${this.autoReplanState.replanCounter} | reason=${this.autoReplanState.lastReason}, `
+      + `min_palm_dist=${Number(config.minDist ?? config.min_dist ?? NaN).toFixed(3)}, `
+      + `hand_contact=${Number(Boolean(config.inContact ?? config.in_contact))}, `
+      + `obj_lin_speed=${Number(config.objLinSpeed ?? config.obj_lin_speed ?? NaN).toFixed(3)} m/s, `
+      + `obj_ang_speed=${Number(config.objAngSpeed ?? config.obj_ang_speed ?? NaN).toFixed(3)} rad/s`
+    );
     this.params.paused = false;
   }
 
