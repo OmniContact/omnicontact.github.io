@@ -239,7 +239,7 @@
   display: grid;
   grid-template-columns: minmax(680px, 1fr) minmax(720px, 1fr);
   gap: 1.25rem;
-  align-items: start;
+  align-items: stretch;
   margin-top: 2rem;
 }
 
@@ -247,15 +247,28 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) 220px;
   gap: 1rem;
+  align-items: stretch;
   margin-top: 0;
 }
 
+.dataset-main,
+.embedded-viewer--dataset-cloud,
 .dataset-side {
   display: grid;
+  min-height: 0;
+}
+
+.dataset-main,
+.embedded-viewer--dataset-cloud {
+  height: 100%;
+}
+
+.dataset-side {
   gap: 0.75rem;
 }
 
 .tsne-panel {
+  height: 100%;
   margin-top: 0;
   padding: 1rem;
   border: 1px solid rgba(31, 41, 51, 0.1);

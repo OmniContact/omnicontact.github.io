@@ -61,6 +61,32 @@
             font-size: 12px;
             font-weight: 800;
         }
+        .mouse-guide {
+            display: grid;
+            gap: 6px;
+            margin-top: 10px;
+        }
+        .mouse-guide div {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #334155;
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .mouse-guide span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 58px;
+            padding: 3px 7px;
+            border: 1px solid rgba(37, 99, 235, 0.22);
+            border-radius: 999px;
+            background: rgba(37, 99, 235, 0.08);
+            color: #245cc7;
+            font-size: 12px;
+            font-weight: 900;
+        }
         #controls {
             left: 50%;
             bottom: 18px;
@@ -107,8 +133,12 @@
     <div id="canvas-container">
         <div id="loading">Loading dataset motion cloud...</div>
         <div id="top-panel">
-            <h1>Dataset Motion Cloud</h1>
-            <p>Ten sequences from each ball and box case are placed into one synchronized 3D scene for quick coverage inspection.</p>
+            <h1>Mouse Controls</h1>
+            <div class="mouse-guide" aria-label="Mouse interaction instructions">
+                <div><span>Wheel</span>Zoom in / out</div>
+                <div><span>Left click</span>Drag to rotate view</div>
+                <div><span>Right click</span>Drag to pan view</div>
+            </div>
             <div id="counter">0 loaded</div>
         </div>
         <div id="controls">
