@@ -169,26 +169,32 @@
           The OmniContact dataset is a MoCap-based HOI corpus for humanoid loco-manipulation. It pairs human motion with synchronized 6-DoF object trajectories, primitive contact modes, dynamic/static phases, and task-level language descriptions.
         </p>
         <div class="dataset-showcase reveal">
-          <div class="tsne-panel">
-            <div class="tsne-header">
-              <div>
-                <h3>Skill-Space t-SNE</h3>
-                <p>Dongbu MoCap clips embedded by skill labels.</p>
+          <div class="dataset-flip-card" data-dataset-flip>
+            <div class="dataset-flip-inner">
+              <div class="dataset-flip-face dataset-flip-front tsne-panel" aria-hidden="false">
+                <div class="tsne-header">
+                  <div>
+                    <h3>Skill-Space t-SNE</h3>
+                    <p>Dongbu MoCap clips embedded by skill labels.</p>
+                  </div>
+                  <div class="dataset-flip-actions">
+                    <div id="tsne-status">Loading points...</div>
+                    <button type="button" class="dataset-flip-button" data-dataset-flip-toggle aria-label="Show GLB viewer" aria-pressed="false">GLB</button>
+                  </div>
+                </div>
+                <div class="tsne-canvas-wrap">
+                  <canvas id="dataset-tsne" width="920" height="560" aria-label="Dataset t-SNE plot by skill"></canvas>
+                  <div id="tsne-label-layer" class="tsne-label-layer" aria-label="Interactive skill labels"></div>
+                </div>
+                <div id="tsne-legend" class="tsne-legend"></div>
               </div>
-              <div id="tsne-status">Loading points...</div>
-            </div>
-            <div class="tsne-canvas-wrap">
-              <canvas id="dataset-tsne" width="920" height="560" aria-label="Dataset t-SNE plot by skill"></canvas>
-              <div id="tsne-label-layer" class="tsne-label-layer" aria-label="Interactive skill labels"></div>
-            </div>
-            <div id="tsne-legend" class="tsne-legend"></div>
-          </div>
-          <div class="dataset-visual-grid">
-            <div class="dataset-main">
-              <div class="embedded-viewer embedded-viewer--dataset-cloud">
+              <div class="dataset-flip-face dataset-flip-back embedded-viewer embedded-viewer--dataset-cloud" aria-hidden="true">
                 <div class="embedded-viewer-header">
                   <h3>Balanced Ball and Box Dataset Sequences</h3>
-                  <a href="dataset_motion_cloud.html?group=dataset_balanced&v=dataset-cloud-20260602" target="_blank" rel="noopener">Open full page</a>
+                  <div class="dataset-flip-actions">
+                    <button type="button" class="dataset-flip-button" data-dataset-flip-toggle aria-label="Show t-SNE plot" aria-pressed="false">t-SNE</button>
+                    <a href="dataset_motion_cloud.html?group=dataset_balanced&v=dataset-cloud-20260602" target="_blank" rel="noopener">Open full page</a>
+                  </div>
                 </div>
                 <iframe
                   src="dataset_motion_cloud.html?group=dataset_balanced&v=dataset-cloud-20260602"
@@ -198,12 +204,12 @@
                 ></iframe>
               </div>
             </div>
-            <div class="dataset-side">
-              <div class="stat-card"><span>1,274</span><p>Valid sequences</p></div>
-              <div class="stat-card"><span>22.29 h</span><p>Total motion duration</p></div>
-              <div class="stat-card"><span>7.22M</span><p>Total object frames</p></div>
-              <div class="stat-card"><span>90 Hz</span><p>Paired capture</p></div>
-            </div>
+          </div>
+          <div class="dataset-side">
+            <div class="stat-card"><span>1,274</span><p>Valid sequences</p></div>
+            <div class="stat-card"><span>22.29 h</span><p>Total motion duration</p></div>
+            <div class="stat-card"><span>7.22M</span><p>Total object frames</p></div>
+            <div class="stat-card"><span>90 Hz</span><p>Paired capture</p></div>
           </div>
         </div>
         <div class="dataset-gallery reveal">
@@ -364,6 +370,28 @@
             placeholder.setAttribute('aria-hidden', 'true');
           }
         }, { once: true });
+      });
+    })();
+
+    (function() {
+      document.querySelectorAll('[data-dataset-flip]').forEach(function(card) {
+        var toggles = card.querySelectorAll('[data-dataset-flip-toggle]');
+        var front = card.querySelector('.dataset-flip-front');
+        var back = card.querySelector('.dataset-flip-back');
+        toggles.forEach(function(toggle) {
+          toggle.addEventListener('click', function() {
+            var isFlipped = card.classList.toggle('is-flipped');
+            if (front) {
+              front.setAttribute('aria-hidden', isFlipped ? 'true' : 'false');
+            }
+            if (back) {
+              back.setAttribute('aria-hidden', isFlipped ? 'false' : 'true');
+            }
+            toggles.forEach(function(item) {
+              item.setAttribute('aria-pressed', item === toggle ? 'true' : 'false');
+            });
+          });
+        });
       });
     })();
 
