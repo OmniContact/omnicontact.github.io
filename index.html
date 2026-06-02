@@ -16,13 +16,13 @@
   <meta property="og:description" content="A contact-centric planning-control interface for generalizable humanoid loco-manipulation.">
   <meta property="og:image" content="static/images/placeholder_overview.png">
 
-  <meta name="theme-color" content="#2563eb">
+  <meta name="theme-color" content="#EE6363">
 
   <title>OmniContact: Chaining Meta-Skills via Contact Flow</title>
 
   <link rel="stylesheet" href="static/css/bulma.min.css?v=omni-20260602-generalization-tabs">
-  <link rel="stylesheet" href="static/css/index.css?v=omni-20260602-generalization-tabs">
-  <link rel="stylesheet" href="static/css/omnicontact.css?v=omni-20260602-generalization-tabs">
+  <link rel="stylesheet" href="static/css/index.css?v=omni-20260603-theme">
+  <link rel="stylesheet" href="static/css/omnicontact.css?v=omni-20260603-theme">
 
   <script defer src="static/js/fontawesome.all.min.js?v=omni-20260602-generalization-tabs"></script>
   <script defer src="static/js/index.js?v=omni-20260602-generalization-tabs"></script>
@@ -169,53 +169,75 @@
           The OmniContact dataset is a MoCap-based HOI corpus for humanoid loco-manipulation. It pairs human motion with synchronized 6-DoF object trajectories, primitive contact modes, dynamic/static phases, and task-level language descriptions.
         </p>
         <div class="dataset-showcase reveal">
-          <div class="dataset-flip-card" data-dataset-flip>
-            <div class="dataset-flip-inner">
-              <div class="dataset-flip-face dataset-flip-front tsne-panel" aria-hidden="false">
-                <div class="tsne-header">
-                  <div>
-                    <h3>Skill-Space t-SNE</h3>
-                    <p>Dongbu MoCap clips embedded by skill labels.</p>
+          <div class="dataset-primary">
+            <div class="dataset-flip-card" data-dataset-flip>
+              <div class="dataset-flip-inner">
+                <div class="dataset-flip-face dataset-flip-front tsne-panel" aria-hidden="false">
+                  <div class="tsne-header">
+                    <div>
+                      <h3>Skill-Space t-SNE</h3>
+                      <p>74,641 Dongbu MoCap clips embedded by skill labels.</p>
+                    </div>
+                    <div class="dataset-flip-actions">
+                      <div id="tsne-status">Loading points...</div>
+                      <button type="button" class="dataset-flip-button" data-dataset-flip-toggle aria-label="Show GLB viewer" aria-pressed="false">View GLB</button>
+                    </div>
                   </div>
-                  <div class="dataset-flip-actions">
-                    <div id="tsne-status">Loading points...</div>
-                    <button type="button" class="dataset-flip-button" data-dataset-flip-toggle aria-label="Show GLB viewer" aria-pressed="false">View GLB</button>
+                  <div class="tsne-canvas-wrap">
+                    <canvas id="dataset-tsne" width="920" height="560" aria-label="Dataset t-SNE plot by skill"></canvas>
+                    <div id="tsne-label-layer" class="tsne-label-layer" aria-label="Interactive skill labels"></div>
                   </div>
+                  <div id="tsne-legend" class="tsne-legend"></div>
                 </div>
-                <div class="tsne-canvas-wrap">
-                  <canvas id="dataset-tsne" width="920" height="560" aria-label="Dataset t-SNE plot by skill"></canvas>
-                  <div id="tsne-label-layer" class="tsne-label-layer" aria-label="Interactive skill labels"></div>
-                </div>
-                <div id="tsne-legend" class="tsne-legend"></div>
-              </div>
-              <div class="dataset-flip-face dataset-flip-back embedded-viewer embedded-viewer--dataset-cloud" aria-hidden="true">
-                <div class="embedded-viewer-header">
-                  <h3>Balanced Ball and Box Dataset Sequences</h3>
-                  <div class="dataset-flip-actions">
-                    <button type="button" class="dataset-flip-button" data-dataset-flip-toggle aria-label="Show t-SNE plot" aria-pressed="false">View t-SNE</button>
-                    <a href="dataset_motion_cloud.html?group=dataset_balanced&v=dataset-cloud-20260602" target="_blank" rel="noopener">Open full page</a>
+                <div class="dataset-flip-face dataset-flip-back embedded-viewer embedded-viewer--dataset-cloud" aria-hidden="true">
+                  <div class="embedded-viewer-header">
+                    <div>
+                      <h3>Balanced Ball and Box Dataset Sequences</h3>
+                      <p>Balanced preview from 49 GLB sequences, arranged as a 7 by 7 skill-balanced grid.</p>
+                    </div>
+                    <div class="dataset-flip-actions">
+                      <button type="button" class="dataset-flip-button" data-dataset-flip-toggle aria-label="Show t-SNE plot" aria-pressed="false">View t-SNE</button>
+                      <a href="dataset_motion_cloud.html?group=dataset_balanced&v=dataset-cloud-20260603-49" target="_blank" rel="noopener">Open full page</a>
+                    </div>
                   </div>
+                  <iframe
+                    src="dataset_motion_cloud.html?group=dataset_balanced&v=dataset-cloud-20260603-49"
+                    title="Balanced OmniContact dataset GLB sequences in one synchronized scene"
+                    loading="lazy"
+                    allow="fullscreen; autoplay"
+                  ></iframe>
                 </div>
-                <iframe
-                  src="dataset_motion_cloud.html?group=dataset_balanced&v=dataset-cloud-20260602"
-                  title="Balanced OmniContact dataset GLB sequences in one synchronized scene"
-                  loading="lazy"
-                  allow="fullscreen; autoplay"
-                ></iframe>
               </div>
             </div>
+            <div class="dataset-side">
+              <div class="stat-card"><span>1,274</span><p>Valid sequences</p></div>
+              <div class="stat-card"><span>22.29 h</span><p>Total motion duration</p></div>
+              <div class="stat-card"><span>7.22M</span><p>Total object frames</p></div>
+              <div class="stat-card"><span>90 Hz</span><p>Paired capture</p></div>
+            </div>
           </div>
-          <div class="dataset-side">
-            <div class="stat-card"><span>1,274</span><p>Valid sequences</p></div>
-            <div class="stat-card"><span>22.29 h</span><p>Total motion duration</p></div>
-            <div class="stat-card"><span>7.22M</span><p>Total object frames</p></div>
-            <div class="stat-card"><span>90 Hz</span><p>Paired capture</p></div>
+          <div class="dataset-gallery reveal">
+            <article class="generalization-video-card dataset-video-card">
+              <video controls autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/carrybox_height_1.mp4" type="video/mp4"></video>
+              <div class="generalization-video-label">Carry box</div>
+            </article>
+            <article class="generalization-video-card dataset-video-card">
+              <video controls autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/push_type1.mp4" type="video/mp4"></video>
+              <div class="generalization-video-label">Push box</div>
+            </article>
+            <article class="generalization-video-card dataset-video-card">
+              <video controls autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/carrybox_size_1.mp4" type="video/mp4"></video>
+              <div class="generalization-video-label">Slide box</div>
+            </article>
+            <article class="generalization-video-card dataset-video-card">
+              <video controls autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/vlm_cylinder.mp4" type="video/mp4"></video>
+              <div class="generalization-video-label">Carry ball</div>
+            </article>
+            <article class="generalization-video-card dataset-video-card">
+              <video controls autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/vlm_soccer.mp4" type="video/mp4"></video>
+              <div class="generalization-video-label">Kick ball</div>
+            </article>
           </div>
-        </div>
-        <div class="dataset-gallery reveal">
-          <div class="media-placeholder"><strong>Carry Samples</strong><span>Insert video strip or image grid.</span></div>
-          <div class="media-placeholder"><strong>Push Samples</strong><span>Insert video strip or image grid.</span></div>
-          <div class="media-placeholder"><strong>Relocate / Slide / Kick</strong><span>Insert specialized primitive examples.</span></div>
         </div>
       </div>
     </section>
@@ -490,10 +512,9 @@
         var rect = canvas.getBoundingClientRect();
         var dpr = Math.min(window.devicePixelRatio || 1, 2);
         var width = Math.max(320, Math.round(rect.width || canvas.width));
-        var height = Math.round(width * 14 / 23);
+        var height = Math.max(320, Math.round(rect.height || canvas.clientHeight || width * 14 / 23));
         canvas.width = Math.round(width * dpr);
         canvas.height = Math.round(height * dpr);
-        canvas.style.height = height + 'px';
 
         var ctx = canvas.getContext('2d');
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);

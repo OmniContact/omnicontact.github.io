@@ -170,8 +170,7 @@
         const manifestUrl = 'static/glb/manifest.json';
         const glbBaseUrl = 'static/glb/';
         const requestedGroup = new URLSearchParams(window.location.search).get('group') || 'dataset_balanced';
-        const columns = 14;
-        const spacing = 3.25;
+        const spacing = 3.0;
         const propOrange = new THREE.Color(0xf2731f);
 
         const container = document.getElementById('canvas-container');
@@ -204,7 +203,7 @@
 
         const groundTexture = makeCheckerTexture();
         const ground = new THREE.Mesh(
-            new THREE.PlaneGeometry(52, 36),
+            new THREE.PlaneGeometry(1, 1),
             new THREE.MeshStandardMaterial({ map: groundTexture, roughness: 0.86 })
         );
         ground.rotation.x = -Math.PI / 2;
@@ -277,9 +276,19 @@
         }
 
         async function loadDatasetItems(items) {
+            const columns = items.length === 49 ? 7 : Math.ceil(Math.sqrt(items.length));
             const rows = Math.ceil(items.length / columns);
+            const gridWidth = Math.max(1, (columns - 1) * spacing);
+            const gridDepth = Math.max(1, (rows - 1) * spacing);
+            const groundSize = Math.max(gridWidth, gridDepth) + spacing * 3.2;
+
+            ground.geometry.dispose();
+            ground.geometry = new THREE.PlaneGeometry(groundSize, groundSize);
+            groundTexture.repeat.set(Math.max(8, groundSize * 0.5), Math.max(8, groundSize * 0.5));
+            groundTexture.needsUpdate = true;
+
             controls.target.set(0, 0.8, 0);
-            camera.position.set(columns * 1.75, rows * 1.25 + 8, rows * 1.35 + 16);
+            camera.position.set(groundSize * 0.5, groundSize * 0.62, groundSize * 0.78);
             camera.near = 0.05;
             camera.far = 500;
             camera.updateProjectionMatrix();

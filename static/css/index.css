@@ -1,9 +1,9 @@
 /* Modern CSS Variables for consistent theming */
 :root {
-  --primary-color: #f97316;
-  --primary-hover: #c2410c;
+  --primary-color: #EE6363;
+  --primary-hover: #d94f4f;
   --secondary-color: #64748b;
-  --accent-color: #fb923c;
+  --accent-color: #EE6363;
   --text-primary: #1e293b;
   --text-secondary: #64748b;
   --text-light: #94a3b8;
@@ -15,8 +15,8 @@
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --gradient-accent: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --gradient-primary: linear-gradient(135deg, #8b5cf6 0%, #EE6363 100%);
+  --gradient-accent: linear-gradient(135deg, #8b5cf6 0%, #EE6363 100%);
   --gradient-subtle: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
   --border-radius: 12px;
   --border-radius-lg: 16px;
@@ -196,7 +196,7 @@ body {
   grid-template-rows: repeat(4, 1fr);
   gap: 2px;
   overflow: hidden;
-  background: rgba(37, 99, 235, 0.15);
+  background: rgba(238, 99, 99, 0.15);
 }
 
 .grid-cell {
@@ -856,12 +856,12 @@ code {
 
 .outline-panel .outline-link:hover {
   color: var(--primary-color);
-  background: rgba(37, 99, 235, 0.08);
+  background: rgba(238, 99, 99, 0.08);
 }
 
 .outline-panel .outline-link.active {
   color: #ffffff;
-  background: linear-gradient(135deg, var(--primary-color) 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, #8b5cf6 0%, var(--primary-color) 100%);
   font-weight: 700;
 }
 
@@ -1528,13 +1528,13 @@ a:focus,
   color: inherit;
   font-weight: 600;
   text-decoration-line: underline;
-  text-decoration-color: rgba(249, 115, 22, 0.5);
+  text-decoration-color: rgba(238, 99, 99, 0.5);
   text-decoration-thickness: 0.12em;
   text-underline-offset: 0.17em;
 }
 
 .abstract-emphasis--statement {
-  color: #f97316;
+  color: #EE6363;
   font-weight: inherit;
 }
 
@@ -2595,15 +2595,15 @@ a:focus,
 .demo-section .demo-tab:hover {
   border-color: var(--primary-color);
   color: var(--primary-color);
-  background: rgba(37, 99, 235, 0.06);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+  background: rgba(238, 99, 99, 0.06);
+  box-shadow: 0 4px 12px rgba(238, 99, 99, 0.12);
   transform: translateY(-1px);
 }
 .demo-section .demo-tab.active {
-  background: linear-gradient(135deg, var(--primary-color) 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, #8b5cf6 0%, var(--primary-color) 100%);
   border-color: transparent;
   color: white;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+  box-shadow: 0 4px 14px rgba(238, 99, 99, 0.34);
   font-weight: 600;
 }
 .demo-main-video-wrap {
@@ -3136,7 +3136,7 @@ a:focus,
 }
 
 .stats-section .bar-fill.ours {
-  background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%);
+  background: linear-gradient(90deg, #8b5cf6 0%, #EE6363 100%);
 }
 
 .stats-section .bar-fill.vision {
@@ -3198,19 +3198,19 @@ a:focus,
 
 .stats-section .line-main {
   fill: none;
-  stroke: #2563eb;
+  stroke: #EE6363;
   stroke-width: 3;
   stroke-linejoin: round;
   stroke-linecap: round;
 }
 
 .stats-section .line-point {
-  fill: #2563eb;
+  fill: #EE6363;
   stroke: #ffffff;
   stroke-width: 1.5;
 }
 
-.stats-section .bar-ours { fill: #2563eb; }
+.stats-section .bar-ours { fill: #EE6363; }
 .stats-section .bar-vision { fill: #0ea5e9; }
 .stats-section .bar-hdmi { fill: #64748b; }
 .stats-section .bar-resmimic { fill: #8b5cf6; }
@@ -3318,7 +3318,7 @@ a:focus,
   margin-right: 0.35rem;
 }
 
-.stats-section .dot-ours { background: #2563eb; }
+.stats-section .dot-ours { background: #EE6363; }
 .stats-section .dot-vision { background: #0ea5e9; }
 .stats-section .dot-hdmi { background: #64748b; }
 .stats-section .dot-resmimic { background: #8b5cf6; }
@@ -3355,6 +3355,21 @@ a:focus,
 .heading-anchor:hover {
   opacity: 1;
   color: var(--primary-color);
+}
+
+.section-heading {
+  background: linear-gradient(135deg, #8b5cf6 0%, #EE6363 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.section-heading .heading-anchor {
+  -webkit-text-fill-color: var(--text-light);
+}
+
+.section-heading .heading-anchor:hover {
+  -webkit-text-fill-color: var(--primary-color);
 }
 
 /* MuJoCo loading overlay */
@@ -3533,7 +3548,7 @@ a:focus,
 
 /* ── 3. Animated Gradient Text on HOT Title ── */
 .hero-main .publication-title .title-main {
-  background: linear-gradient(135deg, #dc2626, #f97316, #facc15, #dc2626);
+  background: linear-gradient(135deg, #8b5cf6, #EE6363, #8b5cf6);
   background-size: 300% 300%;
   -webkit-background-clip: text;
   background-clip: text;
