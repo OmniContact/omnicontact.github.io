@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OmniContact ONNX Policy Viewer</title>
+  <link rel="stylesheet" href="static/css/bulma.min.css">
+  <link rel="stylesheet" href="static/css/index.css">
+  <link rel="stylesheet" href="static/css/omnicontact.css">
+  <style>
+    body {
+      background: #f8fafc;
+    }
+
+    .policy-page {
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .policy-shell {
+      display: grid;
+      grid-template-columns: minmax(280px, 0.34fr) minmax(0, 1fr);
+      gap: 1rem;
+      max-width: 1500px;
+      margin: 0 auto;
+    }
+
+    .policy-info {
+      background: #fff;
+      border: 1px solid #dce3ea;
+      border-radius: 8px;
+      padding: 1.2rem;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    .policy-info h1 {
+      margin: 0 0 0.5rem;
+      color: #172033;
+      font-size: 1.45rem;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .policy-info p,
+    .policy-info li {
+      color: #5f6c7b;
+      line-height: 1.6;
+    }
+
+    .policy-info code {
+      word-break: break-all;
+      white-space: normal;
+    }
+
+    .policy-frame-wrap {
+      overflow: hidden;
+      min-height: calc(100vh - 4rem);
+      border: 1px solid #dce3ea;
+      border-radius: 8px;
+      background: #0f172a;
+      box-shadow: 0 14px 34px rgba(15, 23, 42, 0.16);
+    }
+
+    .policy-frame-wrap iframe {
+      display: block;
+      width: 100%;
+      height: calc(100vh - 4rem);
+      min-height: 720px;
+      border: 0;
+    }
+
+    @media screen and (max-width: 980px) {
+      .policy-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .policy-frame-wrap,
+      .policy-frame-wrap iframe {
+        min-height: 720px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="policy-page">
+    <div class="policy-shell">
+      <aside class="policy-info">
+        <h1>ONNX Policy Viewer</h1>
+        <p>
+          This page runs the real MuJoCo WASM + ONNX Runtime Web viewer for the carry-box WTAC policy.
+          It loads the carry-box G1 scene, builds the 1244-dimensional observation in JavaScript,
+          and executes <code>combine_50k.onnx</code> in the browser.
+        </p>
+        <p>
+          Current config:
+          <code>static/humanoid-policy-viewer/examples/checkpoints/g1/carrybox_wtac_policy.json</code>
+        </p>
+        <p>
+          Serve this page through the local HTTP server. Browser <code>file://</code> access will be blocked
+          by CORS when MuJoCo assets, WASM, and ONNX files are fetched.
+        </p>
+        <p><a href="index.html#vlm-section">Back to project page</a></p>
+      </aside>
+      <section class="policy-frame-wrap" aria-label="MuJoCo ONNX policy viewer">
+        <iframe
+          id="policy-frame"
+          data-src="static/humanoid-policy-viewer/index.html?force_policy=./examples/checkpoints/g1/carrybox_wtac_policy.json&policy=./examples/checkpoints/g1/carrybox_wtac_policy.json"
+          title="MuJoCo WASM and ONNX policy viewer"
+          allow="fullscreen; cross-origin-isolated"
+        ></iframe>
+      </section>
+    </div>
+  </main>
+  <script>
+    (async function() {
+      const viewerVersion = 'carrybox-wtac-20260601-v2';
+
+      if ('serviceWorker' in navigator) {
+        try {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(registrations.map((registration) => registration.update()));
+          if (window.caches) {
+            const keys = await caches.keys();
+            await Promise.all(keys.filter((key) => key !== 'hot-site-v2').map((key) => caches.delete(key)));
+          }
+        } catch (error) {
+          console.warn('Policy viewer cache refresh skipped:', error);
+        }
+      }
+
+      const frame = document.getElementById('policy-frame');
+      const separator = frame.dataset.src.includes('?') ? '&' : '?';
+      frame.src = frame.dataset.src + separator + 'v=' + encodeURIComponent(viewerVersion + '-' + Date.now());
+    })();
+  </script>
+</body>
+</html>

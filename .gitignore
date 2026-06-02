@@ -1,0 +1,9 @@
+node_modules/
+.DS_Store
+__pycache__/
+*.pyc
+.vite/
+dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

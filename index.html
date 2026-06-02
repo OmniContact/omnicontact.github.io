@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="title" content="OmniContact: Chaining Meta-Skills via Contact Flow for Generalizable Humanoid Loco-Manipulation">
+  <meta name="description" content="OmniContact is a hierarchical humanoid loco-manipulation framework that uses contact flow to connect high-level planning, closed-loop skill chaining, recovery, and robust low-level execution.">
+  <meta name="keywords" content="humanoid loco-manipulation, contact flow, meta-skill chaining, vision-language planning, reinforcement learning">
+  <meta name="robots" content="index, follow">
+  <meta name="language" content="English">
+
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="OmniContact">
+  <meta property="og:title" content="OmniContact: Chaining Meta-Skills via Contact Flow">
+  <meta property="og:description" content="A contact-centric planning-control interface for generalizable humanoid loco-manipulation.">
+  <meta property="og:image" content="static/images/placeholder_overview.png">
+
+  <meta name="theme-color" content="#2563eb">
+
+  <title>OmniContact: Chaining Meta-Skills via Contact Flow</title>
+
+  <link rel="stylesheet" href="static/css/bulma.min.css?v=omni-20260602-generalization-tabs">
+  <link rel="stylesheet" href="static/css/index.css?v=omni-20260602-generalization-tabs">
+  <link rel="stylesheet" href="static/css/omnicontact.css?v=omni-20260602-generalization-tabs">
+
+  <script defer src="static/js/fontawesome.all.min.js?v=omni-20260602-generalization-tabs"></script>
+  <script defer src="static/js/index.js?v=omni-20260602-generalization-tabs"></script>
+</head>
+<body>
+  <button type="button" class="scroll-to-top" onclick="scrollToTop()" title="Scroll to top" aria-label="Scroll to top">
+    <i class="fas fa-chevron-up"></i>
+  </button>
+
+  <div class="more-works-container">
+    <aside class="outline-panel" aria-label="Page outline">
+      <div class="outline-panel-title" id="outline-toggle">
+        <i class="fas fa-list-ul"></i>
+        <span>Outline</span>
+        <svg class="outline-fold-icon" viewBox="0 0 16 16" width="12" height="12"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="outline-links" id="outline-links">
+        <a href="#top-section" class="outline-link active" data-outline-link="top-section">Top</a>
+        <a href="#overview-section" class="outline-link" data-outline-link="overview-section">Overview</a>
+        <a href="#live-policy-section" class="outline-link" data-outline-link="live-policy-section">Live MuJoCo</a>
+        <a href="#dataset-section" class="outline-link" data-outline-link="dataset-section">Dataset</a>
+        <a href="#generalized-section" class="outline-link" data-outline-link="generalized-section">Meta Skill</a>
+        <a href="#chaining-section" class="outline-link" data-outline-link="chaining-section">Chaining</a>
+        <a href="#recovery-section" class="outline-link" data-outline-link="recovery-section">Recovery</a>
+        <a href="#vlm-section" class="outline-link" data-outline-link="vlm-section">VLM</a>
+        <a href="#comparison-section" class="outline-link" data-outline-link="comparison-section">Comparison</a>
+      </div>
+    </aside>
+  </div>
+
+  <main id="main-content">
+    <section class="hero hero-main omni-hero" id="top-section">
+      <div class="hero-video-grid omni-hero-grid" aria-hidden="true">
+        <div class="grid-cell"><video autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/carrybox_height_1.mp4" type="video/mp4"></video><span class="grid-label">Carry height 1</span></div>
+        <div class="grid-cell"><video autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/carrybox_height_2.mp4" type="video/mp4"></video><span class="grid-label">Carry height 2</span></div>
+        <div class="grid-cell"><video autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/carrybox_height_3.mp4" type="video/mp4"></video><span class="grid-label">Carry height 3</span></div>
+        <div class="grid-cell"><video autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/carrybox_initpos_1.mp4" type="video/mp4"></video><span class="grid-label">Init pose 1</span></div>
+        <div class="grid-cell"><video autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/carrybox_initpos_2.mp4" type="video/mp4"></video><span class="grid-label">Init pose 2</span></div>
+        <div class="grid-cell"><video autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/carrybox_initpos_3.mp4" type="video/mp4"></video><span class="grid-label">Init pose 3</span></div>
+        <div class="grid-cell"><video autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/carrybox_size_1.mp4" type="video/mp4"></video><span class="grid-label">Box size 1</span></div>
+        <div class="grid-cell"><video autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/carrybox_size_2.mp4" type="video/mp4"></video><span class="grid-label">Box size 2</span></div>
+        <div class="grid-cell"><video autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/push_type1.mp4" type="video/mp4"></video><span class="grid-label">Push type 1</span></div>
+        <div class="grid-cell"><video autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/push_type2.mp4" type="video/mp4"></video><span class="grid-label">Push type 2</span></div>
+        <div class="grid-cell grid-cell--empty"></div>
+        <div class="grid-cell grid-cell--empty"></div>
+        <div class="grid-cell grid-cell--empty"></div>
+        <div class="grid-cell grid-cell--empty"></div>
+        <div class="grid-cell grid-cell--empty"></div>
+        <div class="grid-cell grid-cell--empty"></div>
+      </div>
+      <div class="hero-main-overlay" aria-hidden="true"></div>
+      <div class="hero-body">
+        <div class="container is-max-desktop">
+          <div class="columns is-centered">
+            <div class="column has-text-centered hero-main-content">
+              <h1 class="title is-1 publication-title hero-stagger hero-stagger--1">
+                <span class="title-main">OmniContact</span>
+                <span class="title-sub">Chaining Meta-Skills via Contact Flow<br>for Generalizable Humanoid Loco-Manipulation</span>
+              </h1>
+              <p class="has-text-centered demo-desc hero-stagger hero-stagger--4">
+                OmniContact uses contact flow as a compact planning-control interface. CF-Track learns a unified library of loco-manipulation meta-skills, while CF-Gen synthesizes, chains, and replans contact-flow segments for long-horizon humanoid tasks.
+              </p>
+              <div class="publication-links hero-stagger hero-stagger--5">
+                <span class="link-block"><a href="#overview-section" class="external-link button is-normal is-rounded is-dark"><span class="icon"><i class="fas fa-align-left"></i></span><span>Overview</span></a></span>
+                <span class="link-block"><a href="#dataset-section" class="external-link button is-normal is-rounded is-dark"><span class="icon"><i class="fas fa-database"></i></span><span>Dataset</span></a></span>
+                <span class="link-block"><a href="#chaining-section" class="external-link button is-normal is-rounded is-dark"><span class="icon"><i class="fas fa-link"></i></span><span>Chaining</span></a></span>
+                <span class="link-block"><a href="#vlm-section" class="external-link button is-normal is-rounded is-dark"><span class="icon"><i class="fas fa-eye"></i></span><span>VLM</span></a></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section hero is-light omni-section" id="overview-section">
+      <div class="container is-max-desktop">
+        <h2 class="title is-3 has-text-centered section-heading reveal">Overview <a href="#overview-section" class="heading-anchor" aria-label="Link to this section">#</a></h2>
+        <p class="has-text-centered demo-desc reveal">
+          Long-horizon humanoid loco-manipulation requires more than isolated skills: the robot must establish contact, move objects, transition between primitives, and recover when interaction fails.
+        </p>
+        <div class="overview-layout reveal">
+          <div class="media-placeholder media-placeholder--wide">
+            <div class="placeholder-kicker">Image / Video Placeholder</div>
+            <strong>System Overview Figure</strong>
+            <span>Suggested asset: contact-flow pipeline with CF-Gen, CF-Track, object state monitoring, and chained rollout examples.</span>
+          </div>
+          <div class="overview-copy">
+            <div class="info-card">
+              <h3>Contact Flow</h3>
+              <p>A compact representation combining sparse future body targets and time-series binary contact signals. It preserves interaction intent while remaining structured enough for online synthesis.</p>
+            </div>
+            <div class="info-card">
+              <h3>CF-Track</h3>
+              <p>A unified low-level policy trained with contact-flow targets to execute carrying, pushing, kicking, sliding, relocation, and locomotion-style behaviors under one controller.</p>
+            </div>
+            <div class="info-card">
+              <h3>CF-Gen</h3>
+              <p>A high-level contact-flow synthesizer that adapts skill templates to object state, chains stages in closed loop, and replans when the observed object state deviates from the plan.</p>
+            </div>
+          </div>
+        </div>
+        <div class="metric-row reveal">
+          <div class="metric-card"><span>98.7%</span><p>Carry Box success</p></div>
+          <div class="metric-card"><span>82.5%</span><p>Push Suitcase success</p></div>
+          <div class="metric-card"><span>~40 min</span><p>Long-horizon endurance</p></div>
+          <div class="metric-card"><span>50 Hz</span><p>Closed-loop monitoring</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section hero is-light omni-section live-policy-section" id="live-policy-section">
+      <div class="container live-policy-container">
+        <h2 class="title is-2 has-text-centered section-heading reveal">Live MuJoCo Session <a href="#live-policy-section" class="heading-anchor" aria-label="Link to this section">#</a></h2>
+        <p class="has-text-centered demo-desc reveal">
+          Use the embedded MuJoCo WASM + ONNX policy viewer to inspect the carry-box controller directly in browser. Randomize the box and target poses, reset the rollout, and watch the browser-side planner regenerate contact-flow references online.
+        </p>
+        <div class="embedded-viewer embedded-viewer--policy reveal">
+          <div class="embedded-viewer-header">
+            <h3>Live MuJoCo WASM + ONNX Policy Viewer</h3>
+            <a href="policy-viewer.html?v=carrybox-wtac-20260601-cachefix" target="_blank" rel="noopener">Open full page</a>
+          </div>
+          <iframe
+            src="static/humanoid-policy-viewer/index.html?force_policy=./examples/checkpoints/g1/carrybox_wtac_policy.json&policy=./examples/checkpoints/g1/carrybox_wtac_policy.json&v=overview-onnx-cachefix"
+            title="Live MuJoCo WASM and ONNX carry-box policy viewer"
+            loading="lazy"
+            allow="fullscreen"
+          ></iframe>
+        </div>
+      </div>
+    </section>
+
+    <section class="section hero omni-section" id="dataset-section">
+      <div class="container is-max-desktop dataset-container">
+        <h2 class="title is-3 has-text-centered section-heading reveal">OmniContact Dataset Visualization <a href="#dataset-section" class="heading-anchor" aria-label="Link to this section">#</a></h2>
+        <p class="has-text-centered demo-desc reveal">
+          The OmniContact dataset is a MoCap-based HOI corpus for humanoid loco-manipulation. It pairs human motion with synchronized 6-DoF object trajectories, primitive contact modes, dynamic/static phases, and task-level language descriptions.
+        </p>
+        <div class="dataset-showcase reveal">
+          <div class="tsne-panel">
+            <div class="tsne-header">
+              <div>
+                <h3>Skill-Space t-SNE</h3>
+                <p>Dongbu MoCap clips embedded by skill labels.</p>
+              </div>
+              <div id="tsne-status">Loading points...</div>
+            </div>
+            <div class="tsne-canvas-wrap">
+              <canvas id="dataset-tsne" width="920" height="560" aria-label="Dataset t-SNE plot by skill"></canvas>
+              <div id="tsne-label-layer" class="tsne-label-layer" aria-label="Interactive skill labels"></div>
+            </div>
+            <div id="tsne-legend" class="tsne-legend"></div>
+          </div>
+          <div class="dataset-visual-grid">
+            <div class="dataset-main">
+              <div class="embedded-viewer embedded-viewer--dataset-cloud">
+                <div class="embedded-viewer-header">
+                  <h3>Balanced Ball and Box Dataset Sequences</h3>
+                  <a href="dataset_motion_cloud.html?group=dataset_balanced&v=dataset-cloud-20260602" target="_blank" rel="noopener">Open full page</a>
+                </div>
+                <iframe
+                  src="dataset_motion_cloud.html?group=dataset_balanced&v=dataset-cloud-20260602"
+                  title="Balanced OmniContact dataset GLB sequences in one synchronized scene"
+                  loading="lazy"
+                  allow="fullscreen; autoplay"
+                ></iframe>
+              </div>
+            </div>
+            <div class="dataset-side">
+              <div class="stat-card"><span>1,274</span><p>Valid sequences</p></div>
+              <div class="stat-card"><span>22.29 h</span><p>Total motion duration</p></div>
+              <div class="stat-card"><span>7.22M</span><p>Total object frames</p></div>
+              <div class="stat-card"><span>90 Hz</span><p>Paired capture</p></div>
+            </div>
+          </div>
+        </div>
+        <div class="dataset-gallery reveal">
+          <div class="media-placeholder"><strong>Carry Samples</strong><span>Insert video strip or image grid.</span></div>
+          <div class="media-placeholder"><strong>Push Samples</strong><span>Insert video strip or image grid.</span></div>
+          <div class="media-placeholder"><strong>Relocate / Slide / Kick</strong><span>Insert specialized primitive examples.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section hero is-light omni-section" id="generalized-section">
+      <div class="container is-max-desktop generalization-container">
+        <h2 class="title is-3 has-text-centered section-heading reveal">Generalized Meta Skill <a href="#generalized-section" class="heading-anchor" aria-label="Link to this section">#</a></h2>
+        <p class="has-text-centered demo-desc reveal">
+          Because each skill is represented as contact flow rather than a dense whole-body reference or opaque skill embedding, the same controller can generalize across skill categories, contact modes, object dimensions, and initial-to-goal configurations.
+        </p>
+        <div class="generalization-demo reveal" data-generalization-browser>
+          <div class="generalization-tab-row">
+            <div class="generalization-row-label">Meta-skill</div>
+            <div class="generalization-tabs" role="tablist" aria-label="Meta-skill names">
+              <button type="button" class="generalization-tab is-active" data-generalization-skill="carrybox" aria-selected="true">Carrybox</button>
+              <button type="button" class="generalization-tab" data-generalization-skill="push_suitcase">Push suitcase</button>
+              <button type="button" class="generalization-tab" data-generalization-skill="slide_box">Slide box</button>
+              <button type="button" class="generalization-tab" data-generalization-skill="carry_ball">Carry ball</button>
+              <button type="button" class="generalization-tab" data-generalization-skill="kick_ball">Kick ball</button>
+            </div>
+          </div>
+          <div class="generalization-tab-row">
+            <div class="generalization-row-label">Configuration</div>
+            <div class="generalization-tabs generalization-tabs--secondary" role="tablist" aria-label="Generalized configurations">
+              <button type="button" class="generalization-tab is-active" data-generalization-config="height" aria-selected="true">Height</button>
+              <button type="button" class="generalization-tab" data-generalization-config="shape">Shape</button>
+              <button type="button" class="generalization-tab" data-generalization-config="init">Object init pos</button>
+              <button type="button" class="generalization-tab" data-generalization-config="final">Object final pose</button>
+            </div>
+          </div>
+          <div class="generalization-video-grid" data-generalization-videos></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section hero omni-section" id="chaining-section">
+      <div class="container is-max-desktop">
+        <h2 class="title is-3 has-text-centered section-heading reveal">Meta Skill Chaining <a href="#chaining-section" class="heading-anchor" aria-label="Link to this section">#</a></h2>
+        <p class="has-text-centered demo-desc reveal">
+          CF-Gen decomposes long-horizon tasks into contact-aware stages, synthesizes each segment, and refreshes future segments with the updated object state. This closed-loop design turns reusable meta-skills into robust task-level behavior.
+        </p>
+        <div class="timeline-grid reveal">
+          <article class="timeline-case">
+            <div class="media-placeholder media-placeholder--wide"><strong>Case 1: Stack Boxes</strong><span>Insert multi-stage rollout video.</span></div>
+            <h3>Gather and stack scattered boxes</h3>
+            <p>Repeated carrying segments are chained with updated object poses until the stack is completed.</p>
+          </article>
+          <article class="timeline-case">
+            <div class="media-placeholder media-placeholder--wide"><strong>Case 2: Push-Stack Boxes</strong><span>Insert push then stack rollout video.</span></div>
+            <h3>Combine pushing and carrying</h3>
+            <p>The robot first pushes a suitcase-like object, then switches to box stacking through the same contact-flow interface.</p>
+          </article>
+          <article class="timeline-case">
+            <div class="media-placeholder media-placeholder--wide"><strong>Case 3: Long Endurance</strong><span>Insert long-horizon highlight montage.</span></div>
+            <h3>Continuous long-horizon execution</h3>
+            <p>Closed-loop segment synthesis supports sustained box-carrying behavior over extended horizons.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section hero is-light omni-section" id="recovery-section">
+      <div class="container is-max-desktop">
+        <h2 class="title is-3 has-text-centered section-heading reveal">Recovery <a href="#recovery-section" class="heading-anchor" aria-label="Link to this section">#</a></h2>
+        <p class="has-text-centered demo-desc reveal">
+          OmniContact detects failures by comparing observed and predicted object states. When the deviation exceeds a threshold, CF-Gen replans from the current state, naturally eliciting re-approach and resume behaviors.
+        </p>
+        <div class="recovery-layout reveal">
+          <div class="media-placeholder media-placeholder--wide media-placeholder--tall">
+            <div class="placeholder-kicker">Recovery Video Placeholder</div>
+            <strong>Drop / Object Pose Offset Recovery</strong>
+            <span>Suggested asset: split video showing disturbance, detection, replan, re-contact, and task completion.</span>
+          </div>
+          <div class="recovery-steps">
+            <div><span>1</span><p>Monitor the current object state against the predicted trajectory.</p></div>
+            <div><span>2</span><p>Detect dropped objects, missed contacts, or large pose offsets during execution.</p></div>
+            <div><span>3</span><p>Re-synthesize contact flow from the disturbed state.</p></div>
+            <div><span>4</span><p>Re-approach, restore contact, and resume the long-horizon task.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section hero omni-section" id="vlm-section">
+      <div class="container is-max-desktop vlm-container">
+        <h2 class="title is-3 has-text-centered section-heading reveal">VLM Integration <a href="#vlm-section" class="heading-anchor" aria-label="Link to this section">#</a></h2>
+        <div class="vlm-showcase reveal">
+          <div class="vlm-video-column">
+            <article class="generalization-video-card">
+              <video controls autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/vlm_cylinder.mp4" type="video/mp4"></video>
+              <div class="generalization-video-label">Move the cylinder to the baseket</div>
+            </article>
+            <article class="generalization-video-card">
+              <video controls autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/vlm_soccer.mp4" type="video/mp4"></video>
+              <div class="generalization-video-label">Move the socer ball to the goal</div>
+            </article>
+          </div>
+          <div class="vlm-video-column">
+            <article class="generalization-video-card">
+              <video controls autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/vlm_heart.mp4" type="video/mp4"></video>
+              <div class="generalization-video-label">Arrange the scattered boxes into heart shape</div>
+            </article>
+            <article class="generalization-video-card">
+              <video controls autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/vlm_CORL.mp4" type="video/mp4"></video>
+              <div class="generalization-video-label">Arrange objects as C-O-R-L with color-matched box targets</div>
+            </article>
+          </div>
+          <div class="embedded-viewer embedded-viewer--glb">
+            <div class="embedded-viewer-header">
+              <h3>Interactive Unitree G1 Motion Sequences</h3>
+              <a href="sample_motion_sequences_g1.html?group=vlm&camera=vlm&v=glb-light-20260602" target="_blank" rel="noopener">Open full page</a>
+            </div>
+            <iframe
+              src="sample_motion_sequences_g1.html?group=vlm&camera=vlm&v=glb-light-20260602"
+              title="Interactive Unitree G1 sample motion sequences"
+              loading="lazy"
+              allow="fullscreen; autoplay"
+            ></iframe>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section hero is-light omni-section baseline-comparison" id="comparison-section" data-baseline-browser>
+      <div class="container is-max-desktop baseline-container">
+        <h2 class="title is-3 has-text-centered section-heading reveal">Baseline Comparison <a href="#comparison-section" class="heading-anchor" aria-label="Link to this section">#</a></h2>
+        <div class="generalization-tabs baseline-tabs" role="tablist" aria-label="Baseline comparison tasks">
+          <button type="button" class="generalization-tab is-active" data-baseline-task="carry_box" aria-selected="true">Carry box</button>
+          <button type="button" class="generalization-tab" data-baseline-task="push_suitcase">Push suitcase</button>
+          <button type="button" class="generalization-tab" data-baseline-task="stack_boxes">Stack boxes</button>
+          <button type="button" class="generalization-tab" data-baseline-task="push_stack">Push-stack</button>
+        </div>
+        <div class="generalization-video-grid baseline-video-grid" data-baseline-videos></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function() {
+      var csvUrl = 'static/data_tsne/hoi_tsne_dongbu_clip_cached_all_paper_soft_colors_dongbu_all_by_skill.csv';
+      var colors = {
+        push_box: '#4f83cc',
+        carry_box: '#f2731f',
+        carry_ball: '#33a876',
+        punt_box: '#d95555',
+        kick_ball: '#8b63c7'
+      };
+      var labels = {
+        push_box: 'Push box',
+        carry_box: 'Carry box',
+        carry_ball: 'Carry ball',
+        punt_box: 'Punt box',
+        kick_ball: 'Kick ball'
+      };
+      var tsneState = {
+        points: [],
+        activeSkill: null,
+        lockedSkill: null
+      };
+
+      window.addEventListener('load', function() {
+        var canvas = document.getElementById('dataset-tsne');
+        if (!canvas) return;
+        fetch(csvUrl)
+          .then(function(response) {
+            if (!response.ok) throw new Error('Cannot load t-SNE CSV');
+            return response.text();
+          })
+          .then(function(text) {
+            var points = parseTsneCsv(text);
+            tsneState.points = points;
+            drawTsne(canvas, points, colors, tsneState.activeSkill);
+            renderTsneLabels(canvas, points, colors, labels);
+            renderTsneLegend(points, colors, labels);
+            var status = document.getElementById('tsne-status');
+            if (status) status.textContent = points.length.toLocaleString() + ' clips';
+            window.addEventListener('resize', function() {
+              drawTsne(canvas, points, colors, tsneState.activeSkill);
+              renderTsneLabels(canvas, points, colors, labels);
+            });
+          })
+          .catch(function(error) {
+            var status = document.getElementById('tsne-status');
+            if (status) status.textContent = 't-SNE unavailable';
+            console.warn(error);
+          });
+      });
+
+      function parseTsneCsv(text) {
+        var lines = text.trim().split(/\r?\n/);
+        var header = splitCsvLine(lines.shift());
+        var skillIndex = header.indexOf('skill');
+        var xIndex = header.indexOf('tsne_x');
+        var yIndex = header.indexOf('tsne_y');
+        var points = [];
+        for (var i = 0; i < lines.length; i += 1) {
+          var cols = splitCsvLine(lines[i]);
+          var x = Number(cols[xIndex]);
+          var y = Number(cols[yIndex]);
+          if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+          points.push({ x: x, y: y, skill: cols[skillIndex] || 'unknown' });
+        }
+        return points;
+      }
+
+      function splitCsvLine(line) {
+        var out = [];
+        var value = '';
+        var inQuotes = false;
+        for (var i = 0; i < line.length; i += 1) {
+          var ch = line[i];
+          if (ch === '"') {
+            if (inQuotes && line[i + 1] === '"') {
+              value += '"';
+              i += 1;
+            } else {
+              inQuotes = !inQuotes;
+            }
+          } else if (ch === ',' && !inQuotes) {
+            out.push(value);
+            value = '';
+          } else {
+            value += ch;
+          }
+        }
+        out.push(value);
+        return out;
+      }
+
+      function drawTsne(canvas, points, colorMap, activeSkill) {
+        var rect = canvas.getBoundingClientRect();
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        var width = Math.max(320, Math.round(rect.width || canvas.width));
+        var height = Math.round(width * 14 / 23);
+        canvas.width = Math.round(width * dpr);
+        canvas.height = Math.round(height * dpr);
+        canvas.style.height = height + 'px';
+
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(0, 0, width, height);
+
+        var bounds = points.reduce(function(acc, point) {
+          acc.minX = Math.min(acc.minX, point.x);
+          acc.maxX = Math.max(acc.maxX, point.x);
+          acc.minY = Math.min(acc.minY, point.y);
+          acc.maxY = Math.max(acc.maxY, point.y);
+          return acc;
+        }, { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity });
+        var pad = 34;
+        var scaleX = (width - pad * 2) / Math.max(1e-6, bounds.maxX - bounds.minX);
+        var scaleY = (height - pad * 2) / Math.max(1e-6, bounds.maxY - bounds.minY);
+
+        ctx.globalAlpha = 1;
+        points.forEach(function(point) {
+          var x = pad + (point.x - bounds.minX) * scaleX;
+          var y = height - pad - (point.y - bounds.minY) * scaleY;
+          ctx.fillStyle = colorMap[point.skill] || '#7c8ea3';
+          ctx.globalAlpha = activeSkill && point.skill !== activeSkill ? 0.08 : 0.62;
+          ctx.beginPath();
+          ctx.arc(x, y, activeSkill === point.skill ? 1.9 : 1.45, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        ctx.globalAlpha = 1;
+      }
+
+      function renderTsneLegend(points, colorMap, labelMap) {
+        var legend = document.getElementById('tsne-legend');
+        if (!legend) return;
+        var counts = points.reduce(function(acc, point) {
+          acc[point.skill] = (acc[point.skill] || 0) + 1;
+          return acc;
+        }, {});
+        legend.innerHTML = Object.keys(counts).sort().map(function(skill) {
+          return '<button type="button" class="tsne-legend-item" data-tsne-skill="' + skill + '"><span class="tsne-legend-swatch" style="background:' +
+            (colorMap[skill] || '#7c8ea3') + '"></span>' +
+            (labelMap[skill] || skill) + ' (' + counts[skill].toLocaleString() + ')</button>';
+        }).join('');
+        legend.querySelectorAll('[data-tsne-skill]').forEach(function(button) {
+          bindTsneControl(button, button.getAttribute('data-tsne-skill'));
+        });
+      }
+
+      function renderTsneLabels(canvas, points, colorMap, labelMap) {
+        var layer = document.getElementById('tsne-label-layer');
+        if (!layer || points.length === 0) return;
+        var rect = canvas.getBoundingClientRect();
+        var width = rect.width || canvas.clientWidth || 920;
+        var height = rect.height || canvas.clientHeight || 560;
+        var pad = 34;
+        var bounds = points.reduce(function(acc, point) {
+          acc.minX = Math.min(acc.minX, point.x);
+          acc.maxX = Math.max(acc.maxX, point.x);
+          acc.minY = Math.min(acc.minY, point.y);
+          acc.maxY = Math.max(acc.maxY, point.y);
+          return acc;
+        }, { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity });
+        var scaleX = (width - pad * 2) / Math.max(1e-6, bounds.maxX - bounds.minX);
+        var scaleY = (height - pad * 2) / Math.max(1e-6, bounds.maxY - bounds.minY);
+        var stats = points.reduce(function(acc, point) {
+          if (!acc[point.skill]) acc[point.skill] = { x: 0, y: 0, count: 0 };
+          acc[point.skill].x += point.x;
+          acc[point.skill].y += point.y;
+          acc[point.skill].count += 1;
+          return acc;
+        }, {});
+        layer.innerHTML = Object.keys(stats).sort().map(function(skill) {
+          var stat = stats[skill];
+          var cx = stat.x / stat.count;
+          var cy = stat.y / stat.count;
+          var left = pad + (cx - bounds.minX) * scaleX;
+          var top = height - pad - (cy - bounds.minY) * scaleY;
+          return '<button type="button" class="tsne-float-label" data-tsne-skill="' + skill + '" style="left:' +
+            left.toFixed(1) + 'px;top:' + top.toFixed(1) + 'px;--skill-color:' + (colorMap[skill] || '#7c8ea3') + '">' +
+            (labelMap[skill] || skill) + '<span>' + stat.count.toLocaleString() + '</span></button>';
+        }).join('');
+        layer.querySelectorAll('[data-tsne-skill]').forEach(function(button) {
+          bindTsneControl(button, button.getAttribute('data-tsne-skill'));
+        });
+        updateTsneActiveClasses();
+      }
+
+      function bindTsneControl(element, skill) {
+        element.addEventListener('mouseenter', function() {
+          if (!tsneState.lockedSkill) setTsneActiveSkill(skill);
+        });
+        element.addEventListener('mouseleave', function() {
+          if (!tsneState.lockedSkill) setTsneActiveSkill(null);
+        });
+        element.addEventListener('click', function() {
+          tsneState.lockedSkill = tsneState.lockedSkill === skill ? null : skill;
+          setTsneActiveSkill(tsneState.lockedSkill);
+        });
+      }
+
+      function setTsneActiveSkill(skill) {
+        tsneState.activeSkill = skill;
+        var canvas = document.getElementById('dataset-tsne');
+        if (canvas && tsneState.points.length) drawTsne(canvas, tsneState.points, colors, skill);
+        updateTsneActiveClasses();
+      }
+
+      function updateTsneActiveClasses() {
+        document.querySelectorAll('[data-tsne-skill]').forEach(function(element) {
+          var skill = element.getAttribute('data-tsne-skill');
+          element.classList.toggle('is-active', Boolean(tsneState.activeSkill && skill === tsneState.activeSkill));
+          element.classList.toggle('is-muted', Boolean(tsneState.activeSkill && skill !== tsneState.activeSkill));
+        });
+      }
+    })();
+
+    (function() {
+      var root = document.querySelector('[data-generalization-browser]');
+      if (!root) return;
+
+      var skillTabs = Array.prototype.slice.call(root.querySelectorAll('[data-generalization-skill]'));
+      var configTabs = Array.prototype.slice.call(root.querySelectorAll('[data-generalization-config]'));
+      var videoGrid = root.querySelector('[data-generalization-videos]');
+      var activeSkill = 'carrybox';
+      var activeConfig = 'height';
+      var labels = {
+        carrybox: 'Carrybox',
+        push_suitcase: 'Push suitcase',
+        slide_box: 'Slide box',
+        carry_ball: 'Carry ball',
+        kick_ball: 'Kick ball',
+        height: 'Height',
+        shape: 'Shape',
+        init: 'Object init pos',
+        final: 'Object final pose'
+      };
+      var videos = {
+        carrybox: {
+          height: [
+            'static/videos/omnicontact/carrybox_height_1.mp4',
+            'static/videos/omnicontact/carrybox_height_2.mp4',
+            'static/videos/omnicontact/carrybox_height_3.mp4'
+          ],
+          shape: [
+            'static/videos/omnicontact/carrybox_size_1.mp4',
+            'static/videos/omnicontact/carrybox_size_2.mp4',
+            ''
+          ],
+          init: [
+            'static/videos/omnicontact/carrybox_initpos_1.mp4',
+            'static/videos/omnicontact/carrybox_initpos_2.mp4',
+            ''
+          ],
+          final: [
+            '',
+            '',
+            ''
+          ]
+        },
+        push_suitcase: {},
+        slide_box: {},
+        carry_ball: {},
+        kick_ball: {}
+      };
+
+      function setActive(tabs, activeTab) {
+        tabs.forEach(function(tab) {
+          var isActive = tab === activeTab;
+          tab.classList.toggle('is-active', isActive);
+          tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        });
+      }
+
+      function renderVideos() {
+        var skillVideos = videos[activeSkill] || {};
+        var sources = skillVideos[activeConfig] || ['', '', ''];
+        videoGrid.innerHTML = sources.map(function(src, index) {
+          var label = labels[activeSkill] + ' - ' + labels[activeConfig] + ' ' + (index + 1);
+          if (!src) {
+            return '<article class="generalization-video-card generalization-video-card--empty"><div class="generalization-video-slot"><strong>' +
+              label + '</strong><span>Reserved video slot</span></div><div class="generalization-video-label">' +
+              label + '</div></article>';
+          }
+          return '<article class="generalization-video-card"><video controls autoplay muted loop playsinline preload="metadata"><source src="' +
+            src + '" type="video/mp4"></video><div class="generalization-video-label">' + label + '</div></article>';
+        }).join('');
+      }
+
+      skillTabs.forEach(function(tab) {
+        tab.addEventListener('click', function() {
+          activeSkill = tab.getAttribute('data-generalization-skill');
+          setActive(skillTabs, tab);
+          renderVideos();
+        });
+      });
+      configTabs.forEach(function(tab) {
+        tab.addEventListener('click', function() {
+          activeConfig = tab.getAttribute('data-generalization-config');
+          setActive(configTabs, tab);
+          renderVideos();
+        });
+      });
+      renderVideos();
+    })();
+
+    (function() {
+      var root = document.querySelector('[data-baseline-browser]');
+      if (!root) return;
+
+      var taskTabs = Array.prototype.slice.call(root.querySelectorAll('[data-baseline-task]'));
+      var videoGrid = root.querySelector('[data-baseline-videos]');
+      var activeTask = 'carry_box';
+      var labels = {
+        carry_box: 'Carry box',
+        push_suitcase: 'Push suitcase',
+        stack_boxes: 'Stack boxes',
+        push_stack: 'Push-stack'
+      };
+      var baselines = {
+        carry_box: ['Sonic', 'HDMI', 'PhysHSI', 'LessMimic', 'Ours w. Reference', 'Ours w. CF-Gen'],
+        push_suitcase: ['Sonic', 'LessMimic', 'OmniContact (Ours)'],
+        stack_boxes: ['PhysHSI', 'LessMimic', 'OmniContact (Ours)'],
+        push_stack: ['LessMimic', 'OmniContact (Ours)']
+      };
+      var videos = {
+        carry_box: ['', '', '', '', '', ''],
+        push_suitcase: ['', '', ''],
+        stack_boxes: ['', '', ''],
+        push_stack: ['', '']
+      };
+
+      function setActive(activeTab) {
+        taskTabs.forEach(function(tab) {
+          var isActive = tab === activeTab;
+          tab.classList.toggle('is-active', isActive);
+          tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        });
+      }
+
+      function renderVideos() {
+        var sources = videos[activeTask] || [];
+        var baselineLabels = baselines[activeTask] || [];
+        videoGrid.classList.toggle('baseline-video-grid--carry-box', activeTask === 'carry_box');
+        videoGrid.innerHTML = baselineLabels.map(function(baseline, index) {
+          var src = sources[index] || '';
+          var label = labels[activeTask] + ' - ' + baseline;
+          if (!src) {
+            return '<article class="generalization-video-card generalization-video-card--empty"><div class="generalization-video-slot"><strong>' +
+              baseline + '</strong><span>Reserved video slot</span></div><div class="generalization-video-label">' +
+              label + '</div></article>';
+          }
+          return '<article class="generalization-video-card"><video controls autoplay muted loop playsinline preload="metadata"><source src="' +
+            src + '" type="video/mp4"></video><div class="generalization-video-label">' + label + '</div></article>';
+        }).join('');
+      }
+
+      taskTabs.forEach(function(tab) {
+        tab.addEventListener('click', function() {
+          activeTask = tab.getAttribute('data-baseline-task');
+          setActive(tab);
+          renderVideos();
+        });
+      });
+      renderVideos();
+    })();
+
+    window.addEventListener('load', function() {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          return Promise.all(registrations.map(function(registration) {
+            return registration.unregister();
+          }));
+        }).catch(function(error) {
+          console.warn('Service worker cleanup skipped:', error);
+        });
+      }
+
+      if (window.caches) {
+        caches.keys().then(function(keys) {
+          return Promise.all(keys.map(function(key) {
+            return caches.delete(key);
+          }));
+        }).catch(function(error) {
+          console.warn('Cache cleanup skipped:', error);
+        });
+      }
+    });
+  </script>
+</body>
+</html>
