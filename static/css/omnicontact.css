@@ -306,8 +306,12 @@
 .dataset-flip-back {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
-  margin-top: 0;
+  margin: 0;
   transform: rotateY(180deg);
+}
+
+.dataset-flip-card .dataset-flip-back {
+  margin: 0;
 }
 
 .dataset-flip-actions {
@@ -319,24 +323,26 @@
 }
 
 .dataset-flip-button {
-  min-height: 2.1rem;
-  padding: 0 0.8rem;
-  border: 1px solid rgba(8, 145, 178, 0.24);
+  min-height: 2.25rem;
+  padding: 0 0.95rem;
+  border: 1px solid rgba(249, 115, 22, 0.86);
   border-radius: 999px;
-  background: rgba(8, 145, 178, 0.08);
-  color: var(--omni-cyan);
+  background: #f97316;
+  color: #ffffff;
   font: inherit;
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   font-weight: 900;
-  letter-spacing: 0.04em;
+  letter-spacing: 0;
+  line-height: 1;
+  box-shadow: 0 8px 18px rgba(249, 115, 22, 0.24);
   cursor: pointer;
-  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+  transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 }
 
 .dataset-flip-button:hover,
 .dataset-flip-button:focus-visible {
-  border-color: rgba(8, 145, 178, 0.5);
-  background: rgba(8, 145, 178, 0.14);
+  background: #ea580c;
+  box-shadow: 0 10px 22px rgba(249, 115, 22, 0.32);
   outline: none;
   transform: translateY(-1px);
 }
