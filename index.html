@@ -283,11 +283,11 @@
           <div class="generalization-tab-row">
             <div class="generalization-row-label">Meta-skill</div>
             <div class="generalization-tabs" role="tablist" aria-label="Meta-skill names">
-              <button type="button" class="generalization-tab is-active" data-generalization-skill="carrybox" aria-selected="true">Carrybox</button>
-              <button type="button" class="generalization-tab" data-generalization-skill="push_suitcase">Push suitcase</button>
-              <button type="button" class="generalization-tab" data-generalization-skill="slide_box" disabled aria-disabled="true">Slide box</button>
-              <button type="button" class="generalization-tab" data-generalization-skill="carry_ball" disabled aria-disabled="true">Carry ball</button>
-              <button type="button" class="generalization-tab" data-generalization-skill="kick_ball" disabled aria-disabled="true">Kick ball</button>
+              <button type="button" class="generalization-tab is-active" data-generalization-skill="carrybox" aria-selected="true">Carry Box</button>
+              <button type="button" class="generalization-tab" data-generalization-skill="push_suitcase">Push Suitcase</button>
+              <button type="button" class="generalization-tab" data-generalization-skill="slide_box" disabled aria-disabled="true">Slide Box</button>
+              <button type="button" class="generalization-tab" data-generalization-skill="carry_ball" disabled aria-disabled="true">Carry Ball</button>
+              <button type="button" class="generalization-tab" data-generalization-skill="kick_ball" disabled aria-disabled="true">Kick Ball</button>
             </div>
           </div>
           <div class="generalization-tab-row">
@@ -342,22 +342,13 @@
         <p class="has-text-centered demo-desc reveal">
           OmniContact detects failures by comparing observed and predicted object states. When the deviation exceeds a threshold, CF-Gen replans from the current state, naturally eliciting re-approach and resume behaviors.
         </p>
-        <div class="recovery-layout reveal">
-          <div class="recovery-visual" aria-label="Recovery loop from object-state deviation to replanning">
-            <div><span>1</span><strong>Deviation</strong><em>object pose drifts</em></div>
-            <i></i>
-            <div><span>2</span><strong>Detect</strong><em>state error rises</em></div>
-            <i></i>
-            <div><span>3</span><strong>Replan</strong><em>new contact flow</em></div>
-            <i></i>
-            <div><span>4</span><strong>Resume</strong><em>restore contact</em></div>
+        <div class="recovery-browser reveal" data-recovery-browser>
+          <div class="generalization-tabs recovery-tabs" role="tablist" aria-label="Recovery demos">
+            <button type="button" class="generalization-tab is-active" data-recovery-task="push_suitcase" aria-selected="true">Push Suitcase Recover</button>
+            <button type="button" class="generalization-tab" data-recovery-task="carry_box" aria-selected="false">Carry Box Recover</button>
+            <button type="button" class="generalization-tab" data-recovery-task="relocate_ball" aria-selected="false">Relocate Ball Recover</button>
           </div>
-          <div class="recovery-steps">
-            <div><span>1</span><p>Monitor the current object state against the predicted trajectory.</p></div>
-            <div><span>2</span><p>Detect dropped objects, missed contacts, or large pose offsets during execution.</p></div>
-            <div><span>3</span><p>Re-synthesize contact flow from the disturbed state.</p></div>
-            <div><span>4</span><p>Re-approach, restore contact, and resume the long-horizon task.</p></div>
-          </div>
+          <div class="recovery-video-grid" data-recovery-videos></div>
         </div>
       </div>
     </section>
@@ -730,7 +721,7 @@
       var activeConfig = 'height';
       var preloadedVideos = {};
       var labels = {
-        carrybox: 'Carrybox',
+        carrybox: 'Carry Box',
         push_suitcase: 'Push suitcase',
         slide_box: 'Slide box',
         carry_ball: 'Carry ball',
@@ -984,6 +975,115 @@
         });
       });
       syncConfigTabs();
+      renderVideos();
+    })();
+
+    (function() {
+      var root = document.querySelector('[data-recovery-browser]');
+      if (!root) return;
+
+      var taskTabs = Array.prototype.slice.call(root.querySelectorAll('[data-recovery-task]'));
+      var videoGrid = root.querySelector('[data-recovery-videos]');
+      var activeTask = 'push_suitcase';
+      var preloadedVideos = {};
+      var videos = {
+        push_suitcase: [
+          {
+            src: 'static/videos/omnicontact/baselines/push_suitcase_ours_reference.mp4',
+            label: 'Reference recovery'
+          },
+          {
+            src: 'static/videos/omnicontact/baselines/push_suitcase_ours_cfgen.mp4',
+            label: 'OmniContact recovery'
+          }
+        ],
+        carry_box: [
+          {
+            src: 'static/videos/omnicontact/baselines/carry_box_ours_reference.mp4',
+            label: 'Reference recovery'
+          },
+          {
+            src: 'static/videos/omnicontact/baselines/carry_box_ours_cfgen.mp4',
+            label: 'OmniContact recovery'
+          }
+        ],
+        relocate_ball: [
+          {
+            src: '',
+            label: 'Recovery video A'
+          },
+          {
+            src: '',
+            label: 'Recovery video B'
+          }
+        ]
+      };
+
+      function setActive(tabList, activeTab) {
+        tabList.forEach(function(tab) {
+          var isActive = tab === activeTab;
+          tab.classList.toggle('is-active', isActive);
+          tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        });
+      }
+
+      function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, function(char) {
+          return {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+          }[char];
+        });
+      }
+
+      function buildCard(item) {
+        return '<article class="generalization-video-card recovery-video-card">' +
+          '<div class="generalization-video-label">' + escapeHtml(item.label) + '</div>' +
+          '<video controls autoplay muted loop playsinline preload="metadata"><source src="' + escapeHtml(item.src) + '" type="video/mp4"></video>' +
+          '</article>';
+      }
+
+      function buildEmptyCard(label) {
+        return '<article class="generalization-video-card recovery-video-card generalization-video-card--empty">' +
+          '<div class="generalization-video-label">' + escapeHtml(label) + '</div>' +
+          '<div class="generalization-video-slot"><strong>Preview unavailable</strong><span>This recovery video has not been linked yet.</span></div>' +
+          '</article>';
+      }
+
+      function preloadVideo(src) {
+        if (!src || preloadedVideos[src]) return;
+        var video = document.createElement('video');
+        video.preload = 'auto';
+        video.muted = true;
+        video.playsInline = true;
+        video.src = src;
+        preloadedVideos[src] = video;
+        if (typeof video.load === 'function') video.load();
+      }
+
+      function renderVideos() {
+        var items = videos[activeTask] || [];
+        videoGrid.innerHTML =
+          items.map(function(item) {
+            if (item && item.src) {
+              preloadVideo(item.src);
+              return buildCard(item);
+            }
+            return buildEmptyCard(item && item.label ? item.label : 'Recovery video');
+          }).join('');
+      }
+
+      taskTabs.forEach(function(tab) {
+        tab.addEventListener('click', function() {
+          activeTask = tab.getAttribute('data-recovery-task');
+          setActive(taskTabs, tab);
+          renderVideos();
+        });
+      });
+
       renderVideos();
     })();
 

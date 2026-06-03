@@ -1261,6 +1261,44 @@
   font-weight: 800;
 }
 
+.recovery-browser {
+  width: min(100%, 1320px);
+  margin: 1.9rem auto 0;
+}
+
+.recovery-tabs {
+  grid-template-columns: repeat(3, minmax(190px, 1fr));
+  width: min(100%, 1240px);
+  margin: 0 auto;
+}
+
+.recovery-video-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  width: min(100%, 1240px);
+  margin: 1.35rem auto 0;
+}
+
+.recovery-video-card {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 0.55rem;
+  padding: 0.55rem;
+}
+
+.recovery-video-card video,
+.recovery-video-card .generalization-video-slot {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--omni-radius-sm);
+}
+
+.recovery-video-card video {
+  object-fit: cover;
+}
+
 .vlm-layout {
   grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr);
 }
@@ -1487,6 +1525,10 @@
     grid-template-columns: 1fr;
   }
 
+  .recovery-video-grid {
+    grid-template-columns: 1fr;
+  }
+
   .generalization-feature-rail {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1594,6 +1636,10 @@
   .generalization-tabs--secondary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     width: 100%;
+  }
+
+  .recovery-tabs {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -1997,6 +2043,7 @@
 .dataset-video-card,
 .generalization-carousel-card,
 .generalization-video-grid--multi .generalization-video-card,
+.recovery-video-card,
 .vlm-video-column .generalization-video-card,
 .baseline-video-grid .generalization-video-card {
   border-radius: var(--omni-radius);
@@ -2023,6 +2070,7 @@
 .dataset-video-card .generalization-video-label,
 .generalization-carousel-card .generalization-video-label,
 .generalization-video-grid--multi .generalization-video-label,
+.recovery-video-card .generalization-video-label,
 .vlm-video-column .generalization-video-label,
 .baseline-video-grid .generalization-video-label {
   position: relative;
@@ -2047,6 +2095,7 @@
 .dataset-video-card .generalization-video-label::before,
 .generalization-carousel-card .generalization-video-label::before,
 .generalization-video-grid--multi .generalization-video-label::before,
+.recovery-video-card .generalization-video-label::before,
 .vlm-video-column .generalization-video-label::before,
 .baseline-video-grid .generalization-video-label::before {
   content: "";
@@ -2574,6 +2623,7 @@ body.omni-dark .chain-stage-visual--endurance span:nth-of-type(4),
 body.omni-dark .dataset-video-card .generalization-video-label::before,
 body.omni-dark .generalization-carousel-card .generalization-video-label::before,
 body.omni-dark .generalization-video-grid--multi .generalization-video-label::before,
+body.omni-dark .recovery-video-card .generalization-video-label::before,
 body.omni-dark .vlm-video-column .generalization-video-label::before,
 body.omni-dark .baseline-video-grid .generalization-video-label::before {
   background: linear-gradient(180deg, #ff6a00 0%, #ffb15f 100%);
@@ -2635,6 +2685,7 @@ body.omni-dark .generalization-video-card,
 body.omni-dark .dataset-video-card,
 body.omni-dark .generalization-carousel-card,
 body.omni-dark .generalization-video-grid--multi .generalization-video-card,
+body.omni-dark .recovery-video-card,
 body.omni-dark .vlm-video-column .generalization-video-card,
 body.omni-dark .baseline-video-grid .generalization-video-card {
   background:
@@ -2699,6 +2750,7 @@ body.omni-dark .policy-viewer-load-button small {
 body.omni-dark .dataset-video-card .generalization-video-label,
 body.omni-dark .generalization-carousel-card .generalization-video-label,
 body.omni-dark .generalization-video-grid--multi .generalization-video-label,
+body.omni-dark .recovery-video-card .generalization-video-label,
 body.omni-dark .vlm-video-column .generalization-video-label,
 body.omni-dark .baseline-video-grid .generalization-video-label {
   background: var(--omni-caption-bg);
