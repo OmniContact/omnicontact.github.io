@@ -42,12 +42,19 @@ function createPreview(stage, src, loader) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xf6f7f9);
 
-  const camera = new THREE.PerspectiveCamera(42, 1, 0.03, 80);
+  const camera = new THREE.PerspectiveCamera(34, 1, 0.03, 80);
   camera.position.set(2.6, 1.6, 3.0);
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  const renderer = new THREE.WebGLRenderer({
+    antialias: true,
+    alpha: false,
+    powerPreference: 'high-performance',
+    precision: 'highp'
+  });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 3));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.08;
   stage.appendChild(renderer.domElement);
 
   scene.add(new THREE.HemisphereLight(0xffffff, 0x8b929e, 0.9));
@@ -167,8 +174,13 @@ function polishVisualizationColors(model) {
       const color = isPropObject(child) ? propOrange : pickPolishedColor(clone.color);
       if (clone.color) clone.color.copy(color);
       if (clone.emissive && clone.color) {
-        clone.emissive.copy(color).multiplyScalar(isVisualOverlayObject(child) ? 0.38 : 0.22);
-        clone.emissiveIntensity = isVisualOverlayObject(child) ? 0.9 : 0.65;
+        if (isPropObject(child)) {
+          clone.emissive.copy(color).multiplyScalar(0.22);
+          clone.emissiveIntensity = 0.6;
+        } else {
+          clone.emissive.copy(color).multiplyScalar(isVisualOverlayObject(child) ? 0.38 : 0.22);
+          clone.emissiveIntensity = isVisualOverlayObject(child) ? 0.9 : 0.65;
+        }
       }
       if (isVisualOverlayObject(child)) {
         clone.transparent = true;
@@ -182,8 +194,10 @@ function polishVisualizationColors(model) {
         clone.side = THREE.DoubleSide;
         clone.depthWrite = true;
         clone.depthTest = true;
+        if ('roughness' in clone) clone.roughness = 0.9;
+        if ('metalness' in clone) clone.metalness = 0.0;
       }
-      clone.metalness = 0.0;
+      if ('metalness' in clone) clone.metalness = 0.0;
       clone.needsUpdate = true;
       return clone;
     });

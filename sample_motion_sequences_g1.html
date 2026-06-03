@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sample Motion Sequences - Unitree G1 Carrybox</title>
+    <title>Unitree G1 Motion Viewer</title>
     <style>
         * {
             box-sizing: border-box;
@@ -31,60 +31,32 @@
             justify-content: center;
             background: rgba(255, 255, 255, 0.92);
             z-index: 20;
-            font-size: 18px;
+            font-size: 0;
             font-weight: 700;
         }
 
-        #top-panel {
-            position: absolute;
-            top: 18px;
-            left: 18px;
-            width: min(430px, calc(100vw - 36px));
-            padding: 16px 18px;
-            background: rgba(255, 255, 255, 0.92);
-            border: 1px solid rgba(31, 41, 51, 0.1);
-            border-radius: 8px;
-            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
-            backdrop-filter: blur(10px);
-            z-index: 10;
+        #loading::after {
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(37, 99, 235, 0.18);
+            border-top-color: #2563eb;
+            border-radius: 50%;
+            content: "";
+            animation: spin 0.8s linear infinite;
         }
 
-        #top-panel h1 {
-            margin: 0 0 8px;
-            font-size: 18px;
-            line-height: 1.2;
+        #loading.has-message {
+            font-size: 14px;
         }
 
-        #top-panel p {
-            margin: 0;
-            font-size: 13px;
-            line-height: 1.5;
-            color: #53606d;
+        #loading.has-message::after {
+            display: none;
         }
 
-        #sequence-list {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            max-height: min(320px, calc(100vh - 220px));
-            overflow: auto;
-            margin-top: 14px;
-        }
-
-        .sequence-btn {
-            width: 100%;
-            padding: 8px 10px;
-            border: 1px solid rgba(31, 41, 51, 0.1);
-            border-radius: 6px;
-            background: rgba(248, 250, 252, 0.95);
-            color: #243243;
-            text-align: left;
-        }
-
-        .sequence-btn:hover,
-        .sequence-btn.active {
-            background: #2563eb;
-            color: #f8fafc;
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         #controls {
@@ -141,64 +113,11 @@
             background: #1d4ed8;
         }
 
-        #details-panel {
-            position: absolute;
-            right: 18px;
-            top: 18px;
-            width: min(330px, calc(100vw - 36px));
-            padding: 16px 18px;
-            background: rgba(255, 255, 255, 0.92);
-            border: 1px solid rgba(31, 41, 51, 0.1);
-            border-radius: 8px;
-            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
-            backdrop-filter: blur(10px);
-            z-index: 10;
-            display: none;
-        }
-
-        #details-panel.visible {
-            display: block;
-        }
-
-        #details-panel h2 {
-            margin: 0 0 12px;
-            font-size: 16px;
-        }
-
-        .detail-item {
-            display: flex;
-            justify-content: space-between;
-            gap: 14px;
-            padding: 7px 0;
-            border-top: 1px solid rgba(31, 41, 51, 0.08);
-            font-size: 13px;
-        }
-
-        .detail-label {
-            color: #64748b;
-            font-weight: 700;
-        }
-
-        .detail-value {
-            text-align: right;
-        }
     </style>
 </head>
 <body>
     <div id="canvas-container">
-        <div id="loading">Loading Unitree G1 motion...</div>
-        <div id="top-panel">
-            <h1>Sample Motion Sequences</h1>
-            <p>Interactive 3D visualization of Unitree G1 carrybox sequences exported from Blender as GLB.</p>
-            <div id="sequence-list"></div>
-        </div>
-        <div id="details-panel">
-            <h2>Motion Details</h2>
-            <div class="detail-item"><span class="detail-label">Robot</span><span class="detail-value">Unitree G1</span></div>
-            <div class="detail-item"><span class="detail-label">Task</span><span class="detail-value">Carrybox</span></div>
-            <div class="detail-item"><span class="detail-label">Format</span><span class="detail-value">Animated GLB</span></div>
-            <div class="detail-item"><span class="detail-label">Source</span><span class="detail-value" id="detail-source">-</span></div>
-        </div>
+        <div id="loading"></div>
         <div id="controls">
             <div id="timeline-row">
                 <input type="range" id="timeline-slider" min="0" max="1000" value="0" step="1">
@@ -208,7 +127,6 @@
                 <button id="play-btn">Play</button>
                 <button id="pause-btn">Pause</button>
                 <button id="restart-btn">Restart</button>
-                <button id="info-btn">Info</button>
             </div>
         </div>
     </div>
@@ -231,8 +149,6 @@
         const loading = document.getElementById('loading');
         const timelineSlider = document.getElementById('timeline-slider');
         const timeDisplay = document.getElementById('time-display');
-        const sequenceList = document.getElementById('sequence-list');
-        const detailSource = document.getElementById('detail-source');
         const manifestUrl = 'static/glb/manifest.json';
         const glbBaseUrl = 'static/glb/';
         const urlParams = new URLSearchParams(window.location.search);
@@ -306,6 +222,7 @@
                 loadMotion(items[0], 0);
             })
             .catch((error) => {
+                loading.classList.add('has-message');
                 loading.textContent = 'Failed to load motion manifest.';
                 console.error(error);
             });
@@ -342,10 +259,6 @@
             clock.getDelta();
         });
 
-        document.getElementById('info-btn').addEventListener('click', () => {
-            document.getElementById('details-panel').classList.toggle('visible');
-        });
-
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
@@ -375,6 +288,8 @@
         }
 
         function renderSequenceList(items) {
+            const sequenceList = document.getElementById('sequence-list');
+            if (!sequenceList) return;
             sequenceList.innerHTML = '';
             items.forEach((item, index) => {
                 const button = document.createElement('button');
@@ -396,13 +311,16 @@
         }
 
         function setActiveSequence(index) {
+            const sequenceList = document.getElementById('sequence-list');
+            if (!sequenceList) return;
             [...sequenceList.querySelectorAll('.sequence-btn')].forEach((button, buttonIndex) => {
                 button.classList.toggle('active', buttonIndex === index);
             });
         }
 
         function loadMotion(item, index) {
-            loading.textContent = `Loading ${item.title || item.file}...`;
+            loading.classList.remove('has-message');
+            loading.textContent = '';
             loading.style.display = 'flex';
             setActiveSequence(index);
             resetAnimationState();
@@ -438,7 +356,6 @@
                         setAnimationTime(0);
                     }
 
-                    detailSource.textContent = item.source || item.file;
                     updateTimeDisplay(0);
                     fitCameraToObject(model);
                     loading.style.display = 'none';
@@ -447,6 +364,7 @@
                 },
                 undefined,
                 (error) => {
+                    loading.classList.add('has-message');
                     loading.textContent = `Failed to load ${item.file}`;
                     console.error(error);
                 }
