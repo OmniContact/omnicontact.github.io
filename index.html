@@ -284,14 +284,14 @@
             <div class="generalization-row-label">Meta-skill</div>
             <div class="generalization-tabs" role="tablist" aria-label="Meta-skill names">
               <button type="button" class="generalization-tab is-active" data-generalization-skill="carrybox" aria-selected="true">Carrybox</button>
-              <button type="button" class="generalization-tab" data-generalization-skill="push_suitcase" disabled aria-disabled="true">Push suitcase</button>
+              <button type="button" class="generalization-tab" data-generalization-skill="push_suitcase">Push suitcase</button>
               <button type="button" class="generalization-tab" data-generalization-skill="slide_box" disabled aria-disabled="true">Slide box</button>
               <button type="button" class="generalization-tab" data-generalization-skill="carry_ball" disabled aria-disabled="true">Carry ball</button>
               <button type="button" class="generalization-tab" data-generalization-skill="kick_ball" disabled aria-disabled="true">Kick ball</button>
             </div>
           </div>
           <div class="generalization-tab-row">
-            <div class="generalization-row-label">Configuration</div>
+            <div class="generalization-row-label">Generalization</div>
             <div class="generalization-tabs generalization-tabs--secondary" role="tablist" aria-label="Generalized configurations">
               <button type="button" class="generalization-tab is-active" data-generalization-config="height" aria-selected="true">Height</button>
               <button type="button" class="generalization-tab" data-generalization-config="shape">Shape</button>
@@ -299,7 +299,7 @@
               <button type="button" class="generalization-tab" data-generalization-config="final" disabled aria-disabled="true">Object final pose</button>
             </div>
           </div>
-          <div class="generalization-video-grid generalization-video-grid--carousel" data-generalization-videos></div>
+          <div class="generalization-video-grid generalization-video-grid--multi" data-generalization-videos></div>
         </div>
       </div>
     </section>
@@ -389,10 +389,10 @@
           <div class="embedded-viewer embedded-viewer--glb">
             <div class="embedded-viewer-header">
               <h3>Interactive Unitree G1 Motion Sequences</h3>
-              <a href="sample_motion_sequences_g1.html?group=vlm&camera=vlm&v=glb-clean-20260603" target="_blank" rel="noopener">Open full page</a>
+              <a href="sample_motion_sequences_g1.html?group=vlm&camera=vlm&v=glb-clean-20260603-closecam-upframe" target="_blank" rel="noopener">Open full page</a>
             </div>
             <iframe
-              src="sample_motion_sequences_g1.html?group=vlm&camera=vlm&v=glb-clean-20260603"
+              src="sample_motion_sequences_g1.html?group=vlm&camera=vlm&v=glb-clean-20260603-closecam-upframe"
               title="Interactive Unitree G1 sample motion sequences"
               loading="lazy"
               allow="fullscreen; autoplay"
@@ -728,9 +728,6 @@
       var videoGrid = root.querySelector('[data-generalization-videos]');
       var activeSkill = 'carrybox';
       var activeConfig = 'height';
-      var activeIndex = 0;
-      var isAnimating = false;
-      var slideDuration = 220;
       var preloadedVideos = {};
       var labels = {
         carrybox: 'Carrybox',
@@ -743,17 +740,37 @@
         init: 'Object init pos',
         final: 'Object final pose'
       };
+      var configDefinitions = {
+        carrybox: {
+          height: { label: 'Height' },
+          shape: { label: 'Shape' },
+          init: { label: 'Object init pos' },
+          final: { label: 'Object final pose', disabled: true }
+        },
+        push_suitcase: {
+          height: { label: 'Contact Mode' },
+          shape: { label: 'Shape' },
+          init: { label: 'Object init pos' },
+          final: { label: 'Object final pose' }
+        }
+      };
+      var layoutBySkill = {
+        carrybox: 'featured',
+        push_suitcase: 'paired'
+      };
       var videos = {
         carrybox: {
           height: [
             'static/videos/omnicontact/carrybox_height_1.mp4',
             'static/videos/omnicontact/carrybox_height_2.mp4',
-            'static/videos/omnicontact/carrybox_height_3.mp4'
+            'static/videos/omnicontact/carrybox_height_3.mp4',
+            'static/videos/omnicontact/carrybox_height_4.mp4'
           ],
           shape: [
-            'static/videos/omnicontact/carrybox_size_1.mp4',
-            'static/videos/omnicontact/carrybox_size_2.mp4',
-            ''
+            'static/videos/omnicontact/carrybox_shape_4.mp4',
+            'static/videos/omnicontact/carrybox_shape_1.mp4',
+            'static/videos/omnicontact/carrybox_shape_2.mp4',
+            'static/videos/omnicontact/carrybox_shape_3.mp4'
           ],
           init: [
             'static/videos/omnicontact/carrybox_initpos_1.mp4',
@@ -766,7 +783,24 @@
             ''
           ]
         },
-        push_suitcase: {},
+        push_suitcase: {
+          height: [
+            'static/videos/omnicontact/push_type1.mp4',
+            'static/videos/omnicontact/push_shape2.mp4'
+          ],
+          shape: [
+            'static/videos/omnicontact/push_shape2.mp4',
+            'static/videos/omnicontact/push_type1.mp4'
+          ],
+          init: [
+            'static/videos/omnicontact/push_type1.mp4',
+            'static/videos/omnicontact/push_shape2.mp4'
+          ],
+          final: [
+            'static/videos/omnicontact/push_shape2.mp4',
+            'static/videos/omnicontact/push_type1.mp4'
+          ]
+        },
         slide_box: {},
         carry_ball: {},
         kick_ball: {}
@@ -792,23 +826,18 @@
         });
       }
 
-      function buildCard(src, label, position, isActive) {
-        var classes = 'generalization-carousel-card generalization-carousel-card--' + position;
-        if (isActive) classes += ' is-active';
-        if (!src) classes += ' generalization-carousel-card--empty';
-        var media = !src
-          ? '<div class="generalization-video-slot"><strong>Preview unavailable</strong><span>' + escapeHtml(label) + '</span></div>'
-          : '<video controls autoplay muted loop playsinline preload="auto"><source src="' + escapeHtml(src) + '" type="video/mp4"></video>';
-        var caption = src ? '<div class="generalization-video-label">' + escapeHtml(label) + '</div>' : '';
-        return '<article class="' + classes + '" data-carousel-role="' + position + '"' + (isActive ? ' aria-current="true"' : '') + '>' +
-          '<div class="generalization-carousel-media">' + media + '</div>' +
-          caption +
+      function buildCard(src, extraClass) {
+        var className = 'generalization-video-card' + (extraClass ? ' ' + extraClass : '');
+        return '<article class="' + className + '">' +
+          '<video controls autoplay muted loop playsinline preload="metadata"><source src="' + escapeHtml(src) + '" type="video/mp4"></video>' +
           '</article>';
       }
 
-      function stopAnimation() {
-        isAnimating = false;
-        videoGrid.classList.remove('is-fading');
+      function buildEmptyCard(extraClass) {
+        var className = 'generalization-video-card generalization-video-card--empty' + (extraClass ? ' ' + extraClass : '');
+        return '<article class="' + className + '">' +
+          '<div class="generalization-video-slot"><strong>Preview unavailable</strong><span>The current configuration does not have a demo video yet.</span></div>' +
+          '</article>';
       }
 
       function preloadVideo(src) {
@@ -822,63 +851,121 @@
         if (typeof video.load === 'function') video.load();
       }
 
-      function preloadNeighbors(sources, normalizedIndex) {
-        if (!sources.length) return;
-        var prevIndex = (normalizedIndex - 1 + sources.length) % sources.length;
-        var nextIndex = (normalizedIndex + 1) % sources.length;
-        preloadVideo(sources[prevIndex]);
-        preloadVideo(sources[nextIndex]);
+      function getConfigDefinition(skill, config) {
+        var skillDefinitions = configDefinitions[skill] || configDefinitions.carrybox || {};
+        return skillDefinitions[config] || { label: labels[config] || config, disabled: false };
       }
 
-      function requestSlide(direction) {
-        if (isAnimating) return;
-        activeIndex += direction;
-        renderVideos();
-        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-        isAnimating = true;
-        videoGrid.classList.add('is-fading');
-        window.setTimeout(function() {
-          stopAnimation();
-        }, slideDuration);
+      function findConfigTab(config) {
+        for (var i = 0; i < configTabs.length; i += 1) {
+          if (configTabs[i].getAttribute('data-generalization-config') === config) return configTabs[i];
+        }
+        return null;
+      }
+
+      function getFirstEnabledConfig(skill) {
+        for (var i = 0; i < configTabs.length; i += 1) {
+          var config = configTabs[i].getAttribute('data-generalization-config');
+          if (!getConfigDefinition(skill, config).disabled) return config;
+        }
+        return activeConfig;
+      }
+
+      function syncConfigTabs() {
+        configTabs.forEach(function(tab) {
+          var config = tab.getAttribute('data-generalization-config');
+          var definition = getConfigDefinition(activeSkill, config);
+          var isDisabled = definition.disabled === true;
+          tab.textContent = definition.label;
+          tab.disabled = isDisabled;
+          tab.setAttribute('aria-disabled', isDisabled ? 'true' : 'false');
+        });
+
+        if (getConfigDefinition(activeSkill, activeConfig).disabled) {
+          activeConfig = getFirstEnabledConfig(activeSkill);
+        }
+
+        var activeTab = findConfigTab(activeConfig) || configTabs[0];
+        setActive(configTabs, activeTab);
+      }
+
+      function renderPairedVideos(sources) {
+        var pairItems = sources.slice(0, 2).map(function(src) {
+          return src ? { src: src } : null;
+        });
+
+        while (pairItems.length < 2) {
+          pairItems.push(null);
+        }
+
+        pairItems.forEach(function(item) {
+          if (item) preloadVideo(item.src);
+        });
+
+        videoGrid.innerHTML =
+          '<div class="generalization-paired-layout">' +
+            pairItems.map(function(item) {
+              return item
+                ? buildCard(item.src, 'generalization-video-card--paired')
+                : buildEmptyCard('generalization-video-card--paired');
+            }).join('') +
+          '</div>';
       }
 
       function renderVideos() {
         var skillVideos = videos[activeSkill] || {};
-        var sources = (skillVideos[activeConfig] || []).filter(Boolean);
-        var count = sources.length || 1;
-        var normalizedIndex = ((activeIndex % count) + count) % count;
-        var activeLabel = labels[activeSkill] + ' - ' + labels[activeConfig] + ' ' + (normalizedIndex + 1);
+        var sources = skillVideos[activeConfig] || [];
+        var availableItems = sources.reduce(function(items, src, index) {
+          if (src) items.push({ src: src, index: index });
+          return items;
+        }, []);
+        var layout = layoutBySkill[activeSkill] || 'featured';
 
-        videoGrid.innerHTML =
-          '<div class="generalization-carousel-shell">' +
-            '<button type="button" class="generalization-carousel-arrow generalization-carousel-arrow--prev" data-carousel-step="-1" aria-label="Show previous video">' +
-              '<span aria-hidden="true">&#8249;</span>' +
-            '</button>' +
-            '<div class="generalization-carousel-track">' +
-              buildCard(sources[normalizedIndex] || '', activeLabel, 'current', true) +
-            '</div>' +
-            '<button type="button" class="generalization-carousel-arrow generalization-carousel-arrow--next" data-carousel-step="1" aria-label="Show next video">' +
-              '<span aria-hidden="true">&#8250;</span>' +
-            '</button>' +
-          '</div>';
+        videoGrid.classList.toggle('generalization-video-grid--multi', layout === 'featured');
+        videoGrid.classList.toggle('generalization-video-grid--paired', layout === 'paired');
 
-        Array.prototype.slice.call(videoGrid.querySelectorAll('[data-carousel-step]')).forEach(function(button) {
-          button.addEventListener('click', function() {
-            requestSlide(Number(button.getAttribute('data-carousel-step') || 0));
-          });
+        if (!availableItems.length) {
+          videoGrid.innerHTML = buildEmptyCard();
+          return;
+        }
+
+        if (layout === 'paired') {
+          renderPairedVideos(sources);
+          return;
+        }
+
+        var featuredItem = availableItems[0] || null;
+        var sideItems = availableItems.slice(1, 4);
+        while (sideItems.length < 3) {
+          sideItems.push(null);
+        }
+
+        if (featuredItem) preloadVideo(featuredItem.src);
+        sideItems.forEach(function(item) {
+          if (item) preloadVideo(item.src);
         });
 
-        preloadVideo(sources[normalizedIndex] || '');
-        preloadNeighbors(sources, normalizedIndex);
+        videoGrid.innerHTML =
+          '<div class="generalization-feature-layout">' +
+            '<div class="generalization-feature-main">' +
+              (featuredItem ? buildCard(featuredItem.src, 'generalization-video-card--featured') : buildEmptyCard('generalization-video-card--featured')) +
+            '</div>' +
+            '<div class="generalization-feature-rail">' +
+              sideItems.map(function(item) {
+                return item
+                  ? buildCard(item.src, 'generalization-video-card--compact')
+                  : buildEmptyCard('generalization-video-card--compact');
+              }).join('') +
+            '</div>' +
+          '</div>';
       }
 
       skillTabs.forEach(function(tab) {
         tab.addEventListener('click', function() {
           if (tab.disabled || tab.getAttribute('aria-disabled') === 'true') return;
           activeSkill = tab.getAttribute('data-generalization-skill');
-          activeIndex = 0;
-          stopAnimation();
           setActive(skillTabs, tab);
+          syncConfigTabs();
           renderVideos();
         });
       });
@@ -886,12 +973,11 @@
         tab.addEventListener('click', function() {
           if (tab.disabled || tab.getAttribute('aria-disabled') === 'true') return;
           activeConfig = tab.getAttribute('data-generalization-config');
-          activeIndex = 0;
-          stopAnimation();
           setActive(configTabs, tab);
           renderVideos();
         });
       });
+      syncConfigTabs();
       renderVideos();
     })();
 

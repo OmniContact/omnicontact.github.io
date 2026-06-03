@@ -47,7 +47,7 @@
 }
 
 .generalization-container {
-  max-width: clamp(1180px, 92vw, 1800px) !important;
+  max-width: clamp(1320px, 95vw, 1920px) !important;
 }
 
 .generalization-container > .section-heading,
@@ -555,8 +555,8 @@
 
 .generalization-tab-row {
   display: grid;
-  grid-template-columns: 118px auto;
-  gap: 0.85rem;
+  grid-template-columns: max-content auto;
+  gap: 1.1rem;
   align-items: center;
   justify-content: center;
   width: max-content;
@@ -573,6 +573,7 @@
   letter-spacing: 0.08em;
   text-align: right;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .generalization-tabs {
@@ -643,6 +644,124 @@
 .generalization-video-grid--carousel {
   display: block;
   min-height: auto;
+}
+
+.generalization-video-grid--multi {
+  display: block;
+  width: min(100%, 1240px);
+  max-width: 1240px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 1.9rem;
+}
+
+.generalization-video-grid--paired {
+  display: block;
+  width: min(100%, 1240px);
+  max-width: 1240px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 1.9rem;
+}
+
+.generalization-paired-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.95rem;
+  align-items: stretch;
+}
+
+.generalization-feature-layout {
+  display: flex;
+  gap: 0.95rem;
+  align-items: stretch;
+}
+
+.generalization-feature-main,
+.generalization-feature-rail {
+  min-width: 0;
+}
+
+.generalization-feature-main {
+  flex: 1.78 1 0;
+}
+
+.generalization-feature-rail {
+  flex: 0.74 1 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.72rem;
+  align-self: stretch;
+}
+
+.generalization-video-grid--multi .generalization-video-card {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  gap: 0;
+  width: 100%;
+  justify-self: stretch;
+  min-height: 0;
+  padding: 0.28rem;
+}
+
+.generalization-video-grid--paired .generalization-video-card {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  width: 100%;
+  min-height: 0;
+  padding: 0.28rem;
+}
+
+.generalization-video-grid--multi .generalization-video-card video,
+.generalization-video-grid--multi .generalization-video-slot {
+  order: 1;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--omni-radius-sm);
+}
+
+.generalization-video-grid--multi .generalization-video-card--featured video,
+.generalization-video-grid--multi .generalization-video-card--featured .generalization-video-slot {
+  aspect-ratio: 3 / 2;
+}
+
+.generalization-video-grid--multi .generalization-video-card--compact video,
+.generalization-video-grid--multi .generalization-video-card--compact .generalization-video-slot {
+  aspect-ratio: auto;
+  height: 100%;
+}
+
+.generalization-video-grid--multi .generalization-video-card--compact {
+  flex: 1 1 0;
+}
+
+.generalization-video-grid--paired .generalization-video-card video,
+.generalization-video-grid--paired .generalization-video-slot {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--omni-radius-sm);
+}
+
+.generalization-video-grid--paired .generalization-video-card video {
+  object-fit: cover;
+}
+
+.generalization-video-grid--paired .generalization-video-card--empty {
+  background:
+    linear-gradient(145deg, rgba(139, 92, 246, 0.06), rgba(238, 99, 99, 0.08)),
+    rgba(255, 255, 255, 0.96);
+}
+
+.generalization-video-grid--multi .generalization-video-card video {
+  object-fit: cover;
+}
+
+.generalization-video-grid--multi .generalization-video-card--empty {
+  background:
+    linear-gradient(145deg, rgba(139, 92, 246, 0.06), rgba(238, 99, 99, 0.08)),
+    rgba(255, 255, 255, 0.96);
 }
 
 .generalization-video-card {
@@ -1359,6 +1478,21 @@
   .timeline-grid {
     grid-template-columns: 1fr 1fr;
   }
+
+  .generalization-feature-layout {
+    flex-direction: column;
+  }
+
+  .generalization-paired-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .generalization-feature-rail {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: none;
+    flex: none;
+  }
 }
 
 @media screen and (max-width: 1280px) {
@@ -1530,6 +1664,39 @@
 
   .generalization-video-grid {
     grid-template-columns: 1fr;
+  }
+
+  .generalization-video-grid--multi {
+    width: auto;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    transform: none;
+  }
+
+  .generalization-video-grid--paired {
+    width: auto;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    transform: none;
+  }
+
+  .generalization-feature-layout {
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .generalization-paired-layout {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .generalization-feature-rail {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    flex: none;
   }
 
   .generalization-video-grid--carousel {
@@ -1829,6 +1996,7 @@
 
 .dataset-video-card,
 .generalization-carousel-card,
+.generalization-video-grid--multi .generalization-video-card,
 .vlm-video-column .generalization-video-card,
 .baseline-video-grid .generalization-video-card {
   border-radius: var(--omni-radius);
@@ -1854,6 +2022,7 @@
 
 .dataset-video-card .generalization-video-label,
 .generalization-carousel-card .generalization-video-label,
+.generalization-video-grid--multi .generalization-video-label,
 .vlm-video-column .generalization-video-label,
 .baseline-video-grid .generalization-video-label {
   position: relative;
@@ -1877,6 +2046,7 @@
 
 .dataset-video-card .generalization-video-label::before,
 .generalization-carousel-card .generalization-video-label::before,
+.generalization-video-grid--multi .generalization-video-label::before,
 .vlm-video-column .generalization-video-label::before,
 .baseline-video-grid .generalization-video-label::before {
   content: "";
@@ -2403,6 +2573,7 @@ body.omni-dark .chain-stage-visual--mixed span:nth-of-type(1),
 body.omni-dark .chain-stage-visual--endurance span:nth-of-type(4),
 body.omni-dark .dataset-video-card .generalization-video-label::before,
 body.omni-dark .generalization-carousel-card .generalization-video-label::before,
+body.omni-dark .generalization-video-grid--multi .generalization-video-label::before,
 body.omni-dark .vlm-video-column .generalization-video-label::before,
 body.omni-dark .baseline-video-grid .generalization-video-label::before {
   background: linear-gradient(180deg, #ff6a00 0%, #ffb15f 100%);
@@ -2463,6 +2634,7 @@ body.omni-dark .embedded-viewer,
 body.omni-dark .generalization-video-card,
 body.omni-dark .dataset-video-card,
 body.omni-dark .generalization-carousel-card,
+body.omni-dark .generalization-video-grid--multi .generalization-video-card,
 body.omni-dark .vlm-video-column .generalization-video-card,
 body.omni-dark .baseline-video-grid .generalization-video-card {
   background:
@@ -2526,6 +2698,7 @@ body.omni-dark .policy-viewer-load-button small {
 
 body.omni-dark .dataset-video-card .generalization-video-label,
 body.omni-dark .generalization-carousel-card .generalization-video-label,
+body.omni-dark .generalization-video-grid--multi .generalization-video-label,
 body.omni-dark .vlm-video-column .generalization-video-label,
 body.omni-dark .baseline-video-grid .generalization-video-label {
   background: var(--omni-caption-bg);

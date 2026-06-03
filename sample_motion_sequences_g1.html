@@ -559,11 +559,11 @@
             const size = box.getSize(new THREE.Vector3());
             const center = box.getCenter(new THREE.Vector3());
             const maxDim = Math.max(size.x, size.y, size.z);
-            const distance = Math.max(3.0, maxDim * 1.8);
+            const distance = Math.max(2.45, maxDim * 1.42);
             controls.target.copy(center);
-            controls.target.y = Math.max(center.y, 0.8);
+            controls.target.y = Math.max(center.y, 0.46);
             if (requestedCamera === 'vlm') {
-                camera.position.set(center.x, center.y + distance * 0.72, center.z + distance * 0.62);
+                camera.position.set(center.x, center.y + distance * 0.56, center.z + distance * 0.48);
             } else {
                 camera.position.set(center.x + distance, center.y + distance * 0.55, center.z + distance);
             }
