@@ -2,7 +2,7 @@
 // The MuJoCo/ONNX viewer is versioned by Vite and must always bypass this
 // service worker; otherwise ordinary browser refresh can keep serving an old
 // LessMimic bundle while hard refresh appears correct.
-const CACHE_NAME = 'hot-site-v2';
+const CACHE_NAME = 'hot-site-v20260604';
 
 // Assets to pre-cache on install (critical CSS/JS)
 const PRECACHE = [
