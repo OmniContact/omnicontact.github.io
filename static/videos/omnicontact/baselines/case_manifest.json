@@ -1,0 +1,345 @@
+{
+  "tasks": {
+    "carry_box": {
+      "npz_path": "/home/lightcone/workspace/projects/nair_new/evaluation/aligned_carrybox_npz/carrybox30-28-30_motion_381_with_contact__robot_start_p0d000_p0d000_p0d743.npz",
+      "source_npz_path": "/home/lightcone/workspace/projects/nair_new/evaluation/aligned_carrybox_npz/carrybox30-28-30_motion_381_with_contact__robot_start_p0d000_p0d000_p0d743.npz",
+      "robot_start": [
+        0.0,
+        0.0,
+        0.7429999709129333
+      ],
+      "robot_quat": [
+        0.9969544410705566,
+        0.0038975251372903585,
+        -0.07746309787034988,
+        -0.008132929913699627
+      ],
+      "box_init": [
+        0.45457929372787476,
+        0.031187690794467926,
+        0.807498574256897
+      ],
+      "box_goal": [
+        0.3655545115470886,
+        -2.1159698963165283,
+        0.5965709090232849
+      ],
+      "camera": {
+        "lookat": [
+          0.23808158934116364,
+          -1.0494943857192993,
+          0.7215256690979004
+        ],
+        "distance": 5.601674926280975,
+        "azimuth": 115.0,
+        "elevation": -28.0
+      }
+    },
+    "push_suitcase": {
+      "npz_path": "/home/lightcone/workspace/projects/nair_new/evaluation/aligned_push_npz/carrybox46-50-52_002_contact__robot_start_p0d000_p0d000_p0d793.npz",
+      "source_npz_path": "/home/lightcone/workspace/projects/nair_new/evaluation/aligned_push_npz/carrybox46-50-52_002_contact__robot_start_p0d000_p0d000_p0d793.npz",
+      "robot_start": [
+        0.0,
+        0.0,
+        0.7929999828338623
+      ],
+      "robot_quat": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "box_init": [
+        -0.06504380702972412,
+        -0.5153559446334839,
+        0.25999999046325684
+      ],
+      "box_goal": [
+        -1.9427348375320435,
+        1.806475281715393,
+        0.25999999046325684
+      ],
+      "camera": {
+        "lookat": [
+          -0.9713827967643738,
+          0.6456023454666138,
+          0.6499999761581421
+        ],
+        "distance": 5.627507209777832,
+        "azimuth": 125.0,
+        "elevation": -28.0
+      }
+    }
+  },
+  "web_statuses": {
+    "carry_box": {
+      "hdmi": "failed",
+      "lessmimic": "success",
+      "ours_cfgen": "success"
+    },
+    "push_suitcase": {
+      "hdmi": "failed",
+      "lessmimic": "failed",
+      "ours_cfgen": "failed"
+    }
+  },
+  "videos": {
+    "carry_box": {
+      "sonic": "static/videos/omnicontact/baselines/carry_box_sonic.mp4",
+      "hdmi": "static/videos/omnicontact/baselines/carry_box_hdmi.mp4",
+      "lessmimic": "static/videos/omnicontact/baselines/carry_box_lessmimic.mp4",
+      "ours_cfgen": "static/videos/omnicontact/baselines/carry_box_ours_cfgen.mp4"
+    },
+    "push_suitcase": {
+      "sonic": "static/videos/omnicontact/baselines/push_suitcase_sonic.mp4",
+      "hdmi": "static/videos/omnicontact/baselines/push_suitcase_hdmi.mp4",
+      "lessmimic": "static/videos/omnicontact/baselines/push_suitcase_lessmimic.mp4",
+      "ours_cfgen": "static/videos/omnicontact/baselines/push_suitcase_ours_cfgen.mp4"
+    }
+  },
+  "rows": [
+    {
+      "policy": "sonic",
+      "video_type": "track",
+      "result": "completed",
+      "frames": 334,
+      "duration_s": 11.133333333333333,
+      "video_path": "/home/lightcone/workspace/projects/Achievements/Paper-web/OmniContact/ours/omnicontact.github.io/static/videos/omnicontact/baselines/carry_box_sonic.mp4",
+      "npz_path": "/home/lightcone/workspace/projects/nair_new/evaluation/aligned_carrybox_npz/carrybox30-28-30_motion_381_with_contact__robot_start_p0d000_p0d000_p0d743.npz",
+      "robot_start_x": 0.0,
+      "robot_start_y": 0.0,
+      "robot_start_z": 0.7429999709129333,
+      "init_x": 0.45457929372787476,
+      "init_y": 0.031187690794467926,
+      "init_z": 0.807498574256897,
+      "goal_x": 0.3655545115470886,
+      "goal_y": -2.1159698963165283,
+      "goal_z": 0.5965709090232849,
+      "box_hx": 0.15000000596046448,
+      "box_hy": 0.14000000059604645,
+      "box_hz": 0.15000000596046448,
+      "task": "carry_box",
+      "method": "sonic",
+      "label": "Sonic",
+      "web_path": "static/videos/omnicontact/baselines/carry_box_sonic.mp4",
+      "camera": {
+        "lookat": [
+          0.23808158934116364,
+          -1.0494943857192993,
+          0.7215256690979004
+        ],
+        "distance": 5.601674926280975,
+        "azimuth": 115.0,
+        "elevation": -28.0
+      }
+    },
+    {
+      "policy": "hdmi",
+      "result": "failure",
+      "frames": 572,
+      "duration_s": 19.066666666666666,
+      "video_path": "/home/lightcone/workspace/projects/Achievements/Paper-web/OmniContact/ours/omnicontact.github.io/static/videos/omnicontact/baselines/carry_box_hdmi.mp4",
+      "npz_path": "/home/lightcone/workspace/projects/nair_new/evaluation/aligned_carrybox_npz/carrybox30-28-30_motion_381_with_contact__robot_start_p0d000_p0d000_p0d743.npz",
+      "init_x": 0.45457929372787476,
+      "init_y": 0.031187690794467926,
+      "init_z": 0.807498574256897,
+      "goal_x": 0.3655545115470886,
+      "goal_y": -2.1159698963165283,
+      "goal_z": 0.5965709090232849,
+      "final_error": 2.1922080516815186,
+      "motion_path": "/home/lightcone/workspace/projects/nair_new/evaluation/videos/web_baseline_comparison/_hdmi_motion/carry_box",
+      "task": "carry_box",
+      "method": "hdmi",
+      "label": "HDMI",
+      "web_path": "static/videos/omnicontact/baselines/carry_box_hdmi.mp4",
+      "camera": {
+        "lookat": [
+          0.23808158934116364,
+          -1.0494943857192993,
+          0.7215256690979004
+        ],
+        "distance": 5.601674926280975,
+        "azimuth": 115.0,
+        "elevation": -28.0
+      }
+    },
+    {
+      "policy": "lessmimic",
+      "video_type": "policy",
+      "result": "success",
+      "frames": 275,
+      "duration_s": 9.166666666666666,
+      "video_path": "/home/lightcone/workspace/projects/Achievements/Paper-web/OmniContact/ours/omnicontact.github.io/static/videos/omnicontact/baselines/carry_box_lessmimic.mp4",
+      "npz_path": "/home/lightcone/workspace/projects/nair_new/evaluation/aligned_carrybox_npz/carrybox30-28-30_motion_381_with_contact__robot_start_p0d000_p0d000_p0d743.npz",
+      "robot_start_x": 0.0,
+      "robot_start_y": 0.0,
+      "robot_start_z": 0.7429999709129333,
+      "init_x": 0.45457929372787476,
+      "init_y": 0.031187690794467926,
+      "init_z": 0.807498574256897,
+      "goal_x": 0.3655545115470886,
+      "goal_y": -2.1159698963165283,
+      "goal_z": 0.5965709090232849,
+      "box_hx": 0.15000000596046448,
+      "box_hy": 0.14000000059604645,
+      "box_hz": 0.15000000596046448,
+      "task": "carry_box",
+      "method": "lessmimic",
+      "label": "LessMimic",
+      "web_path": "static/videos/omnicontact/baselines/carry_box_lessmimic.mp4",
+      "camera": {
+        "lookat": [
+          0.23808158934116364,
+          -1.0494943857192993,
+          0.7215256690979004
+        ],
+        "distance": 5.601674926280975,
+        "azimuth": 115.0,
+        "elevation": -28.0
+      }
+    },
+    {
+      "policy": "ours",
+      "video_type": "ruleplanning",
+      "result": "success",
+      "frames": 413,
+      "duration_s": 13.766666666666667,
+      "video_path": "/home/lightcone/workspace/projects/Achievements/Paper-web/OmniContact/ours/omnicontact.github.io/static/videos/omnicontact/baselines/carry_box_ours_cfgen.mp4",
+      "npz_path": "/home/lightcone/workspace/projects/nair_new/evaluation/aligned_carrybox_npz/carrybox30-28-30_motion_381_with_contact__robot_start_p0d000_p0d000_p0d743.npz",
+      "robot_start_x": 0.0,
+      "robot_start_y": 0.0,
+      "robot_start_z": 0.7429999709129333,
+      "init_x": 0.45457929372787476,
+      "init_y": 0.031187690794467926,
+      "init_z": 0.807498574256897,
+      "goal_x": 0.3655545115470886,
+      "goal_y": -2.1159698963165283,
+      "goal_z": 0.5965709090232849,
+      "box_hx": 0.15000000596046448,
+      "box_hy": 0.14000000059604645,
+      "box_hz": 0.15000000596046448,
+      "task": "carry_box",
+      "method": "ours_cfgen",
+      "label": "Ours w. CF-Gen",
+      "web_path": "static/videos/omnicontact/baselines/carry_box_ours_cfgen.mp4",
+      "camera": {
+        "lookat": [
+          0.23808158934116364,
+          -1.0494943857192993,
+          0.7215256690979004
+        ],
+        "distance": 5.601674926280975,
+        "azimuth": 115.0,
+        "elevation": -28.0
+      }
+    },
+    {
+      "policy": "sonic",
+      "result": "completed",
+      "frames": 319,
+      "duration_s": 10.633333333333333,
+      "video_path": "/home/lightcone/workspace/projects/Achievements/Paper-web/OmniContact/ours/omnicontact.github.io/static/videos/omnicontact/baselines/push_suitcase_sonic.mp4",
+      "npz_path": "/home/lightcone/workspace/projects/nair_new/evaluation/aligned_push_npz/carrybox46-50-52_002_contact__robot_start_p0d000_p0d000_p0d793.npz",
+      "init_x": -0.06504380702972412,
+      "init_y": -0.5153559446334839,
+      "goal_x": -1.9427348375320435,
+      "goal_y": 1.806475281715393,
+      "task": "push_suitcase",
+      "method": "sonic",
+      "label": "Sonic",
+      "web_path": "static/videos/omnicontact/baselines/push_suitcase_sonic.mp4",
+      "camera": {
+        "lookat": [
+          -0.9713827967643738,
+          0.6456023454666138,
+          0.6499999761581421
+        ],
+        "distance": 5.627507209777832,
+        "azimuth": 125.0,
+        "elevation": -28.0
+      }
+    },
+    {
+      "policy": "hdmi",
+      "result": "failure",
+      "frames": 572,
+      "duration_s": 19.066666666666666,
+      "video_path": "/home/lightcone/workspace/projects/Achievements/Paper-web/OmniContact/ours/omnicontact.github.io/static/videos/omnicontact/baselines/push_suitcase_hdmi.mp4",
+      "npz_path": "/home/lightcone/workspace/projects/nair_new/evaluation/aligned_push_npz/carrybox46-50-52_002_contact__robot_start_p0d000_p0d000_p0d793.npz",
+      "init_x": -0.06504380702972412,
+      "init_y": -0.5153559446334839,
+      "init_z": 0.25999999046325684,
+      "goal_x": -1.9427348375320435,
+      "goal_y": 1.806475281715393,
+      "goal_z": 0.25999999046325684,
+      "final_error": 2.9860715866088867,
+      "motion_path": "/home/lightcone/workspace/projects/nair_new/evaluation/videos/web_baseline_comparison/_hdmi_motion/push_suitcase",
+      "task": "push_suitcase",
+      "method": "hdmi",
+      "label": "HDMI",
+      "web_path": "static/videos/omnicontact/baselines/push_suitcase_hdmi.mp4",
+      "camera": {
+        "lookat": [
+          -0.9713827967643738,
+          0.6456023454666138,
+          0.6499999761581421
+        ],
+        "distance": 5.627507209777832,
+        "azimuth": 125.0,
+        "elevation": -28.0
+      }
+    },
+    {
+      "policy": "lessmimic",
+      "result": "failure",
+      "frames": 572,
+      "duration_s": 19.066666666666666,
+      "video_path": "/home/lightcone/workspace/projects/Achievements/Paper-web/OmniContact/ours/omnicontact.github.io/static/videos/omnicontact/baselines/push_suitcase_lessmimic.mp4",
+      "npz_path": "/home/lightcone/workspace/projects/nair_new/evaluation/aligned_push_npz/carrybox46-50-52_002_contact__robot_start_p0d000_p0d000_p0d793.npz",
+      "init_x": -0.06504380702972412,
+      "init_y": -0.5153559446334839,
+      "goal_x": -1.9427348375320435,
+      "goal_y": 1.806475281715393,
+      "task": "push_suitcase",
+      "method": "lessmimic",
+      "label": "LessMimic",
+      "web_path": "static/videos/omnicontact/baselines/push_suitcase_lessmimic.mp4",
+      "camera": {
+        "lookat": [
+          -0.9713827967643738,
+          0.6456023454666138,
+          0.6499999761581421
+        ],
+        "distance": 5.627507209777832,
+        "azimuth": 125.0,
+        "elevation": -28.0
+      }
+    },
+    {
+      "policy": "ours",
+      "result": "failure",
+      "frames": 461,
+      "duration_s": 15.366666666666667,
+      "video_path": "/home/lightcone/workspace/projects/Achievements/Paper-web/OmniContact/ours/omnicontact.github.io/static/videos/omnicontact/baselines/push_suitcase_ours_cfgen.mp4",
+      "npz_path": "/home/lightcone/workspace/projects/nair_new/evaluation/aligned_push_npz/carrybox46-50-52_002_contact__robot_start_p0d000_p0d000_p0d793.npz",
+      "init_x": -0.06504380702972412,
+      "init_y": -0.5153559446334839,
+      "goal_x": -1.9427348375320435,
+      "goal_y": 1.806475281715393,
+      "task": "push_suitcase",
+      "method": "ours_cfgen",
+      "label": "Ours w. CF-Gen",
+      "web_path": "static/videos/omnicontact/baselines/push_suitcase_ours_cfgen.mp4",
+      "camera": {
+        "lookat": [
+          -0.9713827967643738,
+          0.6456023454666138,
+          0.6499999761581421
+        ],
+        "distance": 5.627507209777832,
+        "azimuth": 125.0,
+        "elevation": -28.0
+      }
+    }
+  ]
+}

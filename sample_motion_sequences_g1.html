@@ -563,7 +563,10 @@
                     if (isPropObject(child)) {
                         clone.transparent = false;
                         clone.opacity = 1.0;
+                        clone.alphaMap = null;
+                        clone.side = THREE.DoubleSide;
                         clone.depthWrite = true;
+                        clone.depthTest = true;
                         clone.alphaTest = 0;
                     }
                     clone.metalness = 0.0;

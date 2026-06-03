@@ -22,10 +22,19 @@
 
   <link rel="stylesheet" href="static/css/bulma.min.css?v=omni-20260602-generalization-tabs">
   <link rel="stylesheet" href="static/css/index.css?v=omni-20260603-theme">
-  <link rel="stylesheet" href="static/css/omnicontact.css?v=omni-20260603-theme">
+  <link rel="stylesheet" href="static/css/omnicontact.css?v=omni-20260603-glb-samples">
 
   <script defer src="static/js/fontawesome.all.min.js?v=omni-20260602-generalization-tabs"></script>
   <script defer src="static/js/index.js?v=omni-20260602-generalization-tabs"></script>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./static/vendor/three/build/three.module.js",
+      "three/addons/": "./static/vendor/three/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module" src="static/js/dataset-glb-previews.js?v=omni-20260603-glb-samples"></script>
 </head>
 <body>
   <button type="button" class="scroll-to-top" onclick="scrollToTop()" title="Scroll to top" aria-label="Scroll to top">
@@ -216,25 +225,25 @@
               <div class="stat-card"><span>90 Hz</span><p>Paired capture</p></div>
             </div>
           </div>
-          <div class="dataset-gallery reveal">
-            <article class="generalization-video-card dataset-video-card">
-              <video controls autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/carrybox_height_1.mp4" type="video/mp4"></video>
+          <div class="dataset-gallery dataset-glb-gallery reveal" data-dataset-glb-gallery>
+            <article class="generalization-video-card dataset-video-card dataset-glb-card" data-glb-src="static/glb/glb_samples_1000/hold_box.glb?v=yup-20260603">
+              <div class="dataset-glb-stage" aria-label="Carry box GLB preview"></div>
               <div class="generalization-video-label">Carry box</div>
             </article>
-            <article class="generalization-video-card dataset-video-card">
-              <video controls autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/push_type1.mp4" type="video/mp4"></video>
+            <article class="generalization-video-card dataset-video-card dataset-glb-card" data-glb-src="static/glb/glb_samples_1000/push_box.glb?v=yup-20260603">
+              <div class="dataset-glb-stage" aria-label="Push box GLB preview"></div>
               <div class="generalization-video-label">Push box</div>
             </article>
-            <article class="generalization-video-card dataset-video-card">
-              <video controls autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/carrybox_size_1.mp4" type="video/mp4"></video>
-              <div class="generalization-video-label">Slide box</div>
+            <article class="generalization-video-card dataset-video-card dataset-glb-card" data-glb-src="static/glb/glb_samples_1000/kick_box.glb?v=replace-20260603">
+              <div class="dataset-glb-stage" aria-label="Kick box GLB preview"></div>
+              <div class="generalization-video-label">Kick box</div>
             </article>
-            <article class="generalization-video-card dataset-video-card">
-              <video controls autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/vlm_cylinder.mp4" type="video/mp4"></video>
+            <article class="generalization-video-card dataset-video-card dataset-glb-card" data-glb-src="static/glb/glb_samples_1000/hold_ball.glb?v=replace-20260603">
+              <div class="dataset-glb-stage" aria-label="Carry ball GLB preview"></div>
               <div class="generalization-video-label">Carry ball</div>
             </article>
-            <article class="generalization-video-card dataset-video-card">
-              <video controls autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/vlm_soccer.mp4" type="video/mp4"></video>
+            <article class="generalization-video-card dataset-video-card dataset-glb-card" data-glb-src="static/glb/glb_samples_1000/kick_ball.glb?v=yup-20260603">
+              <div class="dataset-glb-stage" aria-label="Kick ball GLB preview"></div>
               <div class="generalization-video-label">Kick ball</div>
             </article>
           </div>
@@ -733,18 +742,62 @@
         stack_boxes: 'Stack boxes',
         push_stack: 'Push-stack'
       };
+      var baselineOrder = ['sonic', 'hdmi', 'lessmimic', 'ours_cfgen'];
       var baselines = {
-        carry_box: ['Sonic', 'HDMI', 'PhysHSI', 'LessMimic', 'Ours w. Reference', 'Ours w. CF-Gen'],
-        push_suitcase: ['Sonic', 'LessMimic', 'OmniContact (Ours)'],
+        carry_box: ['Sonic', 'HDMI', 'LessMimic', 'Ours w. CF-Gen'],
+        push_suitcase: ['Sonic', 'HDMI', 'LessMimic', 'Ours w. CF-Gen'],
         stack_boxes: ['PhysHSI', 'LessMimic', 'OmniContact (Ours)'],
         push_stack: ['LessMimic', 'OmniContact (Ours)']
       };
       var videos = {
-        carry_box: ['', '', '', '', '', ''],
-        push_suitcase: ['', '', ''],
+        carry_box: [
+          'static/videos/omnicontact/baselines/carry_box_sonic.mp4',
+          'static/videos/omnicontact/baselines/carry_box_hdmi.mp4',
+          'static/videos/omnicontact/baselines/carry_box_lessmimic.mp4',
+          'static/videos/omnicontact/baselines/carry_box_ours_cfgen.mp4'
+        ],
+        push_suitcase: [
+          'static/videos/omnicontact/baselines/push_suitcase_sonic.mp4',
+          'static/videos/omnicontact/baselines/push_suitcase_hdmi.mp4',
+          'static/videos/omnicontact/baselines/push_suitcase_lessmimic.mp4',
+          'static/videos/omnicontact/baselines/push_suitcase_ours_cfgen.mp4'
+        ],
         stack_boxes: ['', '', ''],
         push_stack: ['', '']
       };
+      var statusLabels = {
+        failed: 'Failed',
+        failure: 'Failed',
+        error: 'Error',
+        success: 'Success'
+      };
+      var baselineStatuses = {};
+
+      function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, function(char) {
+          return {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+          }[char];
+        });
+      }
+
+      function statusBadge(task, index) {
+        var method = baselineOrder[index];
+        var taskStatuses = baselineStatuses[task] || {};
+        var status = taskStatuses[method];
+        var text = statusLabels[status];
+        if (!text || status === 'success') return '';
+        return '<span class="baseline-status baseline-status--' + escapeHtml(status) + '">' + escapeHtml(text) + '</span>';
+      }
+
+      function baselineStatus(task, index) {
+        var method = baselineOrder[index];
+        return (baselineStatuses[task] || {})[method] || '';
+      }
 
       function setActive(activeTab) {
         taskTabs.forEach(function(tab) {
@@ -757,17 +810,19 @@
       function renderVideos() {
         var sources = videos[activeTask] || [];
         var baselineLabels = baselines[activeTask] || [];
-        videoGrid.classList.toggle('baseline-video-grid--carry-box', activeTask === 'carry_box');
+        videoGrid.classList.toggle('baseline-video-grid--comparison', activeTask === 'carry_box' || activeTask === 'push_suitcase');
         videoGrid.innerHTML = baselineLabels.map(function(baseline, index) {
           var src = sources[index] || '';
           var label = labels[activeTask] + ' - ' + baseline;
-          if (!src) {
+          var status = baselineStatus(activeTask, index);
+          var labelHtml = escapeHtml(label) + statusBadge(activeTask, index);
+          if (!src || status === 'error') {
             return '<article class="generalization-video-card generalization-video-card--empty"><div class="generalization-video-slot"><strong>' +
-              baseline + '</strong><span>Reserved video slot</span></div><div class="generalization-video-label">' +
-              label + '</div></article>';
+              escapeHtml(baseline) + '</strong><span>' + (status === 'error' ? 'Recording unavailable' : 'Reserved video slot') + '</span></div><div class="generalization-video-label">' +
+              labelHtml + '</div></article>';
           }
           return '<article class="generalization-video-card"><video controls autoplay muted loop playsinline preload="metadata"><source src="' +
-            src + '" type="video/mp4"></video><div class="generalization-video-label">' + label + '</div></article>';
+            escapeHtml(src) + '" type="video/mp4"></video><div class="generalization-video-label">' + labelHtml + '</div></article>';
         }).join('');
       }
 
@@ -779,6 +834,17 @@
         });
       });
       renderVideos();
+
+      fetch('static/videos/omnicontact/baselines/case_manifest.json', { cache: 'no-store' })
+        .then(function(response) {
+          return response.ok ? response.json() : null;
+        })
+        .then(function(manifest) {
+          if (!manifest || !manifest.web_statuses) return;
+          baselineStatuses = manifest.web_statuses;
+          renderVideos();
+        })
+        .catch(function() {});
     })();
 
     window.addEventListener('load', function() {

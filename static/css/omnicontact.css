@@ -317,9 +317,50 @@
   object-fit: cover;
 }
 
+.dataset-glb-card {
+  position: relative;
+  display: block;
+  border: 0;
+  background: #f6f7f9;
+}
+
+.dataset-glb-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+}
+
+.dataset-glb-stage canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.dataset-glb-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
 .dataset-video-card .generalization-video-label {
-  padding: 0.5rem 0.75rem;
+  position: absolute;
+  top: 0.55rem;
+  right: 0.55rem;
+  z-index: 2;
+  max-width: calc(100% - 1.1rem);
+  padding: 0.32rem 0.62rem;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12);
   font-size: 0.82rem;
+  line-height: 1.15;
+  text-align: right;
+  backdrop-filter: blur(8px);
 }
 
 .dataset-showcase > .dataset-gallery .media-placeholder {
@@ -671,6 +712,11 @@
   box-shadow: 0 18px 34px rgba(15, 23, 42, 0.11), 0 7px 14px rgba(15, 23, 42, 0.07);
 }
 
+.generalization-video-card.dataset-glb-card {
+  border: 0;
+  background: #f6f7f9;
+}
+
 .generalization-video-card video,
 .generalization-video-slot {
   display: block;
@@ -781,8 +827,33 @@
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
-.baseline-video-grid--carry-box {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+.baseline-video-grid--comparison {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.baseline-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0.45rem;
+  padding: 0.14rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 900;
+  line-height: 1.2;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+.baseline-status--failed,
+.baseline-status--failure {
+  background: rgba(238, 99, 99, 0.14);
+  color: #b91c1c;
+}
+
+.baseline-status--error {
+  background: rgba(15, 23, 42, 0.12);
+  color: #334155;
 }
 
 @keyframes generalization-panel-in {
@@ -1044,6 +1115,10 @@
 }
 
 @media screen and (max-width: 1280px) {
+  .baseline-video-grid--comparison {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .dataset-visual-grid,
   .dataset-showcase {
     grid-template-columns: 1fr;
@@ -1063,6 +1138,11 @@
   .dataset-video-card video {
     height: auto;
     aspect-ratio: 16 / 9;
+  }
+
+  .dataset-glb-stage {
+    aspect-ratio: 16 / 9;
+    height: auto;
   }
 
   .dataset-flip-card {
@@ -1149,7 +1229,7 @@
     grid-template-columns: 1fr;
   }
 
-  .baseline-video-grid--carry-box {
+  .baseline-video-grid--comparison {
     grid-template-columns: 1fr;
   }
 
