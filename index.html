@@ -745,7 +745,7 @@
           height: { label: 'Height' },
           shape: { label: 'Shape' },
           init: { label: 'Object init pos' },
-          final: { label: 'Object final pose', disabled: true }
+          final: { label: 'Object final pose' }
         },
         push_suitcase: {
           height: { label: 'Contact Mode' },
@@ -757,6 +757,11 @@
       var layoutBySkill = {
         carrybox: 'featured',
         push_suitcase: 'paired'
+      };
+      var layoutByConfig = {
+        carrybox: {
+          final: 'paired'
+        }
       };
       var videos = {
         carrybox: {
@@ -773,14 +778,14 @@
             'static/videos/omnicontact/carrybox_shape_3.mp4'
           ],
           init: [
-            'static/videos/omnicontact/carrybox_initpos_1.mp4',
-            'static/videos/omnicontact/carrybox_initpos_2.mp4',
-            ''
+            'static/videos/omnicontact/carrybox_init_2.mp4',
+            'static/videos/omnicontact/carrybox_init_1.mp4',
+            'static/videos/omnicontact/carrybox_init_3.mp4',
+            'static/videos/omnicontact/carrybox_init_4.mp4'
           ],
           final: [
-            '',
-            '',
-            ''
+            'static/videos/omnicontact/carrybox_final_1.mp4',
+            'static/videos/omnicontact/carrybox_final_2.mp4'
           ]
         },
         push_suitcase: {
@@ -919,7 +924,8 @@
           if (src) items.push({ src: src, index: index });
           return items;
         }, []);
-        var layout = layoutBySkill[activeSkill] || 'featured';
+        var skillLayouts = layoutByConfig[activeSkill] || {};
+        var layout = skillLayouts[activeConfig] || layoutBySkill[activeSkill] || 'featured';
 
         videoGrid.classList.toggle('generalization-video-grid--multi', layout === 'featured');
         videoGrid.classList.toggle('generalization-video-grid--paired', layout === 'paired');
