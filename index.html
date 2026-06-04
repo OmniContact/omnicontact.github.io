@@ -253,7 +253,7 @@
             <div class="generalization-tabs" role="tablist" aria-label="Meta-skill names">
               <button type="button" class="generalization-tab is-active" data-generalization-skill="carrybox" aria-selected="true">Carry Box</button>
               <button type="button" class="generalization-tab" data-generalization-skill="push_suitcase">Push Suitcase</button>
-              <button type="button" class="generalization-tab" data-generalization-skill="slide_box" disabled aria-disabled="true">Slide Box</button>
+              <button type="button" class="generalization-tab" data-generalization-skill="slide_box">Slide Box</button>
               <button type="button" class="generalization-tab" data-generalization-skill="carry_ball" disabled aria-disabled="true">Carry Ball</button>
               <button type="button" class="generalization-tab" data-generalization-skill="kick_ball" disabled aria-disabled="true">Kick Ball</button>
             </div>
@@ -719,11 +719,16 @@
           height: { label: 'Contact Mode' },
           shape: { label: 'Shape' },
           init: { label: 'Object init pos' }
+        },
+        slide_box: {
+          init: { label: 'Object init pos' },
+          final: { label: 'Object final pos' }
         }
       };
       var layoutBySkill = {
         carrybox: 'featured',
-        push_suitcase: 'paired'
+        push_suitcase: 'paired',
+        slide_box: 'featured-duo'
       };
       var layoutByConfig = {
         carrybox: {
@@ -777,7 +782,18 @@
             'static/videos/omnicontact/push_init_3.mp4'
           ]
         },
-        slide_box: {},
+        slide_box: {
+          init: [
+            'static/videos/omnicontact/slidebox_init_3.mp4',
+            'static/videos/omnicontact/slidebox_init_1.mp4',
+            'static/videos/omnicontact/slidebox_init_2.mp4'
+          ],
+          final: [
+            'static/videos/omnicontact/slidebox_final_1.mp4',
+            'static/videos/omnicontact/slidebox_final_2.mp4',
+            'static/videos/omnicontact/slidebox_final_3.mp4'
+          ]
+        },
         carry_ball: {},
         kick_ball: {}
       };
