@@ -22,7 +22,7 @@
 
   <link rel="stylesheet" href="static/css/bulma.min.css?v=omni-20260602-generalization-tabs">
   <link rel="stylesheet" href="static/css/index.css?v=omni-20260603-theme">
-  <link rel="stylesheet" href="static/css/omnicontact.css?v=omni-20260604-remote-content-compact">
+  <link rel="stylesheet" href="static/css/omnicontact.css?v=omni-20260604-overview-blueprint">
 
   <script defer src="static/js/fontawesome.all.min.js?v=omni-20260602-generalization-tabs"></script>
   <script defer src="static/js/index.js?v=omni-20260602-generalization-tabs"></script>
@@ -119,49 +119,17 @@
     </section>
 
     <section class="section hero is-light omni-section" id="overview-section">
-      <div class="container is-max-desktop">
+      <div class="container overview-container">
         <h2 class="title is-3 has-text-centered section-heading reveal">Overview <a href="#overview-section" class="heading-anchor" aria-label="Link to this section">#</a></h2>
         <p class="has-text-centered demo-desc reveal">
-          Long-horizon humanoid loco-manipulation requires more than isolated skills: the robot must establish contact, move objects, transition between primitives, and recover when interaction fails.
+          Given task goals and object states, CF-Gen synthesizes kinematic contact-flow segments, and CF-Track executes these segments through a robust low-level policy.
         </p>
-        <div class="overview-layout reveal">
-          <div class="overview-system-figure" aria-label="OmniContact system overview">
-            <div class="overview-node overview-node--planner">
-              <span>Language / Task Goal</span>
-              <strong>CF-Gen</strong>
-              <em>contact-flow synthesis</em>
-            </div>
-            <div class="overview-flow" aria-hidden="true">
-              <span>object state</span>
-              <i></i>
-              <span>future contacts</span>
-            </div>
-            <div class="overview-node overview-node--policy">
-              <span>Meta-skill Library</span>
-              <strong>CF-Track</strong>
-              <em>closed-loop execution</em>
-            </div>
-            <div class="overview-loop" aria-hidden="true">
-              <span>monitor</span>
-              <span>replan</span>
-              <span>resume</span>
-            </div>
-          </div>
-          <div class="overview-copy">
-            <div class="info-card">
-              <h3>Contact Flow</h3>
-              <p>A compact representation combining sparse future body targets and time-series binary contact signals. It preserves interaction intent while remaining structured enough for online synthesis.</p>
-            </div>
-            <div class="info-card">
-              <h3>CF-Track</h3>
-              <p>A unified low-level policy trained with contact-flow targets to execute carrying, pushing, kicking, sliding, relocation, and locomotion-style behaviors under one controller.</p>
-            </div>
-            <div class="info-card">
-              <h3>CF-Gen</h3>
-              <p>A high-level contact-flow synthesizer that adapts skill templates to object state, chains stages in closed loop, and replans when the observed object state deviates from the plan.</p>
-            </div>
-          </div>
-        </div>
+        <figure class="overview-original-figure reveal">
+          <img src="static/images/overview_OmniContact.png?v=overview-pdf-20260604" alt="Overview of OmniContact: CF-Gen synthesizes contact-flow segments and CF-Track executes them with a low-level policy." loading="lazy">
+        </figure>
+        <figure class="overview-original-figure overview-original-figure--contact-flow reveal">
+          <img src="static/images/overview_contact_flow.png?v=overview-pdf-20260604" alt="Contact-flow examples for carry, push, kick, locomotion, and recovery tasks." loading="lazy">
+        </figure>
         <div class="metric-row reveal">
           <div class="metric-card"><span>98.7%</span><p>Carry Box success</p></div>
           <div class="metric-card"><span>82.5%</span><p>Push Suitcase success</p></div>
@@ -750,8 +718,7 @@
         push_suitcase: {
           height: { label: 'Contact Mode' },
           shape: { label: 'Shape' },
-          init: { label: 'Object init pos' },
-          final: { label: 'Object final pose' }
+          init: { label: 'Object init pos' }
         }
       };
       var layoutBySkill = {
@@ -761,6 +728,10 @@
       var layoutByConfig = {
         carrybox: {
           final: 'paired'
+        },
+        push_suitcase: {
+          shape: 'featured-duo',
+          init: 'featured'
         }
       };
       var videos = {
@@ -790,20 +761,20 @@
         },
         push_suitcase: {
           height: [
-            'static/videos/omnicontact/push_type1.mp4',
-            'static/videos/omnicontact/push_shape2.mp4'
+            'static/videos/omnicontact/push_type_1.mp4',
+            'static/videos/omnicontact/push_type_2.mp4'
           ],
           shape: [
-            'static/videos/omnicontact/push_shape2.mp4',
-            'static/videos/omnicontact/push_type1.mp4'
+            'static/videos/omnicontact/push_shape_1.mp4',
+            'static/videos/omnicontact/push_shape_2.mp4',
+            'static/videos/omnicontact/push_shape_3.mp4',
+            ''
           ],
           init: [
-            'static/videos/omnicontact/push_type1.mp4',
-            'static/videos/omnicontact/push_shape2.mp4'
-          ],
-          final: [
-            'static/videos/omnicontact/push_shape2.mp4',
-            'static/videos/omnicontact/push_type1.mp4'
+            'static/videos/omnicontact/push_init_4.mp4',
+            'static/videos/omnicontact/push_init_1.mp4',
+            'static/videos/omnicontact/push_init_2.mp4',
+            'static/videos/omnicontact/push_init_3.mp4'
           ]
         },
         slide_box: {},
@@ -858,7 +829,7 @@
 
       function getConfigDefinition(skill, config) {
         var skillDefinitions = configDefinitions[skill] || configDefinitions.carrybox || {};
-        return skillDefinitions[config] || { label: labels[config] || config, disabled: false };
+        return skillDefinitions[config] || null;
       }
 
       function findConfigTab(config) {
@@ -871,7 +842,8 @@
       function getFirstEnabledConfig(skill) {
         for (var i = 0; i < configTabs.length; i += 1) {
           var config = configTabs[i].getAttribute('data-generalization-config');
-          if (!getConfigDefinition(skill, config).disabled) return config;
+          var definition = getConfigDefinition(skill, config);
+          if (definition && !definition.disabled) return config;
         }
         return activeConfig;
       }
@@ -880,13 +852,17 @@
         configTabs.forEach(function(tab) {
           var config = tab.getAttribute('data-generalization-config');
           var definition = getConfigDefinition(activeSkill, config);
-          var isDisabled = definition.disabled === true;
-          tab.textContent = definition.label;
+          var isHidden = !definition;
+          var isDisabled = isHidden || definition.disabled === true;
+          tab.hidden = isHidden;
+          tab.setAttribute('aria-hidden', isHidden ? 'true' : 'false');
+          tab.textContent = (definition && definition.label) || labels[config] || config;
           tab.disabled = isDisabled;
           tab.setAttribute('aria-disabled', isDisabled ? 'true' : 'false');
         });
 
-        if (getConfigDefinition(activeSkill, activeConfig).disabled) {
+        var activeDefinition = getConfigDefinition(activeSkill, activeConfig);
+        if (!activeDefinition || activeDefinition.disabled) {
           activeConfig = getFirstEnabledConfig(activeSkill);
         }
 
@@ -927,7 +903,7 @@
         var skillLayouts = layoutByConfig[activeSkill] || {};
         var layout = skillLayouts[activeConfig] || layoutBySkill[activeSkill] || 'featured';
 
-        videoGrid.classList.toggle('generalization-video-grid--multi', layout === 'featured');
+        videoGrid.classList.toggle('generalization-video-grid--multi', layout === 'featured' || layout === 'featured-duo');
         videoGrid.classList.toggle('generalization-video-grid--paired', layout === 'paired');
 
         if (!availableItems.length) {
@@ -941,8 +917,9 @@
         }
 
         var featuredItem = availableItems[0] || null;
-        var sideItems = availableItems.slice(1, 4);
-        while (sideItems.length < 3) {
+        var sideCount = layout === 'featured-duo' ? 2 : 3;
+        var sideItems = availableItems.slice(1, 1 + sideCount);
+        while (sideItems.length < sideCount) {
           sideItems.push(null);
         }
 
@@ -999,21 +976,21 @@
         gather_stack: [
           {
             src: 'static/videos/omnicontact/combine_pushstack_1.mp4',
-            label: 'Push-stack chaining'
+            label: '2 Stage: Push Suitcase + Carry Box'
           },
           {
             src: '',
-            label: 'Real grasp-move-place'
+            label: '2 Stage: Push Suitcase + Carry Box'
           }
         ],
         push_carry: [
           {
             src: 'static/videos/omnicontact/baselines/push_stack_ours_cfgen.mp4',
-            label: 'Push then stack'
+            label: '2 Stage: Carry Box + Carry Box'
           },
           {
             src: 'static/videos/omnicontact/push_type1.mp4',
-            label: 'Push transfer segment'
+            label: '3 Stage: Carry Box + Carry Box + Carry Box'
           }
         ],
         long_horizon: [
@@ -1049,15 +1026,9 @@
       }
 
       function buildCard(item) {
-        var badgeHtml = item.badge
-          ? '<div class="recovery-video-badge"><span class="recovery-video-badge-label">Speed</span><strong>' + escapeHtml(item.badge) + '</strong></div>'
-          : '';
         return '<article class="generalization-video-card recovery-video-card">' +
-          '<div class="recovery-video-media">' +
-          badgeHtml +
-          '<video controls autoplay muted loop playsinline preload="metadata"><source src="' + escapeHtml(item.src) + '" type="video/mp4"></video>' +
-          '</div>' +
           '<div class="generalization-video-label">' + escapeHtml(item.label) + '</div>' +
+          '<video controls autoplay muted loop playsinline preload="metadata"><source src="' + escapeHtml(item.src) + '" type="video/mp4"></video>' +
           '</article>';
       }
 
