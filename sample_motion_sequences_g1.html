@@ -194,8 +194,8 @@
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0xf7f8fa);
 
-        const camera = new THREE.PerspectiveCamera(isVlmCloseCamera ? 43 : 55, getViewportAspect(), 0.01, 500);
-        camera.position.set(4.2, 2.4, 4.2);
+	        const camera = new THREE.PerspectiveCamera(isVlmCloseCamera ? 43 : 55, getViewportAspect(), 0.01, 500);
+	        camera.position.set(4.2, 2.4, 4.2);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         resizeRenderer();
