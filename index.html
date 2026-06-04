@@ -22,7 +22,7 @@
 
   <link rel="stylesheet" href="static/css/bulma.min.css?v=omni-20260602-generalization-tabs">
   <link rel="stylesheet" href="static/css/index.css?v=omni-20260603-theme">
-  <link rel="stylesheet" href="static/css/omnicontact.css?v=omni-20260604-overview-blueprint">
+  <link rel="stylesheet" href="static/css/omnicontact.css?v=omni-20260605-section-widths-120">
 
   <script defer src="static/js/fontawesome.all.min.js?v=omni-20260602-generalization-tabs"></script>
   <script defer src="static/js/index.js?v=omni-20260602-generalization-tabs"></script>
@@ -46,14 +46,80 @@
       } catch (error) {}
     })();
   </script>
+  <script>
+    (function() {
+      if (window.location.protocol !== 'file:') return;
+      try {
+        if (sessionStorage.getItem('omni-file-open-notice') === 'seen') return;
+        sessionStorage.setItem('omni-file-open-notice', 'seen');
+      } catch (error) {}
+      window.addEventListener('load', function() {
+        window.setTimeout(function() {
+          var overlay = document.createElement('div');
+          overlay.setAttribute('role', 'dialog');
+          overlay.setAttribute('aria-modal', 'true');
+          overlay.setAttribute('aria-label', 'Local file viewing notice');
+          overlay.style.cssText = [
+            'position:fixed',
+            'inset:0',
+            'z-index:99999',
+            'display:flex',
+            'align-items:center',
+            'justify-content:center',
+            'padding:1.25rem',
+            'background:rgba(5,5,6,0.56)'
+          ].join(';');
+
+          var dialog = document.createElement('div');
+          dialog.style.cssText = [
+            'width:min(92vw,560px)',
+            'border-radius:8px',
+            'background:#fff',
+            'color:#111827',
+            'box-shadow:0 24px 80px rgba(0,0,0,0.34)',
+            'font-family:Arial,sans-serif',
+            'line-height:1.5',
+            'padding:1.2rem 1.35rem'
+          ].join(';');
+
+          dialog.innerHTML =
+            '<h2 style="margin:0 0 0.65rem;font-size:1.05rem;font-weight:800;">Local HTML Notice</h2>' +
+            '<p style="margin:0 0 0.75rem;">You are opening OmniContact from a local HTML file.</p>' +
+            '<p style="margin:0 0 0.75rem;">Most images and videos should work directly. If any interactive viewer, iframe, or asset does not display, please run this command in the project folder:</p>' +
+            '<p style="margin:0 0 0.75rem;"><code style="color:#d11212;font-weight:900;font-size:1.02rem;">python -m http.server 8765</code></p>' +
+            '<p style="margin:0 0 0.75rem;">Then open <code>http://localhost:8765/index.html</code>.</p>' +
+            '<p style="margin:0 0 1rem;">You can also inspect videos directly under <code>static/videos/omnicontact/</code>.</p>' +
+            '<button type="button" style="display:inline-flex;align-items:center;justify-content:center;min-height:2.2rem;padding:0 0.95rem;border:0;border-radius:6px;background:#111827;color:#fff;font-weight:800;cursor:pointer;">OK</button>';
+
+          overlay.appendChild(dialog);
+          document.body.appendChild(overlay);
+
+          var closeButton = dialog.querySelector('button');
+          function closeNotice() {
+            overlay.remove();
+          }
+          closeButton.addEventListener('click', closeNotice);
+          overlay.addEventListener('click', function(event) {
+            if (event.target === overlay) closeNotice();
+          });
+          document.addEventListener('keydown', function onKeydown(event) {
+            if (event.key !== 'Escape') return;
+            document.removeEventListener('keydown', onKeydown);
+            closeNotice();
+          });
+          closeButton.focus();
+        }, 450);
+      });
+    })();
+  </script>
   <button type="button" class="scroll-to-top" onclick="scrollToTop()" title="Scroll to top" aria-label="Scroll to top">
     <i class="fas fa-chevron-up"></i>
   </button>
 
   <div class="more-works-container">
-    <button type="button" class="theme-toggle" data-theme-toggle title="Switch color mode" aria-label="Switch to dark mode">
+    <!-- <button type="button" class="theme-toggle" data-theme-toggle title="Switch color mode" aria-label="Switch to dark mode">
       <i class="fas fa-moon" aria-hidden="true"></i>
-    </button>
+    </button> -->
     <aside class="outline-panel" aria-label="Page outline">
       <div class="outline-panel-title" id="outline-toggle">
         <i class="fas fa-list-ul"></i>
@@ -91,8 +157,8 @@
         <div class="grid-cell"><video autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/carrybox_shape_3.mp4" type="video/mp4"></video><span class="grid-label">Carry shape 3</span></div>
         <div class="grid-cell"><video autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/carrybox_shape_4.mp4" type="video/mp4"></video><span class="grid-label">Carry shape 4</span></div>
         <div class="grid-cell"><video autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/carrybox_size_2.mp4" type="video/mp4"></video><span class="grid-label">Carry size 2</span></div>
-        <div class="grid-cell"><video autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/push_shape2.mp4" type="video/mp4"></video><span class="grid-label">Push shape</span></div>
-        <div class="grid-cell"><video autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/push_type1.mp4" type="video/mp4"></video><span class="grid-label">Push type 1</span></div>
+        <div class="grid-cell"><video autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/push_shape_2.mp4" type="video/mp4"></video><span class="grid-label">Push shape</span></div>
+        <div class="grid-cell"><video autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/push_type_1.mp4" type="video/mp4"></video><span class="grid-label">Push type 1</span></div>
       </div>
       <div class="hero-main-overlay" aria-hidden="true"></div>
       <div class="hero-body">
@@ -121,20 +187,48 @@
     <section class="section hero is-light omni-section" id="overview-section">
       <div class="container overview-container">
         <h2 class="title is-3 has-text-centered section-heading reveal">Overview <a href="#overview-section" class="heading-anchor" aria-label="Link to this section">#</a></h2>
-        <p class="has-text-centered demo-desc reveal">
-          Given task goals and object states, CF-Gen synthesizes kinematic contact-flow segments, and CF-Track executes these segments through a robust low-level policy.
-        </p>
-        <figure class="overview-original-figure reveal">
-          <img src="static/images/overview_OmniContact.png?v=overview-pdf-20260604" alt="Overview of OmniContact: CF-Gen synthesizes contact-flow segments and CF-Track executes them with a low-level policy." loading="lazy">
-        </figure>
-        <figure class="overview-original-figure overview-original-figure--contact-flow reveal">
-          <img src="static/images/overview_contact_flow.png?v=overview-pdf-20260604" alt="Contact-flow examples for carry, push, kick, locomotion, and recovery tasks." loading="lazy">
-        </figure>
-        <div class="metric-row reveal">
-          <div class="metric-card"><span>98.7%</span><p>Carry Box success</p></div>
-          <div class="metric-card"><span>82.5%</span><p>Push Suitcase success</p></div>
-          <div class="metric-card"><span>~40 min</span><p>Long-horizon endurance</p></div>
-          <div class="metric-card"><span>50 Hz</span><p>Closed-loop monitoring</p></div>
+        <div class="overview-framework-layout reveal">
+          <figure class="overview-framework-figure">
+            <img src="static/images/framework.png?v=framework-20260605" alt="OmniContact framework: CF-Gen produces contact-flow targets and CF-Track executes them through a closed-loop humanoid policy." loading="lazy">
+          </figure>
+          <div class="overview-framework-copy">
+            <div class="overview-framework-intro">
+              <span class="overview-kicker">CF-Gen to CF-Track</span>
+              <h3>Object goals become executable contact flow</h3>
+              <p>
+                OmniContact closes the loop between high-level task intent, contact-aware trajectory synthesis, and whole-body humanoid control.
+              </p>
+            </div>
+            <div class="overview-flow-map" aria-label="OmniContact planning and control flow">
+              <article class="overview-feature overview-flow-step">
+                <span aria-hidden="true"></span>
+                <div>
+                  <h4>Read the task state</h4>
+                  <p>CF-Gen grounds language-level goals in object pose, target pose, and humanoid state.</p>
+                </div>
+              </article>
+              <article class="overview-feature overview-flow-step">
+                <span aria-hidden="true"></span>
+                <div>
+                  <h4>Synthesize contact flow</h4>
+                  <p>Adapted contact anchors and stage trajectories form compact body-target sequences.</p>
+                </div>
+              </article>
+              <article class="overview-feature overview-flow-step">
+                <span aria-hidden="true"></span>
+                <div>
+                  <h4>Track and replan online</h4>
+                  <p>CF-Track executes the flow while CF-Gen monitors failures and replans at 50 Hz.</p>
+                </div>
+              </article>
+            </div>
+            <div class="overview-framework-metrics" aria-label="OmniContact key results">
+              <div class="metric-card"><span>98.7%</span><p>Carry Box</p></div>
+              <div class="metric-card"><span>82.5%</span><p>Push Suitcase</p></div>
+              <div class="metric-card"><span>~40 min</span><p>Long Horizon</p></div>
+              <div class="metric-card"><span>50 Hz</span><p>Replanning</p></div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -279,7 +373,6 @@
           <div class="generalization-tabs recovery-tabs" role="tablist" aria-label="Meta skill chaining demos">
             <button type="button" class="generalization-tab is-active" data-chaining-task="gather_stack" aria-selected="true">Push-Stack</button>
             <button type="button" class="generalization-tab" data-chaining-task="push_carry" aria-selected="false">Stack-Boxes</button>
-            <button type="button" class="generalization-tab" data-chaining-task="long_horizon" aria-selected="false">Long Horizon</button>
           </div>
           <div class="recovery-video-grid" data-chaining-videos></div>
         </div>
@@ -327,11 +420,11 @@
           <div class="embedded-viewer embedded-viewer--glb">
 		            <div class="embedded-viewer-header">
 		              <h3>Interactive Unitree G1 Motion Sequences</h3>
-		              <a href="sample_motion_sequences_g1.html?group=vlm&camera=vlm&v=glb-clean-20260604-controls-slim-1" target="_blank" rel="noopener">Open full page</a>
+		              <a href="sample_motion_sequences_g1.html?group=vlm&camera=vlm_wide&v=glb-clean-20260605-vlm-wide-1" target="_blank" rel="noopener">Open full page</a>
 		            </div>
 	            <div class="embedded-viewer-load-stage" data-embedded-viewer-stage>
 	              <iframe
-	                data-src="sample_motion_sequences_g1.html?group=vlm&camera=vlm&v=glb-clean-20260604-controls-slim-1"
+	                data-src="sample_motion_sequences_g1.html?group=vlm&camera=vlm_wide&v=glb-clean-20260605-vlm-wide-1"
 	                title="Interactive Unitree G1 sample motion sequences"
 	                loading="lazy"
 	                allow="fullscreen; autoplay"
@@ -994,7 +1087,7 @@
             label: '2 Stage: Push Suitcase + Carry Box'
           },
           {
-            src: 'static/videos/omnicontact/real/part6_real_grasp-move-place.mp4',
+            src: 'static/videos/omnicontact/combine_pushstack_2.mp4',
             label: '2 Stage: Push Suitcase + Carry Box'
           }
         ],
@@ -1004,18 +1097,8 @@
             label: '2 Stage: Carry Box + Carry Box'
           },
           {
-            src: 'static/videos/omnicontact/push_type1.mp4',
+            src: 'static/videos/omnicontact/push_type_1.mp4',
             label: '3 Stage: Carry Box + Carry Box + Carry Box'
-          }
-        ],
-        long_horizon: [
-          {
-            src: 'static/videos/omnicontact/baselines/carry_box_ours_cfgen.mp4',
-            label: 'Closed-loop carry sequence'
-          },
-          {
-            src: 'static/videos/omnicontact/carrybox_final_2.mp4',
-            label: 'Extended carry continuation'
           }
         ]
       };
@@ -1103,12 +1186,12 @@
       var videos = {
         push_suitcase: [
           {
-            src: 'static/videos/omnicontact/baselines/push_suitcase_ours_reference.mp4',
-            label: 'Reference recovery'
+            src: 'static/videos/omnicontact/push_recovery_1.mp4',
+            label: 'Final Goal Failure (Speed x3ed up)'
           },
           {
-            src: 'static/videos/omnicontact/baselines/push_suitcase_ours_cfgen.mp4',
-            label: 'OmniContact recovery'
+            src: 'static/videos/omnicontact/push_recovery_2.mp4',
+            label: 'Final Goal Failure (Speed x3ed up)'
           }
         ],
         carry_box: [
@@ -1121,16 +1204,6 @@
             src: 'static/videos/omnicontact/carrybox_recovery_2.mp4',
             label: 'In Contact Failure (Speed x3ed up)',
             badge: '3x'
-          }
-        ],
-        relocate_ball: [
-          {
-            src: '',
-            label: 'Recovery video A'
-          },
-          {
-            src: '',
-            label: 'Recovery video B'
           }
         ]
       };

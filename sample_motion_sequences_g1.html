@@ -188,7 +188,8 @@
         const urlParams = new URLSearchParams(window.location.search);
         const requestedGroup = urlParams.get('group');
         const requestedCamera = urlParams.get('camera');
-        const isVlmCamera = requestedCamera === 'vlm' || requestedCamera === 'vlm_close';
+        const isVlmWideCamera = requestedCamera === 'vlm_wide';
+        const isVlmCamera = requestedCamera === 'vlm' || requestedCamera === 'vlm_close' || isVlmWideCamera;
         const isVlmCloseCamera = requestedCamera === 'vlm_close';
 
         const scene = new THREE.Scene();
@@ -617,9 +618,11 @@
             const maxDim = Math.max(size.x, size.y, size.z);
             const distance = isVlmCloseCamera
                 ? Math.max(2.3, maxDim * 1.12)
-                : isVlmCamera
-                    ? Math.max(2.1, maxDim * 1.08)
-                    : Math.max(2.45, maxDim * 1.42);
+                : isVlmWideCamera
+                    ? Math.max(3.15, maxDim * 1.52)
+                    : isVlmCamera
+                        ? Math.max(2.1, maxDim * 1.08)
+                        : Math.max(2.45, maxDim * 1.42);
             controls.target.copy(center);
             controls.target.y = isVlmCloseCamera
                 ? Math.max(center.y + 0.04, 0.62)
@@ -627,6 +630,8 @@
             camera.fov = isVlmCloseCamera ? 50 : 55;
             if (isVlmCloseCamera) {
                 camera.position.set(center.x, center.y + distance * 0.5, center.z + distance * 0.34);
+            } else if (isVlmWideCamera) {
+                camera.position.set(center.x, center.y + distance * 0.64, center.z + distance * 0.64);
             } else if (isVlmCamera) {
                 camera.position.set(center.x, center.y + distance * 0.56, center.z + distance * 0.48);
             } else {
