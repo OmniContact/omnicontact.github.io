@@ -13,101 +13,159 @@ const visualPalette = {
 const cards = Array.from(document.querySelectorAll('[data-glb-src]'));
 if (cards.length > 0) {
   const loader = new GLTFLoader();
-  const previews = [];
+  const previews = new Map();
   const clock = new THREE.Clock();
+  let animationFrameId = null;
 
   cards.forEach((card) => {
     const stage = card.querySelector('.dataset-glb-stage');
     const src = card.getAttribute('data-glb-src');
     if (!stage || !src) return;
-    previews.push(createPreview(stage, src, loader));
+    previews.set(stage, createPreview(stage, src, loader));
   });
 
-  Promise.allSettled(previews.map((preview) => preview.ready)).then(() => {
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        const preview = previews.get(entry.target);
+        if (!preview) return;
+        preview.setVisible(entry.isIntersecting);
+        if (entry.isIntersecting) {
+          preview.load();
+          requestAnimation();
+        }
+      });
+    }, { rootMargin: '220px 0px', threshold: 0.01 });
+
+    previews.forEach((preview, stage) => observer.observe(stage));
+  } else {
+    previews.forEach((preview) => {
+      preview.setVisible(true);
+      preview.load();
+    });
+    requestAnimation();
+  }
+
+  function requestAnimation() {
+    if (animationFrameId !== null) return;
     clock.getDelta();
-    animate();
-  });
+    animationFrameId = requestAnimationFrame(animate);
+  }
 
   function animate() {
-    requestAnimationFrame(animate);
+    animationFrameId = null;
     const delta = clock.getDelta();
+    let hasActivePreview = false;
+
     previews.forEach((preview) => {
+      if (!preview.visible || !preview.renderer) return;
+      hasActivePreview = true;
       preview.mixer?.update(delta);
       preview.renderer.render(preview.scene, preview.camera);
     });
+
+    if (hasActivePreview) {
+      animationFrameId = requestAnimationFrame(animate);
+    }
   }
 }
 
 function createPreview(stage, src, loader) {
-  const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xf6f7f9);
-
-  const camera = new THREE.PerspectiveCamera(34, 1, 0.03, 80);
-  camera.position.set(2.6, 1.6, 3.0);
-
-  const renderer = new THREE.WebGLRenderer({
-    antialias: true,
-    alpha: false,
-    powerPreference: 'high-performance',
-    precision: 'highp'
-  });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 3));
-  renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.08;
-  stage.appendChild(renderer.domElement);
-
-  scene.add(new THREE.HemisphereLight(0xffffff, 0x8b929e, 0.9));
-  const keyLight = new THREE.DirectionalLight(0xffffff, 0.34);
-  keyLight.position.set(5, 7, 4);
-  scene.add(keyLight);
-
-  const groundTexture = makeCheckerTexture();
-  const ground = new THREE.Mesh(
-    new THREE.PlaneGeometry(8, 8),
-    new THREE.MeshStandardMaterial({ map: groundTexture, roughness: 0.86 })
-  );
-  ground.rotation.x = -Math.PI / 2;
-  scene.add(ground);
-
+  let scene = null;
+  let camera = null;
+  let renderer = null;
   let mixer = null;
-  const resize = () => {
-    const rect = stage.getBoundingClientRect();
-    const width = Math.max(1, Math.floor(rect.width));
-    const height = Math.max(1, Math.floor(rect.height));
-    renderer.setSize(width, height, false);
-    camera.aspect = width / height;
-    camera.updateProjectionMatrix();
+  let resizeObserver = null;
+  let ready = null;
+  let visible = false;
+
+  const preview = {
+    get scene() { return scene; },
+    get camera() { return camera; },
+    get renderer() { return renderer; },
+    get mixer() { return mixer; },
+    get visible() { return visible; },
+    setVisible(value) {
+      visible = value;
+    },
+    load() {
+      if (ready) return ready;
+      ready = initializePreview();
+      return ready;
+    }
   };
-  resize();
 
-  const observer = new ResizeObserver(resize);
-  observer.observe(stage);
+  function initializePreview() {
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xf6f7f9);
 
-  const ready = loadGltf(loader, src)
-    .then((gltf) => {
-      const model = gltf.scene;
-      polishVisualizationColors(model);
-      scene.add(model);
+    camera = new THREE.PerspectiveCamera(34, 1, 0.03, 80);
+    camera.position.set(2.6, 1.6, 3.0);
 
-      if (gltf.animations.length > 0) {
-        mixer = new THREE.AnimationMixer(model);
-        gltf.animations.forEach((clip) => {
-          const action = mixer.clipAction(clip);
-          action.play();
-        });
-      }
-      const bounds = measurePreviewBounds(model, mixer, gltf.animations);
-      fitCameraToBounds(bounds, camera);
-      if (mixer) mixer.setTime(0);
-      resize();
-    })
-    .catch((error) => {
-      stage.classList.add('is-error');
-      console.warn(`Failed to load dataset GLB preview: ${src}`, error);
+    renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: false,
+      powerPreference: 'high-performance',
+      precision: 'highp'
     });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 3));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.08;
+    stage.appendChild(renderer.domElement);
 
-  return { scene, camera, renderer, get mixer() { return mixer; }, ready };
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x8b929e, 0.9));
+    const keyLight = new THREE.DirectionalLight(0xffffff, 0.34);
+    keyLight.position.set(5, 7, 4);
+    scene.add(keyLight);
+
+    const groundTexture = makeCheckerTexture();
+    const ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(8, 8),
+      new THREE.MeshStandardMaterial({ map: groundTexture, roughness: 0.86 })
+    );
+    ground.rotation.x = -Math.PI / 2;
+    scene.add(ground);
+
+    const resize = () => {
+      const rect = stage.getBoundingClientRect();
+      const width = Math.max(1, Math.floor(rect.width));
+      const height = Math.max(1, Math.floor(rect.height));
+      renderer.setSize(width, height, false);
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+    };
+    resize();
+
+    resizeObserver = new ResizeObserver(resize);
+    resizeObserver.observe(stage);
+
+    return loadGltf(loader, src)
+      .then((gltf) => {
+        const model = gltf.scene;
+        polishVisualizationColors(model);
+        scene.add(model);
+
+        if (gltf.animations.length > 0) {
+          mixer = new THREE.AnimationMixer(model);
+          gltf.animations.forEach((clip) => {
+            const action = mixer.clipAction(clip);
+            action.play();
+          });
+        }
+        const bounds = measurePreviewBounds(model, mixer, gltf.animations);
+        fitCameraToBounds(bounds, camera);
+        if (mixer) mixer.setTime(0);
+        resize();
+      })
+      .catch((error) => {
+        stage.classList.add('is-error');
+        resizeObserver?.disconnect();
+        console.warn('Failed to load dataset GLB preview: ' + src, error);
+      });
+  }
+
+  return preview;
 }
 
 function loadGltf(loader, url) {
@@ -150,7 +208,7 @@ function fitCameraToBounds(box, camera) {
   const distance = Math.max(
     radius / Math.sin(verticalFov / 2),
     radius / Math.sin(horizontalFov / 2)
-  ) * 1.18;
+  ) * 0.944;
   const direction = new THREE.Vector3(1.08, 0.54, 1.2).normalize();
   const target = center.clone();
   target.y += Math.max(size.y * 0.04, 0.05);

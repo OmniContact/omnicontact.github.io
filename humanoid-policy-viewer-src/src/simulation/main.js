@@ -148,6 +148,9 @@ function plannerObjectBodyName(task) {
 }
 
 function plannerGhostBodyName(task) {
+  if (isPushPlannerTask(task)) {
+    return null;
+  }
   return 'ghost_box';
 }
 
@@ -2020,7 +2023,8 @@ export class MuJoCoDemo {
     if (this.mujocoRoot && this.mujocoRoot.cylinders) {
       const numWraps = this.lastSimState.tendons.numWraps.count;
       this.mujocoRoot.cylinders.count = numWraps;
-      this.mujocoRoot.spheres.count = numWraps > 0 ? numWraps + 1 : 0;
+      this.mujocoRoot.spheres.count = 0;
+      this.mujocoRoot.spheres.visible = false;
       this.mujocoRoot.cylinders.instanceMatrix.needsUpdate = true;
       this.mujocoRoot.spheres.instanceMatrix.needsUpdate = true;
     }

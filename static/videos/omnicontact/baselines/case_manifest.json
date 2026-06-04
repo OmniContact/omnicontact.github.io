@@ -36,8 +36,8 @@
       }
     },
     "push_suitcase": {
-      "npz_path": "/home/lightcone/workspace/projects/nair_new/evaluation/videos/push_lessmimic_yaml_collinear_2/exported_ours_rule_npz/push_left_ours_rule.npz",
-      "source_npz_path": "/home/lightcone/workspace/projects/nair_new/evaluation/videos/push_lessmimic_yaml_collinear_2/exported_ours_rule_npz/push_left_ours_rule.npz",
+      "npz_path": "/home/lightcone/workspace/projects/nair_new/evaluation/videos/push_lessmimic_yaml_collinear/exported_ours_rule_npz/push_line_mid_x_neg_y_ours_rule.npz",
+      "source_npz_path": "/home/lightcone/workspace/projects/nair_new/evaluation/videos/push_lessmimic_yaml_collinear/exported_ours_rule_npz/push_line_mid_x_neg_y_ours_rule.npz",
       "robot_start": [
         0.0,
         0.0,
@@ -50,22 +50,22 @@
         0.0
       ],
       "box_init": [
-        0.5,
-        0.18000000715255737,
+        0.44999998807907104,
+        -0.20000000298023224,
         0.25999999046325684
       ],
       "box_goal": [
-        1.3856606483459473,
-        2.0342459678649902,
+        1.0539876222610474,
+        -0.20373943448066711,
         0.25999999046325684
       ],
       "camera": {
         "lookat": [
-          0.6929104924201965,
-          1.0267187356948853,
+          0.526996910572052,
+          -0.12162566184997559,
           0.6499999761581421
         ],
-        "distance": 5.07731819152832,
+        "distance": 3.683237314224243,
         "azimuth": 125.0,
         "elevation": -28.0
       }
@@ -183,10 +183,13 @@
   "web_statuses": {
     "carry_box": {},
     "push_suitcase": {},
-    "stack_boxes": {
-      "physhsi": "failed"
-    },
-    "push_stack": {}
+    "stack_boxes": {},
+    "push_stack": {
+      "sonic": "failed",
+      "hdmi": "failed",
+      "lessmimic": "failed",
+      "ours_cfgen": "success"
+    }
   },
   "videos": {
     "carry_box": {
@@ -363,12 +366,12 @@
       "frames": 0,
       "duration_s": 0.0,
       "video_path": "/home/lightcone/workspace/projects/Achievements/Paper-web/OmniContact/ours/omnicontact.github.io/static/videos/omnicontact/baselines/push_suitcase_sonic.mp4",
-      "npz_path": "/home/lightcone/workspace/projects/nair_new/evaluation/videos/push_lessmimic_yaml_collinear_2/exported_ours_rule_npz/push_left_ours_rule.npz",
-      "init_x": 0.5,
-      "init_y": 0.18000000715255737,
+      "npz_path": "/home/lightcone/workspace/projects/nair_new/evaluation/videos/push_lessmimic_yaml_collinear/exported_ours_rule_npz/push_line_mid_x_neg_y_ours_rule.npz",
+      "init_x": 0.44999998807907104,
+      "init_y": -0.20000000298023224,
       "init_z": 0.25999999046325684,
-      "goal_x": 1.3856606483459473,
-      "goal_y": 2.0342459678649902,
+      "goal_x": 1.0539876222610474,
+      "goal_y": -0.20373943448066711,
       "goal_z": 0.25999999046325684,
       "task": "push_suitcase",
       "method": "sonic",
@@ -376,11 +379,11 @@
       "web_path": "static/videos/omnicontact/baselines/push_suitcase_sonic.mp4",
       "camera": {
         "lookat": [
-          0.6929104924201965,
-          1.0267187356948853,
+          0.526996910572052,
+          -0.12162566184997559,
           0.6499999761581421
         ],
-        "distance": 5.07731819152832,
+        "distance": 3.683237314224243,
         "azimuth": 125.0,
         "elevation": -28.0
       }
@@ -391,12 +394,12 @@
       "frames": 0,
       "duration_s": 0.0,
       "video_path": "/home/lightcone/workspace/projects/Achievements/Paper-web/OmniContact/ours/omnicontact.github.io/static/videos/omnicontact/baselines/push_suitcase_hdmi.mp4",
-      "npz_path": "/home/lightcone/workspace/projects/nair_new/evaluation/videos/push_lessmimic_yaml_collinear_2/exported_ours_rule_npz/push_left_ours_rule.npz",
-      "init_x": 0.5,
-      "init_y": 0.18000000715255737,
+      "npz_path": "/home/lightcone/workspace/projects/nair_new/evaluation/videos/push_lessmimic_yaml_collinear/exported_ours_rule_npz/push_line_mid_x_neg_y_ours_rule.npz",
+      "init_x": 0.44999998807907104,
+      "init_y": -0.20000000298023224,
       "init_z": 0.25999999046325684,
-      "goal_x": 1.3856606483459473,
-      "goal_y": 2.0342459678649902,
+      "goal_x": 1.0539876222610474,
+      "goal_y": -0.20373943448066711,
       "goal_z": 0.25999999046325684,
       "task": "push_suitcase",
       "method": "hdmi",
@@ -404,11 +407,11 @@
       "web_path": "static/videos/omnicontact/baselines/push_suitcase_hdmi.mp4",
       "camera": {
         "lookat": [
-          0.6929104924201965,
-          1.0267187356948853,
+          0.526996910572052,
+          -0.12162566184997559,
           0.6499999761581421
         ],
-        "distance": 5.07731819152832,
+        "distance": 3.683237314224243,
         "azimuth": 125.0,
         "elevation": -28.0
       }
@@ -419,12 +422,12 @@
       "frames": 0,
       "duration_s": 0.0,
       "video_path": "/home/lightcone/workspace/projects/Achievements/Paper-web/OmniContact/ours/omnicontact.github.io/static/videos/omnicontact/baselines/push_suitcase_lessmimic.mp4",
-      "npz_path": "/home/lightcone/workspace/projects/nair_new/evaluation/videos/push_lessmimic_yaml_collinear_2/exported_ours_rule_npz/push_left_ours_rule.npz",
-      "init_x": 0.5,
-      "init_y": 0.18000000715255737,
+      "npz_path": "/home/lightcone/workspace/projects/nair_new/evaluation/videos/push_lessmimic_yaml_collinear/exported_ours_rule_npz/push_line_mid_x_neg_y_ours_rule.npz",
+      "init_x": 0.44999998807907104,
+      "init_y": -0.20000000298023224,
       "init_z": 0.25999999046325684,
-      "goal_x": 1.3856606483459473,
-      "goal_y": 2.0342459678649902,
+      "goal_x": 1.0539876222610474,
+      "goal_y": -0.20373943448066711,
       "goal_z": 0.25999999046325684,
       "task": "push_suitcase",
       "method": "lessmimic",
@@ -432,11 +435,11 @@
       "web_path": "static/videos/omnicontact/baselines/push_suitcase_lessmimic.mp4",
       "camera": {
         "lookat": [
-          0.6929104924201965,
-          1.0267187356948853,
+          0.526996910572052,
+          -0.12162566184997559,
           0.6499999761581421
         ],
-        "distance": 5.07731819152832,
+        "distance": 3.683237314224243,
         "azimuth": 125.0,
         "elevation": -28.0
       }
@@ -447,12 +450,12 @@
       "frames": 0,
       "duration_s": 0.0,
       "video_path": "/home/lightcone/workspace/projects/Achievements/Paper-web/OmniContact/ours/omnicontact.github.io/static/videos/omnicontact/baselines/push_suitcase_ours_cfgen.mp4",
-      "npz_path": "/home/lightcone/workspace/projects/nair_new/evaluation/videos/push_lessmimic_yaml_collinear_2/exported_ours_rule_npz/push_left_ours_rule.npz",
-      "init_x": 0.5,
-      "init_y": 0.18000000715255737,
+      "npz_path": "/home/lightcone/workspace/projects/nair_new/evaluation/videos/push_lessmimic_yaml_collinear/exported_ours_rule_npz/push_line_mid_x_neg_y_ours_rule.npz",
+      "init_x": 0.44999998807907104,
+      "init_y": -0.20000000298023224,
       "init_z": 0.25999999046325684,
-      "goal_x": 1.3856606483459473,
-      "goal_y": 2.0342459678649902,
+      "goal_x": 1.0539876222610474,
+      "goal_y": -0.20373943448066711,
       "goal_z": 0.25999999046325684,
       "task": "push_suitcase",
       "method": "ours_cfgen",
@@ -460,11 +463,11 @@
       "web_path": "static/videos/omnicontact/baselines/push_suitcase_ours_cfgen.mp4",
       "camera": {
         "lookat": [
-          0.6929104924201965,
-          1.0267187356948853,
+          0.526996910572052,
+          -0.12162566184997559,
           0.6499999761581421
         ],
-        "distance": 5.07731819152832,
+        "distance": 3.683237314224243,
         "azimuth": 125.0,
         "elevation": -28.0
       }
@@ -527,9 +530,9 @@
     },
     {
       "policy": "physhsi",
-      "result": "failure",
-      "frames": 1308,
-      "duration_s": 43.6,
+      "result": "skipped",
+      "frames": 0,
+      "duration_s": 0.0,
       "video_path": "/home/lightcone/workspace/projects/Achievements/Paper-web/OmniContact/ours/omnicontact.github.io/static/videos/omnicontact/baselines/stack_boxes_physhsi.mp4",
       "npz_path": "stackbox_sample_000",
       "init_x": -0.9315191507339478,
@@ -538,8 +541,6 @@
       "goal_x": 1.0,
       "goal_y": 0.0,
       "goal_z": 0.15000000596046448,
-      "stage_results": "partial,success,failure",
-      "max_error": 1.0794585943222046,
       "task": "stack_boxes",
       "method": "physhsi",
       "label": "PhysHSI",
@@ -613,9 +614,9 @@
     },
     {
       "policy": "sonic",
-      "result": "skipped",
-      "frames": 0,
-      "duration_s": 0.0,
+      "result": "failure",
+      "frames": 748,
+      "duration_s": 24.933333333333334,
       "video_path": "/home/lightcone/workspace/projects/Achievements/Paper-web/OmniContact/ours/omnicontact.github.io/static/videos/omnicontact/baselines/push_stack_sonic.mp4",
       "npz_path": "push_stack_sample_000",
       "init_x": 1.0,
@@ -624,6 +625,9 @@
       "goal_x": 0.5478467345237732,
       "goal_y": -0.36063674092292786,
       "goal_z": 0.25999999046325684,
+      "stage_results": "push:completed,carry:completed",
+      "push_error_xy": 0.5783609747886658,
+      "carry_error": 1.529771089553833,
       "task": "push_stack",
       "method": "sonic",
       "label": "Sonic",
@@ -641,9 +645,9 @@
     },
     {
       "policy": "hdmi",
-      "result": "skipped",
-      "frames": 0,
-      "duration_s": 0.0,
+      "result": "failure",
+      "frames": 572,
+      "duration_s": 19.066666666666666,
       "video_path": "/home/lightcone/workspace/projects/Achievements/Paper-web/OmniContact/ours/omnicontact.github.io/static/videos/omnicontact/baselines/push_stack_hdmi.mp4",
       "npz_path": "push_stack_sample_000",
       "init_x": 1.0,
@@ -652,6 +656,9 @@
       "goal_x": 0.5478467345237732,
       "goal_y": -0.36063674092292786,
       "goal_z": 0.25999999046325684,
+      "final_error": 3.5911142826080322,
+      "motion_path": "/home/lightcone/workspace/projects/nair_new/evaluation/videos/web_baseline_comparison/_hdmi_motion/push_stack",
+      "source_motion_npz": "/home/lightcone/workspace/projects/nair_new/evaluation/videos/push_lessmimic_yaml_collinear/exported_ours_rule_npz/push_line_mid_x_neg_y_ours_rule.npz",
       "task": "push_stack",
       "method": "hdmi",
       "label": "HDMI",
@@ -669,9 +676,9 @@
     },
     {
       "policy": "lessmimic",
-      "result": "skipped",
-      "frames": 0,
-      "duration_s": 0.0,
+      "result": "failure",
+      "frames": 1456,
+      "duration_s": 48.53333333333333,
       "video_path": "/home/lightcone/workspace/projects/Achievements/Paper-web/OmniContact/ours/omnicontact.github.io/static/videos/omnicontact/baselines/push_stack_lessmimic.mp4",
       "npz_path": "push_stack_sample_000",
       "init_x": 1.0,
@@ -680,6 +687,9 @@
       "goal_x": 0.5478467345237732,
       "goal_y": -0.36063674092292786,
       "goal_z": 0.25999999046325684,
+      "stage_results": "push:partial,carry:success",
+      "push_error_xy": 0.5969133445356949,
+      "carry_error": 0.7152240896868622,
       "task": "push_stack",
       "method": "lessmimic",
       "label": "LessMimic",
@@ -697,9 +707,9 @@
     },
     {
       "policy": "ours_cfgen",
-      "result": "skipped",
-      "frames": 0,
-      "duration_s": 0.0,
+      "result": "success",
+      "frames": 801,
+      "duration_s": 26.7,
       "video_path": "/home/lightcone/workspace/projects/Achievements/Paper-web/OmniContact/ours/omnicontact.github.io/static/videos/omnicontact/baselines/push_stack_ours_cfgen.mp4",
       "npz_path": "push_stack_sample_000",
       "init_x": 1.0,
@@ -708,6 +718,8 @@
       "goal_x": 0.5478467345237732,
       "goal_y": -0.36063674092292786,
       "goal_z": 0.25999999046325684,
+      "push_error_xy": 0.30419017614572946,
+      "carry_error": 0.1134647773340427,
       "task": "push_stack",
       "method": "ours_cfgen",
       "label": "Ours w. CF-Gen",

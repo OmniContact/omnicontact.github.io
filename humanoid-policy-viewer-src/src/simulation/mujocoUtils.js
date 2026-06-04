@@ -574,6 +574,30 @@ export async function loadSceneFromURL(mujoco, filename, parent) {
       }
     }
 
+    let geom_start_idx = model.name_geomadr[g];
+    let geom_end_idx = geom_start_idx;
+    while (geom_end_idx < names_array.length && names_array[geom_end_idx] !== 0) {
+      geom_end_idx++;
+    }
+    const geomName = textDecoder.decode(names_array.subarray(geom_start_idx, geom_end_idx));
+    const bodyName = bodies[b]?.name ?? '';
+    const isHiddenPlannerVisual =
+      bodyName.startsWith('ghost_') ||
+      geomName.startsWith('ghost_') ||
+      geomName.includes('_collision') ||
+      model.geom_group?.[g] === 3;
+    const isGhostOrRefVisual =
+      bodyName.startsWith('ref_') ||
+      geomName.startsWith('ref_');
+
+    const ghostThemeColor = [0.93, 0.39, 0.39];
+    const ghostThemeOpacity = 0.42;
+
+    if (isGhostOrRefVisual) {
+      color = [...ghostThemeColor, ghostThemeOpacity];
+      texture = undefined;
+    }
+
     const materialOptions = {
       color: new THREE.Color(color[0], color[1], color[2]),
       transparent: color[3] < 1.0,
@@ -587,7 +611,14 @@ export async function loadSceneFromURL(mujoco, filename, parent) {
       materialOptions.map = texture;
     }
 
-    let currentMaterial = new THREE.MeshPhysicalMaterial(materialOptions);
+    let currentMaterial = isGhostOrRefVisual
+      ? new THREE.MeshBasicMaterial({
+        color: new THREE.Color(...ghostThemeColor),
+        transparent: true,
+        opacity: color[3],
+        depthWrite: false
+      })
+      : new THREE.MeshPhysicalMaterial(materialOptions);
 
     let mesh = new THREE.Mesh();
     if (type == 0) {
@@ -599,16 +630,12 @@ export async function loadSceneFromURL(mujoco, filename, parent) {
       mesh = new THREE.Mesh(geometry, currentMaterial);
     }
 
+    mesh.visible = !isHiddenPlannerVisual;
     mesh.castShadow = g == 0 ? false : true;
     mesh.receiveShadow = type != 7;
-    let geom_start_idx = model.name_geomadr[g];
-    let geom_end_idx = geom_start_idx;
-    while (geom_end_idx < names_array.length && names_array[geom_end_idx] !== 0) {
-      geom_end_idx++;
-    }
     mesh.bodyID = b;
     mesh.geomID = g;
-    mesh.geomName = textDecoder.decode(names_array.subarray(geom_start_idx, geom_end_idx));
+    mesh.geomName = geomName;
     bodies[b].add(mesh);
     parent.geomIdToMesh[g] = mesh;
     getPosition(model.geom_pos, g, mesh.position);
@@ -635,6 +662,7 @@ export async function loadSceneFromURL(mujoco, filename, parent) {
     tendonMat,
     1023
   );
+  mujocoRoot.spheres.visible = false;
   mujocoRoot.spheres.receiveShadow = true;
   mujocoRoot.spheres.castShadow = true;
   mujocoRoot.add(mujocoRoot.spheres);

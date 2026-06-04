@@ -1,15 +1,15 @@
 // Service Worker — cache-first for small homepage assets only.
 // The MuJoCo/ONNX viewer is versioned by Vite and must always bypass this
 // service worker; otherwise ordinary browser refresh can keep serving an old
-// LessMimic bundle while hard refresh appears correct.
-const CACHE_NAME = 'hot-site-v20260604';
+// viewer bundle while hard refresh appears correct.
+const CACHE_NAME = 'omnicontact-site-v20260604-stackbox-nair-new-pushstack-final-h264';
 
 // Assets to pre-cache on install (critical CSS/JS)
 const PRECACHE = [
   'static/css/bulma.min.css',
   'static/css/index.css',
   'static/js/index.js',
-  'static/images/hot-icon.png',
+  'static/images/omnicontact-overview.svg',
 ];
 
 self.addEventListener('install', (event) => {

@@ -62,13 +62,20 @@
         #controls {
             position: absolute;
             left: 50%;
-            bottom: 24px;
+            bottom: 8px;
             transform: translateX(-50%);
-            width: min(620px, calc(100vw - 36px));
-            padding: 14px;
-            background: rgba(17, 24, 39, 0.88);
-            border-radius: 8px;
-            box-shadow: 0 12px 34px rgba(0, 0, 0, 0.22);
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            align-items: center;
+            gap: 8px;
+            width: min(680px, calc(100vw - 20px));
+            padding: 8px 10px;
+            background: rgba(17, 24, 39, 0.62);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
+            backdrop-filter: blur(10px);
             z-index: 10;
         }
 
@@ -76,6 +83,8 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            flex: 1;
+            min-width: 0;
         }
 
         #timeline-slider {
@@ -85,24 +94,23 @@
         }
 
         #time-display {
-            width: 106px;
+            width: 92px;
             color: #e5e7eb;
-            font: 600 12px/1.2 "Courier New", monospace;
+            font: 600 11px/1.2 "Courier New", monospace;
             text-align: right;
         }
 
         #button-row {
             display: flex;
-            gap: 8px;
-            justify-content: center;
-            margin-top: 10px;
+            gap: 6px;
+            flex-shrink: 0;
         }
 
         button {
             border: 0;
-            border-radius: 6px;
-            padding: 8px 13px;
-            font-size: 13px;
+            border-radius: 9px;
+            padding: 6px 10px;
+            font-size: 11px;
             font-weight: 700;
             color: #f8fafc;
             background: #2563eb;
@@ -113,20 +121,46 @@
             background: #1d4ed8;
         }
 
+        @media (max-width: 640px) {
+            #controls {
+                width: calc(100vw - 14px);
+                gap: 6px;
+                padding: 7px 8px;
+            }
+
+            #timeline-row {
+                gap: 6px;
+            }
+
+            #time-display {
+                width: 74px;
+                font-size: 10px;
+            }
+
+            #button-row {
+                gap: 4px;
+            }
+
+            button {
+                padding: 5px 8px;
+                font-size: 10px;
+            }
+        }
+
     </style>
 </head>
 <body>
     <div id="canvas-container">
         <div id="loading"></div>
         <div id="controls">
-            <div id="timeline-row">
-                <input type="range" id="timeline-slider" min="0" max="1000" value="0" step="1">
-                <div id="time-display">0.00s / 0.00s</div>
-            </div>
             <div id="button-row">
                 <button id="play-btn">Play</button>
                 <button id="pause-btn">Pause</button>
                 <button id="restart-btn">Restart</button>
+            </div>
+            <div id="timeline-row">
+                <input type="range" id="timeline-slider" min="0" max="1000" value="0" step="1">
+                <div id="time-display">0.00s / 0.00s</div>
             </div>
         </div>
     </div>
@@ -154,15 +188,17 @@
         const urlParams = new URLSearchParams(window.location.search);
         const requestedGroup = urlParams.get('group');
         const requestedCamera = urlParams.get('camera');
+        const isVlmCamera = requestedCamera === 'vlm' || requestedCamera === 'vlm_close';
+        const isVlmCloseCamera = requestedCamera === 'vlm_close';
 
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0xf7f8fa);
 
-        const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.01, 500);
+        const camera = new THREE.PerspectiveCamera(isVlmCloseCamera ? 43 : 55, getViewportAspect(), 0.01, 500);
         camera.position.set(4.2, 2.4, 4.2);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
+        resizeRenderer();
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.outputColorSpace = THREE.SRGBColorSpace;
         renderer.shadowMap.enabled = false;
@@ -259,11 +295,31 @@
             clock.getDelta();
         });
 
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
+        function getViewportSize() {
+            const rect = container.getBoundingClientRect();
+            return {
+                width: Math.max(1, Math.floor(rect.width || window.innerWidth)),
+                height: Math.max(1, Math.floor(rect.height || window.innerHeight))
+            };
+        }
+
+        function getViewportAspect() {
+            const size = getViewportSize();
+            return size.width / size.height;
+        }
+
+        function resizeRenderer() {
+            const size = getViewportSize();
+            camera.aspect = size.width / size.height;
             camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+            renderer.setSize(size.width, size.height, false);
+        }
+
+        window.addEventListener('resize', resizeRenderer);
+
+        if ('ResizeObserver' in window) {
+            new ResizeObserver(resizeRenderer).observe(container);
+        }
 
         function animate() {
             requestAnimationFrame(animate);
@@ -559,10 +615,19 @@
             const size = box.getSize(new THREE.Vector3());
             const center = box.getCenter(new THREE.Vector3());
             const maxDim = Math.max(size.x, size.y, size.z);
-            const distance = Math.max(2.45, maxDim * 1.42);
+            const distance = isVlmCloseCamera
+                ? Math.max(2.3, maxDim * 1.12)
+                : isVlmCamera
+                    ? Math.max(2.1, maxDim * 1.08)
+                    : Math.max(2.45, maxDim * 1.42);
             controls.target.copy(center);
-            controls.target.y = Math.max(center.y, 0.46);
-            if (requestedCamera === 'vlm') {
+            controls.target.y = isVlmCloseCamera
+                ? Math.max(center.y + 0.04, 0.62)
+                : Math.max(center.y, 0.46);
+            camera.fov = isVlmCloseCamera ? 50 : 55;
+            if (isVlmCloseCamera) {
+                camera.position.set(center.x, center.y + distance * 0.5, center.z + distance * 0.34);
+            } else if (isVlmCamera) {
                 camera.position.set(center.x, center.y + distance * 0.56, center.z + distance * 0.48);
             } else {
                 camera.position.set(center.x + distance, center.y + distance * 0.55, center.z + distance);

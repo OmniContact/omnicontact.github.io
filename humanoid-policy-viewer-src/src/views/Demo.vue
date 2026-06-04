@@ -574,7 +574,7 @@ export default {
         this.renderScale = this.demo.renderScale ?? this.renderScale;
         this.state = 1;
         // Signal parent page that the viewer is ready (dismisses loading overlay)
-        try { window.parent.postMessage({ type: 'lessmimic-ready' }, '*'); } catch (e) {}
+        try { window.parent.postMessage({ type: 'omnicontact-ready' }, '*'); } catch (e) {}
       } catch (error) {
         this.state = -1;
         this.extra_error_message = error.toString();
@@ -907,7 +907,7 @@ export default {
       this.demo?.dispose();
     });
     window.addEventListener('message', this._onMessage = (e) => {
-      if (e.data?.type === 'lessmimic-close') this.demo?.dispose();
+      if (e.data?.type === 'omnicontact-close') this.demo?.dispose();
     });
 
     const MOVE_SPEED = 1.5;  // units per second
@@ -1036,7 +1036,7 @@ export default {
 
 .controls-eyebrow {
   display: block;
-  color: #8ee5d7;
+  color: #ffb0b0;
   font-size: 0.63rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -1108,7 +1108,7 @@ export default {
 }
 
 .control-section-primary {
-  border-color: rgba(94, 234, 212, 0.22);
+  border-color: rgba(238, 99, 99, 0.22);
   background: linear-gradient(180deg, rgba(20, 31, 44, 0.78), rgba(13, 20, 31, 0.64));
 }
 
@@ -1205,7 +1205,7 @@ export default {
 
 .planner-task-toggle .v-btn.v-btn--active,
 .planner-task-toggle .v-btn.v-btn--selected {
-  background: rgba(59, 130, 246, 0.88) !important;
+  background: rgba(238, 99, 99, 0.88) !important;
   color: #ffffff !important;
 }
 
@@ -1304,8 +1304,8 @@ export default {
 }
 
 .pos-input:focus {
-  outline: 1px solid rgba(94, 234, 212, 0.76);
-  border-color: rgba(94, 234, 212, 0.62);
+  outline: 1px solid rgba(238, 99, 99, 0.76);
+  border-color: rgba(238, 99, 99, 0.62);
 }
 
 .user-object-scale {
@@ -1373,7 +1373,7 @@ export default {
 }
 
 .section-title-group .v-icon {
-  color: #8ee5d7;
+  color: #ffb0b0;
 }
 
 .section-meta {
@@ -1517,7 +1517,7 @@ export default {
 }
 
 .mobile-turn-btn:active {
-  background: rgba(37, 99, 235, 0.5);
+  background: rgba(238, 99, 99, 0.5);
 }
 
 /* Skill switching bar (top-center) */
@@ -1544,13 +1544,13 @@ export default {
 }
 
 .mobile-skill-btn.active {
-  background: rgba(37, 99, 235, 0.7);
-  border-color: rgba(96, 165, 250, 0.6);
+  background: rgba(238, 99, 99, 0.7);
+  border-color: rgba(255, 176, 176, 0.6);
   color: #ffffff;
 }
 
 .mobile-skill-btn:active {
-  background: rgba(37, 99, 235, 0.5);
+  background: rgba(238, 99, 99, 0.5);
 }
 
 /* Drawer toggle button (top-right) */
@@ -1642,7 +1642,7 @@ export default {
 }
 
 .mobile-task-btn.active {
-  background: #2563eb;
+  background: #EE6363;
   color: #fff;
 }
 
@@ -1763,7 +1763,7 @@ export default {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #2563eb;
+  background: #EE6363;
   border: 2px solid rgba(255, 255, 255, 0.3);
 }
 

@@ -22,7 +22,7 @@
 
   <link rel="stylesheet" href="static/css/bulma.min.css?v=omni-20260602-generalization-tabs">
   <link rel="stylesheet" href="static/css/index.css?v=omni-20260603-theme">
-  <link rel="stylesheet" href="static/css/omnicontact.css?v=omni-20260604-live-link-readable">
+  <link rel="stylesheet" href="static/css/omnicontact.css?v=omni-20260604-remote-content-compact">
 
   <script defer src="static/js/fontawesome.all.min.js?v=omni-20260602-generalization-tabs"></script>
   <script defer src="static/js/index.js?v=omni-20260602-generalization-tabs"></script>
@@ -34,7 +34,7 @@
     }
   }
   </script>
-  <script type="module" src="static/js/dataset-glb-previews.js?v=omni-20260603-glb-previews-fullpath-sharp"></script>
+  <script type="module" src="static/js/dataset-glb-previews.js?v=omni-20260604-dataset-preview-closeup"></script>
 </head>
 <body>
   <script>
@@ -69,7 +69,7 @@
         <a href="#chaining-section" class="outline-link" data-outline-link="chaining-section">Chaining</a>
         <a href="#recovery-section" class="outline-link" data-outline-link="recovery-section">Recovery</a>
         <a href="#vlm-section" class="outline-link" data-outline-link="vlm-section">VLM</a>
-        <a href="#comparison-section" class="outline-link" data-outline-link="comparison-section">Comparison</a>
+        <a href="#comparison-section" class="outline-link" data-outline-link="comparison-section">Baselines</a>
       </div>
     </aside>
   </div>
@@ -177,11 +177,11 @@
         <div class="embedded-viewer embedded-viewer--policy reveal">
           <div class="embedded-viewer-header">
             <h3>Live MuJoCo WASM + ONNX Policy Viewer</h3>
-            <a href="policy-viewer.html?v=carrybox-wtac-dual-box-scene-20260602" target="_blank" rel="noopener">Open full page</a>
+            <a href="policy-viewer.html?v=policy-hide-push-ghostbox-20260604a" target="_blank" rel="noopener">Open full page</a>
           </div>
           <div class="policy-viewer-stage" data-policy-viewer-stage>
             <iframe
-              data-src="static/humanoid-policy-viewer/index.html?force_policy=./examples/checkpoints/g1/carrybox_wtac_policy.json&policy=./examples/checkpoints/g1/carrybox_wtac_policy.json&v=overview-onnx-dual-box-scene-20260602"
+              data-src="static/humanoid-policy-viewer/index.html?force_policy=./examples/checkpoints/g1/carrybox_wtac_policy.json&policy=./examples/checkpoints/g1/carrybox_wtac_policy.json&v=policy-hide-push-ghostbox-20260604a"
               title="Live MuJoCo WASM and ONNX carry-box policy viewer"
               loading="lazy"
               allow="fullscreen"
@@ -212,7 +212,7 @@
                   <div class="tsne-header">
                     <div>
                       <h3>Dataset t-SNE</h3>
-                      <p>74,641 Dongbu MoCap clips embedded by skill labels.</p>
+                      <p>74,641 MoCap clips embedded by skill labels.</p>
                     </div>
                     <div class="dataset-flip-actions">
                       <div id="tsne-status">Loading points...</div>
@@ -233,12 +233,12 @@
                     <div class="dataset-flip-actions">
                       <a href="dataset_motion_cloud.html?group=dataset_balanced&v=dataset-cloud-20260603-49" target="_blank" rel="noopener">Open full page</a>
                     </div>
-                  </div>
-                  <iframe
-                    src="dataset_motion_cloud.html?group=dataset_balanced&v=dataset-cloud-20260603-49"
-                    title="Balanced OmniContact dataset GLB sequences in one synchronized scene"
-                    loading="lazy"
-                    allow="fullscreen; autoplay"
+	                  </div>
+	                  <iframe
+	                    data-src="dataset_motion_cloud.html?group=dataset_balanced&v=dataset-cloud-20260603-49"
+	                    title="Balanced OmniContact dataset GLB sequences in one synchronized scene"
+	                    loading="lazy"
+	                    allow="fullscreen; autoplay"
                   ></iframe>
                 </div>
               </div>
@@ -307,31 +307,13 @@
     <section class="section hero omni-section" id="chaining-section">
       <div class="container is-max-desktop">
         <h2 class="title is-3 has-text-centered section-heading reveal">Meta Skill Chaining <a href="#chaining-section" class="heading-anchor" aria-label="Link to this section">#</a></h2>
-        <p class="has-text-centered demo-desc reveal">
-          CF-Gen decomposes long-horizon tasks into contact-aware stages, synthesizes each segment, and refreshes future segments with the updated object state. This closed-loop design turns reusable meta-skills into robust task-level behavior.
-        </p>
-        <div class="timeline-grid reveal">
-          <article class="timeline-case">
-            <div class="chain-stage-visual" aria-label="Stack boxes chaining stages">
-              <span>pick</span><i></i><span>carry</span><i></i><span>place</span><i></i><span>align</span>
-            </div>
-            <h3>Gather and stack scattered boxes</h3>
-            <p>Repeated carrying segments are chained with updated object poses until the stack is completed.</p>
-          </article>
-          <article class="timeline-case">
-            <div class="chain-stage-visual chain-stage-visual--mixed" aria-label="Push then stack chaining stages">
-              <span>push</span><i></i><span>relocalize</span><i></i><span>grasp</span><i></i><span>stack</span>
-            </div>
-            <h3>Combine pushing and carrying</h3>
-            <p>The robot first pushes a suitcase-like object, then switches to box stacking through the same contact-flow interface.</p>
-          </article>
-          <article class="timeline-case">
-            <div class="chain-stage-visual chain-stage-visual--endurance" aria-label="Long endurance repeated chaining stages">
-              <span>segment 1</span><i></i><span>segment 2</span><i></i><span>...</span><i></i><span>40 min</span>
-            </div>
-            <h3>Continuous long-horizon execution</h3>
-            <p>Closed-loop segment synthesis supports sustained box-carrying behavior over extended horizons.</p>
-          </article>
+        <div class="recovery-browser reveal" data-chaining-browser>
+          <div class="generalization-tabs recovery-tabs" role="tablist" aria-label="Meta skill chaining demos">
+            <button type="button" class="generalization-tab is-active" data-chaining-task="gather_stack" aria-selected="true">Push-Stack</button>
+            <button type="button" class="generalization-tab" data-chaining-task="push_carry" aria-selected="false">Stack-Boxes</button>
+            <button type="button" class="generalization-tab" data-chaining-task="long_horizon" aria-selected="false">Long Horizon</button>
+          </div>
+          <div class="recovery-video-grid" data-chaining-videos></div>
         </div>
       </div>
     </section>
@@ -339,13 +321,10 @@
     <section class="section hero is-light omni-section" id="recovery-section">
       <div class="container is-max-desktop">
         <h2 class="title is-3 has-text-centered section-heading reveal">Recovery <a href="#recovery-section" class="heading-anchor" aria-label="Link to this section">#</a></h2>
-        <p class="has-text-centered demo-desc reveal">
-          OmniContact detects failures by comparing observed and predicted object states. When the deviation exceeds a threshold, CF-Gen replans from the current state, naturally eliciting re-approach and resume behaviors.
-        </p>
         <div class="recovery-browser reveal" data-recovery-browser>
           <div class="generalization-tabs recovery-tabs" role="tablist" aria-label="Recovery demos">
-            <button type="button" class="generalization-tab is-active" data-recovery-task="push_suitcase" aria-selected="true">Push Suitcase Recover</button>
-            <button type="button" class="generalization-tab" data-recovery-task="carry_box" aria-selected="false">Carry Box Recover</button>
+            <button type="button" class="generalization-tab is-active" data-recovery-task="carry_box" aria-selected="true">Carry Box Recover</button>
+            <button type="button" class="generalization-tab" data-recovery-task="push_suitcase" aria-selected="false">Push Suitcase Recover</button>
             <button type="button" class="generalization-tab" data-recovery-task="relocate_ball" aria-selected="false">Relocate Ball Recover</button>
           </div>
           <div class="recovery-video-grid" data-recovery-videos></div>
@@ -379,19 +358,27 @@
             </article>
           </div>
           <div class="embedded-viewer embedded-viewer--glb">
-            <div class="embedded-viewer-header">
-              <h3>Interactive Unitree G1 Motion Sequences</h3>
-              <a href="sample_motion_sequences_g1.html?group=vlm&camera=vlm&v=glb-clean-20260603-closecam-upframe" target="_blank" rel="noopener">Open full page</a>
-            </div>
-            <iframe
-              src="sample_motion_sequences_g1.html?group=vlm&camera=vlm&v=glb-clean-20260603-closecam-upframe"
-              title="Interactive Unitree G1 sample motion sequences"
-              loading="lazy"
-              allow="fullscreen; autoplay"
-            ></iframe>
-          </div>
-        </div>
-      </div>
+	            <div class="embedded-viewer-header">
+	              <h3>Interactive Unitree G1 Motion Sequences</h3>
+	              <a href="sample_motion_sequences_g1.html?group=vlm&camera=vlm&v=glb-clean-20260604-controls-slim-1" target="_blank" rel="noopener">Open full page</a>
+	            </div>
+	            <div class="embedded-viewer-load-stage" data-embedded-viewer-stage>
+	              <iframe
+	                data-src="sample_motion_sequences_g1.html?group=vlm&camera=vlm&v=glb-clean-20260604-controls-slim-1"
+	                title="Interactive Unitree G1 sample motion sequences"
+	                loading="lazy"
+	                allow="fullscreen; autoplay"
+	              ></iframe>
+	              <div class="policy-viewer-placeholder" data-embedded-viewer-placeholder>
+	                <button type="button" class="policy-viewer-load-button" data-embedded-viewer-load>
+	                  <span>Click to Load Motion Sequences</span>
+	                  <small>Interactive GLB viewer</small>
+	                </button>
+	              </div>
+	            </div>
+	          </div>
+	        </div>
+	      </div>
     </section>
 
     <section class="section hero is-light omni-section baseline-comparison" id="comparison-section" data-baseline-browser>
@@ -445,35 +432,56 @@
       });
     })();
 
-    (function() {
-      document.querySelectorAll('[data-policy-viewer-stage]').forEach(function(stage) {
-        var iframe = stage.querySelector('iframe[data-src]');
-        var placeholder = stage.querySelector('[data-policy-viewer-placeholder]');
-        var button = stage.querySelector('[data-policy-viewer-load]');
-        if (!iframe || !button) return;
+	    (function() {
+	      function loadIframe(iframe, stage, placeholder) {
+	        if (!iframe.getAttribute('src')) {
+	          iframe.setAttribute('src', iframe.getAttribute('data-src'));
+	        }
+	        if (stage) {
+	          stage.classList.add('is-loading');
+	        }
+	        if (placeholder) {
+	          placeholder.setAttribute('aria-hidden', 'true');
+	        }
+	      }
 
-        button.addEventListener('click', function() {
-          if (!iframe.getAttribute('src')) {
-            iframe.setAttribute('src', iframe.getAttribute('data-src'));
-          }
-          stage.classList.add('is-loading');
-          if (placeholder) {
-            placeholder.setAttribute('aria-hidden', 'true');
-          }
-        }, { once: true });
-      });
-    })();
+	      document.querySelectorAll('[data-policy-viewer-stage]').forEach(function(stage) {
+	        var iframe = stage.querySelector('iframe[data-src]');
+	        var placeholder = stage.querySelector('[data-policy-viewer-placeholder]');
+	        var button = stage.querySelector('[data-policy-viewer-load]');
+	        if (!iframe || !button) return;
+
+	        button.addEventListener('click', function() {
+	          loadIframe(iframe, stage, placeholder);
+	        }, { once: true });
+	      });
+
+	      document.querySelectorAll('[data-embedded-viewer-stage]').forEach(function(stage) {
+	        var iframe = stage.querySelector('iframe[data-src]');
+	        var placeholder = stage.querySelector('[data-embedded-viewer-placeholder]');
+	        var button = stage.querySelector('[data-embedded-viewer-load]');
+	        if (!iframe || !button) return;
+
+	        button.addEventListener('click', function() {
+	          loadIframe(iframe, stage, placeholder);
+	        }, { once: true });
+	      });
+	    })();
 
     (function() {
       document.querySelectorAll('[data-dataset-flip]').forEach(function(card) {
         var root = card.closest('.dataset-primary') || document;
-        var tabs = root.querySelectorAll('[data-dataset-view]');
-        var front = card.querySelector('.dataset-flip-front');
-        var back = card.querySelector('.dataset-flip-back');
+	        var tabs = root.querySelectorAll('[data-dataset-view]');
+	        var front = card.querySelector('.dataset-flip-front');
+	        var back = card.querySelector('.dataset-flip-back');
+	        var motionIframe = back ? back.querySelector('iframe[data-src]') : null;
 
-        function setView(view) {
-          var isMotion = view === 'motion';
-          card.classList.toggle('is-flipped', isMotion);
+	        function setView(view) {
+	          var isMotion = view === 'motion';
+	          if (isMotion && motionIframe && !motionIframe.getAttribute('src')) {
+	            motionIframe.setAttribute('src', motionIframe.getAttribute('data-src'));
+	          }
+	          card.classList.toggle('is-flipped', isMotion);
           if (front) {
             front.setAttribute('aria-hidden', isMotion ? 'true' : 'false');
           }
@@ -980,12 +988,125 @@
     })();
 
     (function() {
+      var root = document.querySelector('[data-chaining-browser]');
+      if (!root) return;
+
+      var taskTabs = Array.prototype.slice.call(root.querySelectorAll('[data-chaining-task]'));
+      var videoGrid = root.querySelector('[data-chaining-videos]');
+      var activeTask = 'gather_stack';
+      var preloadedVideos = {};
+      var videos = {
+        gather_stack: [
+          {
+            src: 'static/videos/omnicontact/combine_pushstack_1.mp4',
+            label: 'Push-stack chaining'
+          },
+          {
+            src: '',
+            label: 'Real grasp-move-place'
+          }
+        ],
+        push_carry: [
+          {
+            src: 'static/videos/omnicontact/baselines/push_stack_ours_cfgen.mp4',
+            label: 'Push then stack'
+          },
+          {
+            src: 'static/videos/omnicontact/push_type1.mp4',
+            label: 'Push transfer segment'
+          }
+        ],
+        long_horizon: [
+          {
+            src: 'static/videos/omnicontact/baselines/carry_box_ours_cfgen.mp4',
+            label: 'Closed-loop carry sequence'
+          },
+          {
+            src: 'static/videos/omnicontact/carrybox_final_2.mp4',
+            label: 'Extended carry continuation'
+          }
+        ]
+      };
+
+      function setActive(tabList, activeTab) {
+        tabList.forEach(function(tab) {
+          var isActive = tab === activeTab;
+          tab.classList.toggle('is-active', isActive);
+          tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        });
+      }
+
+      function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, function(char) {
+          return {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+          }[char];
+        });
+      }
+
+      function buildCard(item) {
+        var badgeHtml = item.badge
+          ? '<div class="recovery-video-badge"><span class="recovery-video-badge-label">Speed</span><strong>' + escapeHtml(item.badge) + '</strong></div>'
+          : '';
+        return '<article class="generalization-video-card recovery-video-card">' +
+          '<div class="recovery-video-media">' +
+          badgeHtml +
+          '<video controls autoplay muted loop playsinline preload="metadata"><source src="' + escapeHtml(item.src) + '" type="video/mp4"></video>' +
+          '</div>' +
+          '<div class="generalization-video-label">' + escapeHtml(item.label) + '</div>' +
+          '</article>';
+      }
+
+      function buildEmptyCard(label) {
+        return '<article class="generalization-video-card recovery-video-card generalization-video-card--empty">' +
+          '<div class="generalization-video-label">' + escapeHtml(label) + '</div>' +
+          '<div class="generalization-video-slot"><strong>Preview unavailable</strong><span>This chaining video has not been linked yet.</span></div>' +
+          '</article>';
+      }
+
+      function preloadVideo(src) {
+        if (!src || preloadedVideos[src]) return;
+        var video = document.createElement('video');
+        video.preload = 'metadata';
+        video.src = src;
+        preloadedVideos[src] = video;
+        if (typeof video.load === 'function') video.load();
+      }
+
+      function renderVideos() {
+        var items = videos[activeTask] || [];
+        videoGrid.innerHTML =
+          items.map(function(item) {
+            if (item && item.src) {
+              preloadVideo(item.src);
+              return buildCard(item);
+            }
+            return buildEmptyCard(item && item.label ? item.label : 'Chaining video');
+          }).join('');
+      }
+
+      taskTabs.forEach(function(tab) {
+        tab.addEventListener('click', function() {
+          activeTask = tab.getAttribute('data-chaining-task');
+          setActive(taskTabs, tab);
+          renderVideos();
+        });
+      });
+
+      renderVideos();
+    })();
+
+    (function() {
       var root = document.querySelector('[data-recovery-browser]');
       if (!root) return;
 
       var taskTabs = Array.prototype.slice.call(root.querySelectorAll('[data-recovery-task]'));
       var videoGrid = root.querySelector('[data-recovery-videos]');
-      var activeTask = 'push_suitcase';
+      var activeTask = 'carry_box';
       var preloadedVideos = {};
       var videos = {
         push_suitcase: [
@@ -1000,12 +1121,14 @@
         ],
         carry_box: [
           {
-            src: 'static/videos/omnicontact/baselines/carry_box_ours_reference.mp4',
-            label: 'Reference recovery'
+            src: 'static/videos/omnicontact/carrybox_recovery_1.mp4',
+            label: 'Final Goal Failure (Speed x3ed up)',
+            badge: '3x'
           },
           {
-            src: 'static/videos/omnicontact/baselines/carry_box_ours_cfgen.mp4',
-            label: 'OmniContact recovery'
+            src: 'static/videos/omnicontact/carrybox_recovery_2.mp4',
+            label: 'In Contact Failure (Speed x3ed up)',
+            badge: '3x'
           }
         ],
         relocate_ball: [
@@ -1041,9 +1164,15 @@
       }
 
       function buildCard(item) {
+        var badgeHtml = item.badge
+          ? '<div class="recovery-video-badge"><span class="recovery-video-badge-label">Speed</span><strong>' + escapeHtml(item.badge) + '</strong></div>'
+          : '';
         return '<article class="generalization-video-card recovery-video-card">' +
-          '<div class="generalization-video-label">' + escapeHtml(item.label) + '</div>' +
+          '<div class="recovery-video-media">' +
+          badgeHtml +
           '<video controls autoplay muted loop playsinline preload="metadata"><source src="' + escapeHtml(item.src) + '" type="video/mp4"></video>' +
+          '</div>' +
+          '<div class="generalization-video-label">' + escapeHtml(item.label) + '</div>' +
           '</article>';
       }
 
@@ -1101,7 +1230,7 @@
         stack_boxes: 'Stack boxes',
         push_stack: 'Push-stack'
       };
-      var baselineCacheVersion = 'baseline-20260604-h264-all';
+      var baselineCacheVersion = 'baseline-20260604-pushstack-rerecord-h264';
       var baselineOrderByTask = {
         carry_box: ['sonic', 'hdmi', 'physhsi', 'lessmimic', 'ours_cfgen'],
         push_suitcase: ['sonic', 'hdmi', 'lessmimic', 'ours_cfgen'],
@@ -1130,11 +1259,11 @@
           ours_cfgen: 'static/videos/omnicontact/baselines/push_suitcase_ours_cfgen.mp4'
         },
         stack_boxes: {
-          sonic: 'static/videos/omnicontact/baselines/stack_boxes_sonic.mp4',
-          hdmi: 'static/videos/omnicontact/baselines/stack_boxes_hdmi.mp4',
-          physhsi: 'static/videos/omnicontact/baselines/stack_boxes_physhsi.mp4',
-          lessmimic: 'static/videos/omnicontact/baselines/stack_boxes_lessmimic.mp4',
-          ours_cfgen: 'static/videos/omnicontact/baselines/stack_boxes_ours_cfgen.mp4'
+          sonic: 'static/videos/omnicontact/baselines/stack_boxes_sonic_nair_new_h264.mp4',
+          hdmi: 'static/videos/omnicontact/baselines/stack_boxes_hdmi_nair_new_h264.mp4',
+          physhsi: 'static/videos/omnicontact/baselines/stack_boxes_physhsi_nair_new_h264.mp4',
+          lessmimic: 'static/videos/omnicontact/baselines/stack_boxes_lessmimic_nair_new_h264.mp4',
+          ours_cfgen: 'static/videos/omnicontact/baselines/stack_boxes_ours_cfgen_nair_new_h264.mp4'
         },
         push_stack: {
           sonic: 'static/videos/omnicontact/baselines/push_stack_sonic.mp4',
@@ -1146,6 +1275,7 @@
       var statusLabels = {
         failed: 'Failed',
         failure: 'Failed',
+        partial: 'Partial',
         error: 'Error',
         success: 'Success'
       };

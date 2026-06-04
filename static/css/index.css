@@ -134,11 +134,6 @@ body {
   }
 }
 
-.dnerf {
-  font-variant: small-caps;
-}
-
-
 /* Hero Section Modernization */
 .hero {
   position: relative;
@@ -3546,7 +3541,7 @@ a:focus,
   66% { transform: translate(20px, -25px); }
 }
 
-/* ── 3. Animated Gradient Text on HOT Title ── */
+/* ── 3. Animated Gradient Text on Project Title ── */
 .hero-main .publication-title .title-main {
   background: linear-gradient(135deg, #8b5cf6, #EE6363, #8b5cf6);
   background-size: 300% 300%;
