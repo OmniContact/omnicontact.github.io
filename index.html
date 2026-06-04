@@ -979,7 +979,7 @@
             label: '2 Stage: Push Suitcase + Carry Box'
           },
           {
-            src: '',
+            src: 'static/videos/omnicontact/real/part6_real_grasp-move-place.mp4',
             label: '2 Stage: Push Suitcase + Carry Box'
           }
         ],
@@ -1026,9 +1026,15 @@
       }
 
       function buildCard(item) {
+        var badgeHtml = item.badge
+          ? '<div class="recovery-video-badge"><span class="recovery-video-badge-label">Speed</span><strong>' + escapeHtml(item.badge) + '</strong></div>'
+          : '';
         return '<article class="generalization-video-card recovery-video-card">' +
-          '<div class="generalization-video-label">' + escapeHtml(item.label) + '</div>' +
+          '<div class="recovery-video-media">' +
+          badgeHtml +
           '<video controls autoplay muted loop playsinline preload="metadata"><source src="' + escapeHtml(item.src) + '" type="video/mp4"></video>' +
+          '</div>' +
+          '<div class="generalization-video-label">' + escapeHtml(item.label) + '</div>' +
           '</article>';
       }
 
@@ -1093,12 +1099,12 @@
         carry_box: [
           {
             src: 'static/videos/omnicontact/carrybox_recovery_1.mp4',
-            label: 'Final Goal Failure (Speed x3ed up)',
+            label: 'Final Goal Failure',
             badge: '3x'
           },
           {
             src: 'static/videos/omnicontact/carrybox_recovery_2.mp4',
-            label: 'In Contact Failure (Speed x3ed up)',
+            label: 'In Contact Failure',
             badge: '3x'
           }
         ],
