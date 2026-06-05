@@ -22,7 +22,7 @@
 
   <link rel="stylesheet" href="static/css/bulma.min.css?v=omni-20260602-generalization-tabs">
   <link rel="stylesheet" href="static/css/index.css?v=omni-20260603-theme">
-  <link rel="stylesheet" href="static/css/omnicontact.css?v=omni-20260605-section-widths-120">
+  <link rel="stylesheet" href="static/css/omnicontact.css?v=omni-20260605-overview-tabs">
 
   <script defer src="static/js/fontawesome.all.min.js?v=omni-20260602-generalization-tabs"></script>
   <script defer src="static/js/index.js?v=omni-20260602-generalization-tabs"></script>
@@ -187,46 +187,32 @@
     <section class="section hero is-light omni-section" id="overview-section">
       <div class="container overview-container">
         <h2 class="title is-3 has-text-centered section-heading reveal">Overview <a href="#overview-section" class="heading-anchor" aria-label="Link to this section">#</a></h2>
-        <div class="overview-framework-layout reveal">
-          <figure class="overview-framework-figure">
-            <img src="static/images/framework.png?v=framework-20260605" alt="OmniContact framework: CF-Gen produces contact-flow targets and CF-Track executes them through a closed-loop humanoid policy." loading="lazy">
-          </figure>
-          <div class="overview-framework-copy">
-            <div class="overview-framework-intro">
-              <span class="overview-kicker">CF-Gen to CF-Track</span>
-              <h3>Object goals become executable contact flow</h3>
-              <p>
-                OmniContact closes the loop between high-level task intent, contact-aware trajectory synthesis, and whole-body humanoid control.
-              </p>
+        <div class="overview-showcase reveal" data-overview-switcher>
+          <div class="dataset-view-tabs overview-view-tabs" role="tablist" aria-label="Overview views">
+            <button type="button" class="dataset-view-tab is-active" data-overview-view="video" aria-selected="true">OmniContact video</button>
+            <button type="button" class="dataset-view-tab" data-overview-view="framework" aria-selected="false">Framework image</button>
+          </div>
+          <div class="overview-panel-set">
+            <div class="overview-tab-panel overview-tab-panel--video" data-overview-panel="video" aria-hidden="false">
+              <figure class="overview-video-figure">
+                <video autoplay muted loop playsinline controls preload="metadata">
+                  <source src="static/videos/omnicontact/overview.mp4" type="video/mp4">
+                </video>
+              </figure>
             </div>
-            <div class="overview-flow-map" aria-label="OmniContact planning and control flow">
-              <article class="overview-feature overview-flow-step">
-                <span aria-hidden="true"></span>
-                <div>
-                  <h4>Read the task state</h4>
-                  <p>CF-Gen grounds language-level goals in object pose, target pose, and humanoid state.</p>
-                </div>
-              </article>
-              <article class="overview-feature overview-flow-step">
-                <span aria-hidden="true"></span>
-                <div>
-                  <h4>Synthesize contact flow</h4>
-                  <p>Adapted contact anchors and stage trajectories form compact body-target sequences.</p>
-                </div>
-              </article>
-              <article class="overview-feature overview-flow-step">
-                <span aria-hidden="true"></span>
-                <div>
-                  <h4>Track and replan online</h4>
-                  <p>CF-Track executes the flow while CF-Gen monitors failures and replans at 50 Hz.</p>
-                </div>
-              </article>
-            </div>
-            <div class="overview-framework-metrics" aria-label="OmniContact key results">
-              <div class="metric-card"><span>98.7%</span><p>Carry Box</p></div>
-              <div class="metric-card"><span>82.5%</span><p>Push Suitcase</p></div>
-              <div class="metric-card"><span>~40 min</span><p>Long Horizon</p></div>
-              <div class="metric-card"><span>50 Hz</span><p>Replanning</p></div>
+            <div class="overview-tab-panel overview-tab-panel--framework" data-overview-panel="framework" aria-hidden="true" hidden>
+              <figure class="overview-original-figure">
+                <img src="static/images/overview_OmniContact.png?v=overview-pdf-20260604" alt="Overview of OmniContact: CF-Gen synthesizes contact-flow segments and CF-Track executes them with a low-level policy." loading="lazy">
+              </figure>
+              <figure class="overview-original-figure overview-original-figure--contact-flow">
+                <img src="static/images/overview_contact_flow.png?v=overview-pdf-20260604" alt="Contact-flow examples for carry, push, kick, locomotion, and recovery tasks." loading="lazy">
+              </figure>
+              <div class="metric-row">
+                <div class="metric-card"><span>98.7%</span><p>Carry Box success</p></div>
+                <div class="metric-card"><span>82.5%</span><p>Push Suitcase success</p></div>
+                <div class="metric-card"><span>~40 min</span><p>Long-horizon endurance</p></div>
+                <div class="metric-card"><span>50 Hz</span><p>Closed-loop monitoring</p></div>
+              </div>
             </div>
           </div>
         </div>
@@ -348,7 +334,7 @@
               <button type="button" class="generalization-tab is-active" data-generalization-skill="carrybox" aria-selected="true">Carry Box</button>
               <button type="button" class="generalization-tab" data-generalization-skill="push_suitcase">Push Suitcase</button>
               <button type="button" class="generalization-tab" data-generalization-skill="slide_box">Slide Box</button>
-              <button type="button" class="generalization-tab" data-generalization-skill="carry_ball" disabled aria-disabled="true">Carry Ball</button>
+              <button type="button" class="generalization-tab" data-generalization-skill="carry_ball" disabled aria-disabled="true">Relocate Ball</button>
               <button type="button" class="generalization-tab" data-generalization-skill="kick_ball" disabled aria-disabled="true">Kick Ball</button>
             </div>
           </div>
@@ -527,6 +513,47 @@
 	        }, { once: true });
 	      });
 	    })();
+
+    (function() {
+      document.querySelectorAll('[data-overview-switcher]').forEach(function(root) {
+        var tabs = root.querySelectorAll('[data-overview-view]');
+        var videoPanel = root.querySelector('[data-overview-panel="video"]');
+        var frameworkPanel = root.querySelector('[data-overview-panel="framework"]');
+        var overviewVideo = videoPanel ? videoPanel.querySelector('video') : null;
+
+        function setView(view) {
+          var showVideo = view === 'video';
+          if (videoPanel) {
+            videoPanel.hidden = !showVideo;
+            videoPanel.setAttribute('aria-hidden', showVideo ? 'false' : 'true');
+          }
+          if (frameworkPanel) {
+            frameworkPanel.hidden = showVideo;
+            frameworkPanel.setAttribute('aria-hidden', showVideo ? 'true' : 'false');
+          }
+          if (overviewVideo) {
+            if (showVideo) {
+              overviewVideo.play().catch(function() {});
+            } else {
+              overviewVideo.pause();
+            }
+          }
+          tabs.forEach(function(tab) {
+            var isActive = tab.getAttribute('data-overview-view') === view;
+            tab.classList.toggle('is-active', isActive);
+            tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+          });
+        }
+
+        tabs.forEach(function(tab) {
+          tab.addEventListener('click', function() {
+            setView(tab.getAttribute('data-overview-view'));
+          });
+        });
+
+        setView('video');
+      });
+    })();
 
     (function() {
       document.querySelectorAll('[data-dataset-flip]').forEach(function(card) {

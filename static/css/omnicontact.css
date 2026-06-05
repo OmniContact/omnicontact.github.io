@@ -71,7 +71,7 @@
 }
 
 .overview-original-figure {
-  width: min(100%, 1280px);
+  width: min(60vw, 1280px);
   margin: 2rem auto 0;
   padding: clamp(0.45rem, 1vw, 0.8rem);
   border: 1px solid rgba(203, 213, 225, 0.86);
@@ -91,6 +91,52 @@
 
 .overview-original-figure--contact-flow {
   margin-top: 1.05rem;
+}
+
+.overview-showcase {
+  display: grid;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.overview-view-tabs {
+  justify-self: center;
+}
+
+.overview-panel-set {
+  min-width: 0;
+}
+
+.overview-tab-panel[hidden] {
+  display: none !important;
+}
+
+.overview-tab-panel--video,
+.overview-tab-panel--framework {
+  min-width: 0;
+}
+
+.overview-tab-panel--framework > .overview-original-figure:first-child {
+  margin-top: 0;
+}
+
+.overview-video-figure {
+  width: min(60vw, 1280px);
+  margin: 0 auto;
+  padding: clamp(0.45rem, 1vw, 0.8rem);
+  border: 1px solid rgba(203, 213, 225, 0.86);
+  border-radius: var(--omni-radius-sm);
+  background: #ffffff;
+  box-shadow: var(--omni-shadow-soft);
+  overflow: hidden;
+}
+
+.overview-video-figure video {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+  background: #000000;
 }
 
 .live-policy-section {
@@ -174,8 +220,11 @@
 .metric-row {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: min(60vw, 1280px);
   gap: 0.9rem;
   margin-top: 1.25rem;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .metric-card,
@@ -2941,6 +2990,12 @@
 @media screen and (max-width: 768px) {
   .overview-container {
     width: min(94vw, 680px) !important;
+  }
+
+  .overview-original-figure,
+  .overview-video-figure,
+  .metric-row {
+    width: 100%;
   }
 
   .overview-blueprint {
