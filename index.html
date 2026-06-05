@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="static/css/omnicontact.css?v=omni-20260605-overview-tabs">
 
   <script defer src="static/js/fontawesome.all.min.js?v=omni-20260602-generalization-tabs"></script>
-  <script defer src="static/js/index.js?v=omni-20260602-generalization-tabs"></script>
+  <script defer src="static/js/index.js?v=omni-20260605-global-video-mute"></script>
   <script type="importmap">
   {
     "imports": {
@@ -334,8 +334,7 @@
               <button type="button" class="generalization-tab is-active" data-generalization-skill="carrybox" aria-selected="true">Carry Box</button>
               <button type="button" class="generalization-tab" data-generalization-skill="push_suitcase">Push Suitcase</button>
               <button type="button" class="generalization-tab" data-generalization-skill="slide_box">Slide Box</button>
-              <button type="button" class="generalization-tab" data-generalization-skill="carry_ball" disabled aria-disabled="true">Relocate Ball</button>
-              <button type="button" class="generalization-tab" data-generalization-skill="kick_ball" disabled aria-disabled="true">Kick Ball</button>
+              <button type="button" class="generalization-tab" data-generalization-skill="carry_ball" aria-selected="false">Relocate Ball</button>
             </div>
           </div>
           <div class="generalization-tab-row">
@@ -820,7 +819,7 @@
         carrybox: 'Carry Box',
         push_suitcase: 'Push suitcase',
         slide_box: 'Slide box',
-        carry_ball: 'Carry ball',
+        carry_ball: 'Relocate ball',
         kick_ball: 'Kick ball',
         height: 'Height',
         shape: 'Shape',
@@ -842,12 +841,16 @@
         slide_box: {
           init: { label: 'Object init pos' },
           final: { label: 'Object final pos' }
+        },
+        carry_ball: {
+          init: { label: 'Object init pos' }
         }
       };
       var layoutBySkill = {
         carrybox: 'featured',
         push_suitcase: 'paired',
-        slide_box: 'featured-duo'
+        slide_box: 'featured-duo',
+        carry_ball: 'paired'
       };
       var layoutByConfig = {
         carrybox: {
@@ -913,7 +916,12 @@
             'static/videos/omnicontact/slidebox_final_3.mp4'
           ]
         },
-        carry_ball: {},
+        carry_ball: {
+          init: [
+            'static/videos/omnicontact/relocateball_init_1.mp4',
+            'static/videos/omnicontact/relocateball_init_2.mp4'
+          ]
+        },
         kick_ball: {}
       };
 
@@ -1120,11 +1128,11 @@
         ],
         push_carry: [
           {
-            src: 'static/videos/omnicontact/baselines/push_stack_ours_cfgen.mp4',
+            src: 'static/videos/omnicontact/combine_stack-2boxes.mp4',
             label: '2 Stage: Carry Box + Carry Box'
           },
           {
-            src: 'static/videos/omnicontact/push_type_1.mp4',
+            src: 'static/videos/omnicontact/combine_stack-3boxes.mp4',
             label: '3 Stage: Carry Box + Carry Box + Carry Box'
           }
         ]
@@ -1174,6 +1182,9 @@
         if (!src || preloadedVideos[src]) return;
         var video = document.createElement('video');
         video.preload = 'metadata';
+        video.muted = true;
+        video.defaultMuted = true;
+        video.volume = 0;
         video.src = src;
         preloadedVideos[src] = video;
         if (typeof video.load === 'function') video.load();

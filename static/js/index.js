@@ -1,5 +1,40 @@
 window.HELP_IMPROVE_VIDEOJS = false;
 
+function muteVideoElement(video) {
+    if (!video) return;
+    video.muted = true;
+    video.defaultMuted = true;
+    if (typeof video.volume === 'number') {
+        video.volume = 0;
+    }
+}
+
+function setupGlobalVideoMute() {
+    document.querySelectorAll('video').forEach(muteVideoElement);
+
+    if (!('MutationObserver' in window)) return;
+
+    var observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            mutation.addedNodes.forEach(function(node) {
+                if (!node || node.nodeType !== 1) return;
+                if (node.tagName === 'VIDEO') {
+                    muteVideoElement(node);
+                    return;
+                }
+                if (typeof node.querySelectorAll === 'function') {
+                    node.querySelectorAll('video').forEach(muteVideoElement);
+                }
+            });
+        });
+    });
+
+    observer.observe(document.documentElement, {
+        childList: true,
+        subtree: true
+    });
+}
+
 // Lightweight analytics helper (uses existing GA4 gtag if present)
 function trackEvent(action, label, value) {
     if (typeof gtag === 'function') {
@@ -1130,6 +1165,8 @@ function setupVideoGlow() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    setupGlobalVideoMute();
+
     var options = {
         slidesToScroll: 1,
         slidesToShow: 1,
