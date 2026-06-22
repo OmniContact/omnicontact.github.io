@@ -494,10 +494,10 @@
       "skill": "kick_ball"
     },
     {
-      "id": "corl_16box_motion",
-      "title": "corl 16box motion",
-      "file": "corl_16box_motion.glb",
-      "source": "corl_16box_motion.glb",
+      "id": "noitom_rt100",
+      "title": "noitom rt100",
+      "file": "noitom_rt100.glb",
+      "source": "noitom_rt100.glb",
       "group": "vlm",
       "category": "other",
       "case": "other",
@@ -999,10 +999,10 @@
     ],
     "vlm": [
       {
-        "id": "corl_16box_motion",
-        "title": "corl 16box motion",
-        "file": "corl_16box_motion.glb",
-        "source": "corl_16box_motion.glb",
+        "id": "noitom_rt100",
+        "title": "noitom rt100",
+        "file": "noitom_rt100.glb",
+        "source": "noitom_rt100.glb",
         "group": "vlm",
         "category": "other",
         "case": "other",
