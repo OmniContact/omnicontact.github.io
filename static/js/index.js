@@ -862,6 +862,17 @@ function setupOutlinePanel() {
     updateActiveFromScroll();
 }
 
+function setupAffiliationsToggle() {
+    var wrap = document.querySelector('.affiliations-wrap');
+    var button = document.querySelector('.affiliations-toggle');
+    if (!wrap || !button) return;
+
+    button.addEventListener('click', function() {
+        var isOpen = wrap.classList.toggle('is-open');
+        button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+}
+
 /* ── 3D Card Tilt on Contribution Cards ── */
 function setupCardTilt() {
     if (!window.matchMedia('(hover: hover)').matches) return;
@@ -1194,6 +1205,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setupMethodOverviewPanels();
     setupPlannerSkillTabs();
     setupMujocoSessionLauncher();
+    setupAffiliationsToggle();
     setupOutlinePanel();
     setupLazyVideos();
 

@@ -110,6 +110,11 @@ body {
   align-items: center;
 }
 
+.publication-links .button[aria-disabled="true"] {
+  cursor: default;
+  pointer-events: none;
+}
+
 .publication-links {
   display: flex;
   flex-wrap: wrap;
@@ -401,12 +406,13 @@ body {
 
 .hero-main .publication-authors,
 .hero-main .publication-authors .author-name,
-.hero-main .eql-cntrb {
+.hero-main .eql-cntrb,
+.hero-main .affiliations-body {
   color: #e2e8f0 !important;
 }
 
 .hero-main .publication-authors a {
-  color: #fed7aa !important;
+  color: #ffffff !important;
 }
 
 .hero-main .button.is-dark {
@@ -446,6 +452,13 @@ body {
     font-family: 'Inter', sans-serif !important;
     font-weight: 500;
     margin-bottom: 1.5rem;
+}
+
+.publication-authors--dense {
+  max-width: 1080px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.75;
 }
 
 .publication-venue {
@@ -1115,6 +1128,11 @@ code {
     margin-bottom: 0.35rem !important;
   }
 
+  .hero-main .publication-authors--dense {
+    max-width: 100%;
+    line-height: 1.45;
+  }
+
   .hero-main .affiliations-wrap {
     margin-top: 0.15em !important;
   }
@@ -1136,7 +1154,7 @@ code {
     line-height: 1.5 !important;
   }
 
-  /* Buttons: 3-column grid so 5 buttons split 3+2, bottom row centered */
+  /* Buttons: 3-column grid so 6 buttons split 3+3 cleanly. */
   .publication-links {
     display: grid;
     grid-template-columns: repeat(6, auto);
@@ -1147,11 +1165,6 @@ code {
   .publication-links .link-block {
     display: inline-block;
     grid-column: span 2;
-  }
-
-  /* Bottom row: offset by 1 column to center 2 items in a 6-col grid */
-  .publication-links .link-block:nth-child(4) {
-    grid-column: 2 / span 2;
   }
 
   .publication-links .button {
