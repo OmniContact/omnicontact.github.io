@@ -1,7 +1,7 @@
 {
   "policy_type": "carrybox_bbox_wtac",
   "onnx": {
-    "path": "./examples/checkpoints/g1/combine_50k.onnx"
+    "path": "./examples/checkpoints/g1/policy.onnx"
   },
   "reference_frames": 900,
   "reference_source": "rule_planner",

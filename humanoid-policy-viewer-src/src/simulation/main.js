@@ -9,7 +9,7 @@ import { eulerToQuat, normalizeQuat } from './utils/math.js';
 const queryParams = new URLSearchParams(window.location.search);
 const defaultPolicy = queryParams.get('force_policy')
   ?? queryParams.get('policy')
-  ?? "./examples/checkpoints/g1/carrybox_wtac_policy.json";
+  ?? "./examples/checkpoints/g1/omnicontact_policy.json";
 const DEFAULT_CARRYBOX_SCENE = 'g1/carrybox_manager_carry.xml';
 const LOCAL_PUSHBOX_SCENE = 'g1/omniplan2track_push_box.xml';
 

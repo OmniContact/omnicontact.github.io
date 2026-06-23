@@ -131,12 +131,18 @@
   overflow: hidden;
 }
 
-.overview-video-figure video {
+.overview-video-figure video,
+.overview-video-figure iframe {
   display: block;
   width: 100%;
-  height: auto;
   border-radius: 4px;
   background: #000000;
+}
+
+.overview-video-figure iframe {
+  aspect-ratio: 16 / 9;
+  height: auto;
+  border: 0;
 }
 
 .live-policy-section {

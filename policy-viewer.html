@@ -85,26 +85,23 @@
   <main class="policy-page">
     <div class="policy-shell">
       <aside class="policy-info">
-        <h1>ONNX Policy Viewer</h1>
+        <h1>Live Policy Demo</h1>
         <p>
-          This page runs the real MuJoCo WASM + ONNX Runtime Web viewer for the carry-box WTAC policy.
-          It loads the carry-box G1 scene, builds the 1244-dimensional observation in JavaScript,
-          and executes <code>combine_50k.onnx</code> in the browser.
+          This interactive demo runs the OmniContact policy directly in your browser with MuJoCo WASM and ONNX Runtime Web.
         </p>
         <p>
-          Current config:
-          <code>static/humanoid-policy-viewer/examples/checkpoints/g1/carrybox_wtac_policy.json</code>
+          The viewer loads the G1 and box scene, builds the policy observation online, and executes policy.onnx for closed-loop control.
         </p>
         <p>
-          Serve this page through the local HTTP server. Browser <code>file://</code> access will be blocked
-          by CORS when MuJoCo assets, WASM, and ONNX files are fetched.
+          Policy config:
+          <code>static/humanoid-policy-viewer/examples/checkpoints/g1/omnicontact_policy.json</code>
         </p>
-        <p><a href="index.html#vlm-section">Back to project page</a></p>
+        <p><a href="index.html">Back to project page</a></p>
       </aside>
       <section class="policy-frame-wrap" aria-label="MuJoCo ONNX policy viewer">
         <iframe
           id="policy-frame"
-          data-src="static/humanoid-policy-viewer/index.html?force_policy=./examples/checkpoints/g1/carrybox_wtac_policy.json&policy=./examples/checkpoints/g1/carrybox_wtac_policy.json"
+          data-src="static/humanoid-policy-viewer/index.html?force_policy=./examples/checkpoints/g1/omnicontact_policy.json&policy=./examples/checkpoints/g1/omnicontact_policy.json"
           title="MuJoCo WASM and ONNX policy viewer"
           allow="fullscreen; cross-origin-isolated"
         ></iframe>
