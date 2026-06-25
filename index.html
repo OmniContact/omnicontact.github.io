@@ -145,8 +145,8 @@
       <div class="hero-video-grid omni-hero-grid" aria-hidden="true">
         <div class="grid-cell"><video autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/slidebox_init_3.mp4" type="video/mp4"></video><span class="grid-label">Carry final 1</span></div>
         <div class="grid-cell"><video autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/slidebox_final_2.mp4" type="video/mp4"></video><span class="grid-label">Carry final 2</span></div>
-        <div class="grid-cell"><video autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/slidebox_init_1.mp4" type="video/mp4"></video><span class="grid-label">Carry height 1</span></div>
-        <div class="grid-cell"><video autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/slidebox_final_1.mp4" type="video/mp4"></video><span class="grid-label">Carry height 2</span></div>
+        <div class="grid-cell"><video autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/relocateball_final_1.mp4" type="video/mp4"></video><span class="grid-label">Carry height 1</span></div>
+        <div class="grid-cell"><video autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/relocateball_init_2.mp4" type="video/mp4"></video><span class="grid-label">Carry height 2</span></div>
         <div class="grid-cell"><video autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/carrybox_height_3.mp4" type="video/mp4"></video><span class="grid-label">Carry height 3</span></div>
         <div class="grid-cell"><video autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/carrybox_init_1.mp4" type="video/mp4"></video><span class="grid-label">Carry init 1</span></div>
         <div class="grid-cell"><video autoplay muted loop playsinline preload="metadata"><source src="static/videos/omnicontact/combine_pushstack_2.mp4" type="video/mp4"></video><span class="grid-label">Carry init 2</span></div>
@@ -374,7 +374,7 @@
               <button type="button" class="generalization-tab is-active" data-generalization-config="height" aria-selected="true">Height</button>
               <button type="button" class="generalization-tab" data-generalization-config="shape">Shape</button>
               <button type="button" class="generalization-tab" data-generalization-config="init">Object init pos</button>
-              <button type="button" class="generalization-tab" data-generalization-config="final" disabled aria-disabled="true">Object final pose</button>
+              <button type="button" class="generalization-tab" data-generalization-config="final">Object final pos</button>
             </div>
           </div>
           <div class="generalization-video-grid generalization-video-grid--multi" data-generalization-videos></div>
@@ -847,14 +847,14 @@
         height: 'Height',
         shape: 'Shape',
         init: 'Object init pos',
-        final: 'Object final pose'
+        final: 'Object final pos'
       };
       var configDefinitions = {
         carrybox: {
           height: { label: 'Height' },
           shape: { label: 'Shape' },
           init: { label: 'Object init pos' },
-          final: { label: 'Object final pose' }
+          final: { label: 'Object final pos' }
         },
         push_suitcase: {
           height: { label: 'Contact Mode' },
@@ -866,14 +866,15 @@
           final: { label: 'Object final pos' }
         },
         carry_ball: {
-          init: { label: 'Object init pos' }
+          init: { label: 'Object init pos' },
+          final: { label: 'Object final pos' }
         }
       };
       var layoutBySkill = {
         carrybox: 'featured',
         push_suitcase: 'paired',
         slide_box: 'featured-duo',
-        carry_ball: 'paired'
+        carry_ball: 'featured'
       };
       var layoutByConfig = {
         carrybox: {
@@ -941,8 +942,16 @@
         },
         carry_ball: {
           init: [
+            'static/videos/omnicontact/relocateball_init_2.mp4',
             'static/videos/omnicontact/relocateball_init_1.mp4',
-            'static/videos/omnicontact/relocateball_init_2.mp4'
+            'static/videos/omnicontact/relocateball_init_3.mp4',
+            'static/videos/omnicontact/relocateball_init_4.mp4'
+          ],
+          final: [
+            'static/videos/omnicontact/relocateball_final_1.mp4',
+            'static/videos/omnicontact/relocateball_final_2.mp4',
+            'static/videos/omnicontact/relocateball_final_3.mp4',
+            'static/videos/omnicontact/relocateball_final_4.mp4'
           ]
         },
         kick_ball: {}
