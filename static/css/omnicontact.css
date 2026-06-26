@@ -3180,7 +3180,8 @@ body:not(.omni-dark) .omni-section {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-body:not(.omni-dark) #overview-section {
+body:not(.omni-dark) #overview-section,
+body:not(.omni-dark) #citation-section {
   background:
     linear-gradient(112deg, transparent 0%, rgba(238, 99, 99, 0.16) 28%, rgba(255, 176, 176, 0.08) 44%, transparent 70%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0)),
@@ -3682,7 +3683,8 @@ body.omni-dark .omni-section {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-body.omni-dark #overview-section {
+body.omni-dark #overview-section,
+body.omni-dark #citation-section {
   background:
     linear-gradient(112deg, transparent 0%, rgba(255, 106, 0, 0.16) 28%, rgba(255, 177, 95, 0.08) 44%, transparent 70%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0)),
