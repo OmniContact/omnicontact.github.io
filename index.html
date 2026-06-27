@@ -363,10 +363,10 @@
           <div class="generalization-tab-row">
             <div class="generalization-row-label">Meta-skill</div>
             <div class="generalization-tabs generalization-tabs--skills" role="tablist" aria-label="Meta-skill names">
-              <button type="button" class="generalization-tab is-active" data-generalization-skill="carrybox" aria-selected="true">Carry Box</button>
-              <button type="button" class="generalization-tab" data-generalization-skill="push_suitcase">Push Suitcase</button>
-              <button type="button" class="generalization-tab" data-generalization-skill="slide_box">Slide Box</button>
+              <button type="button" class="generalization-tab is-active" data-generalization-skill="push_suitcase" aria-selected="true">Push Suitcase</button>
               <button type="button" class="generalization-tab" data-generalization-skill="carry_ball" aria-selected="false">Relocate Ball</button>
+              <button type="button" class="generalization-tab" data-generalization-skill="slide_box" aria-selected="false">Slide Box</button>
+              <button type="button" class="generalization-tab" data-generalization-skill="carrybox" aria-selected="false">Carry Box</button>
             </div>
           </div>
           <div class="generalization-tab-row">
@@ -857,7 +857,7 @@
       var skillTabs = Array.prototype.slice.call(root.querySelectorAll('[data-generalization-skill]'));
       var configTabs = Array.prototype.slice.call(root.querySelectorAll('[data-generalization-config]'));
       var videoGrid = root.querySelector('[data-generalization-videos]');
-      var activeSkill = 'carrybox';
+      var activeSkill = 'push_suitcase';
       var activeConfig = 'height';
       var preloadedVideos = {};
       var labels = {
@@ -906,6 +906,9 @@
           shape: 'featured-duo',
           init: 'featured'
         }
+      };
+      var configOrderBySkill = {
+        push_suitcase: ['shape', 'height', 'init']
       };
       var videos = {
         carrybox: {
@@ -1037,8 +1040,11 @@
       }
 
       function getFirstEnabledConfig(skill) {
-        for (var i = 0; i < configTabs.length; i += 1) {
-          var config = configTabs[i].getAttribute('data-generalization-config');
+        var orderedConfigs = configOrderBySkill[skill] || configTabs.map(function(tab) {
+          return tab.getAttribute('data-generalization-config');
+        });
+        for (var i = 0; i < orderedConfigs.length; i += 1) {
+          var config = orderedConfigs[i];
           var definition = getConfigDefinition(skill, config);
           if (definition && !definition.disabled) return config;
         }
@@ -1046,16 +1052,21 @@
       }
 
       function syncConfigTabs() {
+        var orderedConfigs = configOrderBySkill[activeSkill] || configTabs.map(function(tab) {
+          return tab.getAttribute('data-generalization-config');
+        });
         configTabs.forEach(function(tab) {
           var config = tab.getAttribute('data-generalization-config');
           var definition = getConfigDefinition(activeSkill, config);
           var isHidden = !definition;
           var isDisabled = isHidden || definition.disabled === true;
+          var orderIndex = orderedConfigs.indexOf(config);
           tab.hidden = isHidden;
           tab.setAttribute('aria-hidden', isHidden ? 'true' : 'false');
           tab.textContent = (definition && definition.label) || labels[config] || config;
           tab.disabled = isDisabled;
           tab.setAttribute('aria-disabled', isDisabled ? 'true' : 'false');
+          tab.style.order = orderIndex === -1 ? String(configTabs.length) : String(orderIndex);
         });
 
         var activeDefinition = getConfigDefinition(activeSkill, activeConfig);
